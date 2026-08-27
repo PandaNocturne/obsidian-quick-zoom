@@ -110,6 +110,10 @@
   color: var(--text-muted);
 }
 
+.zoom-plugin-title-icon.zoom-plugin-icon--document.is-active {
+  color: var(--interactive-accent, var(--color-accent, #7f6df2));
+}
+
 .zoom-plugin-title--document {
   color: var(--text-normal);
 }

@@ -24,9 +24,16 @@ export interface HeaderHistoryControls {
   onForward: () => void;
 }
 
-function appendTitleIcon(container: HTMLElement, item: OutlineIconTarget) {
+function appendTitleIcon(
+  container: HTMLElement,
+  item: OutlineIconTarget,
+  options?: { active?: boolean }
+) {
   const iconSpan = container.ownerDocument.createElement("span");
   iconSpan.className = `zoom-plugin-title-icon ${outlineIconColorClass(item)}`;
+  if (item.kind === "document" && options?.active) {
+    iconSpan.classList.add("is-active");
+  }
   iconSpan.setAttribute("aria-hidden", "true");
   setIcon(iconSpan, outlineIconName(item));
   container.appendChild(iconSpan);
@@ -64,6 +71,7 @@ export function renderHeader(
   doc: Document,
   ctx: {
     breadcrumbs: Breadcrumb[];
+    mode?: "zoom" | "navigate";
     onClick: (
       pos: number | null,
       event: MouseEvent,
@@ -85,6 +93,7 @@ export function renderHeader(
 ) {
   const {
     breadcrumbs,
+    mode = "zoom",
     onClick,
     onDoubleClick,
     onDelimiterClick,
@@ -119,14 +128,24 @@ export function renderHeader(
     if (isDocument) {
       b.classList.add("zoom-plugin-title--document");
     }
-    if (siblings.length > 0) {
+    // Document is a zoom toggle (enter/exit), not a sibling picker.
+    if (!isDocument && siblings.length > 0) {
       b.classList.add("zoom-plugin-title-has-siblings");
     }
     b.dataset.pos = String(breadcrumb.pos);
     b.href = "#";
-    b.setAttribute("aria-label", breadcrumb.title);
+    if (isDocument) {
+      b.setAttribute(
+        "aria-label",
+        mode === "navigate" ? "缩放到当前标题" : "退出缩放"
+      );
+    } else {
+      b.setAttribute("aria-label", breadcrumb.title);
+    }
 
-    appendTitleIcon(b, breadcrumb);
+    appendTitleIcon(b, breadcrumb, {
+      active: isDocument && mode === "zoom",
+    });
 
     if (!isDocument) {
       const titleSpan = doc.createElement("span");

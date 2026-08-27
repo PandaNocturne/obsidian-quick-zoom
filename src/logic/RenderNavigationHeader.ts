@@ -93,6 +93,7 @@ const headerState = StateField.define<HeaderState | null>({
         top: true,
         dom: renderHeader(view.dom.ownerDocument, {
           breadcrumbs: state.breadcrumbs,
+          mode: state.mode,
           onClick: (pos, event, siblings) =>
             state.onClick(
               view,
@@ -247,8 +248,18 @@ export class RenderNavigationHeader {
     );
 
     if (mode === "navigate") {
+      // File icon: enter zoom at the current heading (same control as zoom-out).
       if (pos === null) {
-        this.navigateTo(view, 0);
+        const zoomTarget = [...breadcrumbs]
+          .reverse()
+          .find((b) => typeof b.pos === "number");
+        if (zoomTarget && typeof zoomTarget.pos === "number") {
+          this.zoomIn.zoomIn(view, zoomTarget.pos);
+          return;
+        }
+        if (siblings.length > 0) {
+          this.showOutlineMenu(view, siblings, selectedPath, event, "zoom");
+        }
         return;
       }
       if (siblings.length > 0) {
@@ -277,17 +288,22 @@ export class RenderNavigationHeader {
     pos: number | null,
     _event: MouseEvent,
     _siblings: SiblingItem[],
-    _breadcrumbs: Breadcrumb[],
+    breadcrumbs: Breadcrumb[],
     mode: HeaderInteractionMode
   ) => {
     this.outlineMenu.hideAll();
 
     if (mode === "navigate") {
       if (pos === null) {
-        this.navigateTo(view, 0);
-      } else {
-        this.navigateTo(view, pos);
+        const zoomTarget = [...breadcrumbs]
+          .reverse()
+          .find((b) => typeof b.pos === "number");
+        if (zoomTarget && typeof zoomTarget.pos === "number") {
+          this.zoomIn.zoomIn(view, zoomTarget.pos);
+        }
+        return;
       }
+      this.navigateTo(view, pos);
       return;
     }
 
