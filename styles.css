@@ -17,6 +17,8 @@
   cursor: pointer;
   border-radius: var(--radius-s);
   padding: 0 2px;
+  line-height: var(--line-height-normal);
+  min-height: var(--icon-size);
 }
 
 .zoom-plugin-title-icon {
@@ -24,6 +26,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  align-self: center;
+  line-height: 0;
 }
 
 .zoom-plugin-title-icon svg {
@@ -52,11 +56,13 @@
 }
 
 .zoom-plugin-title-text {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  align-self: center;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  vertical-align: bottom;
   line-height: var(--line-height-normal);
 }
 
@@ -109,9 +115,12 @@
 }
 
 .zoom-plugin-delimiter {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
   padding: 0 var(--size-4-2);
   color: var(--text-faint);
+  line-height: var(--line-height-normal);
 }
 
 .zoom-plugin-bls-zoom .cm-editor .cm-formatting-list-ol,
@@ -168,6 +177,33 @@
 .menu.zoom-plugin-outline-menu .menu-item:not(.is-disabled):not(.is-label) {
   display: flex;
   align-items: center;
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label)
+  .menu-item-icon {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.menu.zoom-plugin-outline-menu .zoom-plugin-outline-title {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: var(--line-height-normal);
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label):has(.zoom-plugin-outline-title-md) {
+  align-items: center;
+  padding-top: var(--size-2-2);
+  padding-bottom: var(--size-2-2);
 }
 
 .menu.zoom-plugin-outline-menu
@@ -239,20 +275,4 @@
   .menu-item:not(.is-disabled):not(.is-label):hover.selected
   .menu-item-icon {
   color: var(--text-on-accent);
-}
-
-.menu.zoom-plugin-outline-menu .zoom-plugin-outline-title {
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: middle;
-  line-height: var(--line-height-normal);
-}
-
-.menu.zoom-plugin-outline-menu
-  .menu-item:not(.is-disabled):not(.is-label):has(.zoom-plugin-outline-title-md) {
-  align-items: center;
-  padding-top: var(--size-2-2);
-  padding-bottom: var(--size-2-2);
 }

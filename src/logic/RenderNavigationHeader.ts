@@ -148,13 +148,7 @@ export class RenderNavigationHeader {
     );
 
     if (pos === null) {
-      if (siblings.length === 0) {
-        this.zoomOut.zoomOut(view);
-        return;
-      }
-      this.showOutlineMenu(view, siblings, selectedPath, event, {
-        includeExitZoom: true,
-      });
+      this.zoomOut.zoomOut(view);
       return;
     }
 
