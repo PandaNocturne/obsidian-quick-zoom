@@ -127,7 +127,7 @@
 }
 
 .zoom-plugin-title-icon.zoom-plugin-icon--text {
-  color: var(--text-faint);
+  color: var(--color-green, #68b984);
 }
 
 .zoom-plugin-title-text {
@@ -338,7 +338,7 @@
 }
 
 .menu.zoom-plugin-outline-menu .menu-item-icon.zoom-plugin-icon--text {
-  color: var(--text-faint);
+  color: var(--color-green, #68b984);
 }
 
 .menu.zoom-plugin-outline-menu

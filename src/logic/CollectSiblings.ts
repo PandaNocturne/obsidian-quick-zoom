@@ -1,6 +1,7 @@
 import { foldable } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 
+import { calculateParagraphRange } from "./utils/calculateParagraphRange";
 import { cleanTitle } from "./utils/cleanTitle";
 import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
 import {
@@ -9,8 +10,8 @@ import {
   detectListType,
 } from "./utils/listItemParsing";
 
-export type OutlineKind = "heading" | "list";
-export type BreadcrumbKind = "document" | OutlineKind | "text";
+export type OutlineKind = "heading" | "list" | "text";
+export type BreadcrumbKind = "document" | OutlineKind;
 
 export interface SiblingItem {
   title: string;
@@ -42,6 +43,9 @@ export function detectOutlineKind(lineText: string): OutlineKind {
 export function outlineIcon(
   item: Pick<SiblingItem, "kind" | "headingLevel" | "listType">
 ): string {
+  if (item.kind === "text") {
+    return "pilcrow";
+  }
   if (item.kind === "list") {
     switch (item.listType) {
       case "ordered":
@@ -61,7 +65,7 @@ export function outlineIconName(item: OutlineIconTarget): string {
     return "scan-eye";
   }
   if (item.kind === "text") {
-    return "text";
+    return "pilcrow";
   }
   return outlineIcon({
     kind: item.kind,
@@ -150,6 +154,18 @@ export function collectSiblings(
       continue;
     }
 
+    const headingLevel = detectHeadingLevel(line.text);
+    if (headingLevel !== null) {
+      siblings.push({
+        title: cleanTitle(line.text),
+        pos: line.from,
+        kind: "heading",
+        headingLevel,
+      });
+      skipUntil = line.to;
+      continue;
+    }
+
     const listType = detectListType(line.text, listOptions);
     if (listType) {
       siblings.push({
@@ -159,7 +175,24 @@ export function collectSiblings(
         listType,
       });
       skipUntil = line.to;
+      continue;
     }
+
+    // Paragraph or blank line — only as children under a parent, not at document root
+    // (root menus would be flooded with every loose paragraph). Cursor zoom still works.
+    if (parentPos === null) {
+      continue;
+    }
+
+    const para = calculateParagraphRange(state, line.from, listOptions);
+    const title =
+      line.text.trim() === "" ? "(empty)" : cleanTitle(line.text) || "(empty)";
+    siblings.push({
+      title,
+      pos: line.from,
+      kind: "text",
+    });
+    skipUntil = para.to;
   }
 
   return siblings;

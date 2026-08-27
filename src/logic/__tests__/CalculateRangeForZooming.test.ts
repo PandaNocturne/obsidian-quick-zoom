@@ -20,10 +20,10 @@ beforeEach(() => {
   foldable.mockReturnValue(null);
 });
 
-test("should return nothing if block is unfoldable", () => {
+test("should return heading line if heading is unfoldable", () => {
   foldable.mockReturnValue(null);
   const state = EditorState.create({
-    doc: "# header\n\nline1\n",
+    doc: "# header",
   });
   const calculateRangeForZooming = new CalculateRangeForZooming();
 
@@ -33,7 +33,7 @@ test("should return nothing if block is unfoldable", () => {
     ALL_LISTS_ON
   );
 
-  expect(x).toBeNull();
+  expect(x).toStrictEqual({ from: 0, to: state.doc.line(1).to });
 });
 
 test("should return range from line start if block is foldable", () => {
@@ -68,7 +68,7 @@ test("should return range of current line if block is unfoldable but line is lis
   expect(x).toStrictEqual({ from: 6, to: 12 });
 });
 
-test("should not zoom single-line list when list recognition is disabled", () => {
+test("should not treat list as list when list recognition is disabled; zoom as paragraph", () => {
   foldable.mockReturnValue(null);
   const state = EditorState.create({
     doc: "line\n\n- list\n\nline",
@@ -81,5 +81,43 @@ test("should not zoom single-line list when list recognition is disabled", () =>
     recognizeTaskLists: false,
   });
 
-  expect(x).toBeNull();
+  // "- list" is treated as a single-line paragraph when list recognition is off
+  expect(x).toStrictEqual({ from: 6, to: 12 });
+});
+
+test("should zoom blank line as its own range", () => {
+  foldable.mockReturnValue(null);
+  const state = EditorState.create({
+    doc: "a\n\nb",
+  });
+  const calculateRangeForZooming = new CalculateRangeForZooming();
+  const blank = state.doc.line(2);
+
+  const x = calculateRangeForZooming.calculateRangeForZooming(
+    state,
+    blank.from,
+    ALL_LISTS_ON
+  );
+
+  expect(x).toStrictEqual({ from: blank.from, to: blank.to });
+});
+
+test("should zoom contiguous paragraph lines as one block", () => {
+  foldable.mockReturnValue(null);
+  const state = EditorState.create({
+    doc: "# h\n\npara1\npara2\n\nnext",
+  });
+  const calculateRangeForZooming = new CalculateRangeForZooming();
+  const para1 = state.doc.line(3);
+
+  const x = calculateRangeForZooming.calculateRangeForZooming(
+    state,
+    para1.from,
+    ALL_LISTS_ON
+  );
+
+  expect(x).toStrictEqual({
+    from: state.doc.line(3).from,
+    to: state.doc.line(4).to,
+  });
 });
