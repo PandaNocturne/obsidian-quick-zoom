@@ -55,6 +55,21 @@ export class CollectBreadcrumbs {
     private settings: SettingsService
   ) {}
 
+  public collectDocumentBreadcrumb(state: EditorState): Breadcrumb[] {
+    const listOptions = this.settings.getListRecognitionOptions();
+    const rootSiblings = collectSiblings(state, null, listOptions);
+
+    return [
+      {
+        title: this.getDocumentTitle.getDocumentTitle(state),
+        pos: null,
+        siblings: rootSiblings,
+        children: rootSiblings,
+        kind: "document",
+      },
+    ];
+  }
+
   public collectBreadcrumbs(state: EditorState, pos: number) {
     const listOptions = this.settings.getListRecognitionOptions();
     const breadcrumbs: Breadcrumb[] = [

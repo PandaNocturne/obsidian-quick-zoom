@@ -6,7 +6,7 @@ import { EditorView, showPanel } from "@codemirror/view";
 import { Breadcrumb } from "./CollectBreadcrumbs";
 import { SiblingItem } from "./CollectSiblings";
 import { OutlineHoverMenu } from "./OutlineHoverMenu";
-import { renderHeader } from "./utils/renderHeader";
+import { HeaderHistoryControls, renderHeader } from "./utils/renderHeader";
 
 import { LoggerService } from "../services/LoggerService";
 import { SettingsService } from "../services/SettingsService";
@@ -19,6 +19,13 @@ export interface ZoomIn {
 
 export interface ZoomOut {
   zoomOut(view: EditorView): void;
+}
+
+export interface ZoomHistoryNav {
+  canZoomBack(view: EditorView): boolean;
+  canZoomForward(view: EditorView): boolean;
+  zoomBack(view: EditorView): void;
+  zoomForward(view: EditorView): void;
 }
 
 interface HeaderState {
@@ -44,6 +51,7 @@ interface HeaderState {
     children: SiblingItem[],
     breadcrumbs: Breadcrumb[]
   ) => void;
+  getHistory: (view: EditorView) => HeaderHistoryControls;
   renderOptions: {
     renderMarkdown: boolean;
     itemMaxWidthPx: number;
@@ -91,6 +99,7 @@ const headerState = StateField.define<HeaderState | null>({
               children,
               state.breadcrumbs
             ),
+          history: state.getHistory(view),
           renderOptions: state.renderOptions,
         }),
       });
@@ -111,7 +120,8 @@ export class RenderNavigationHeader {
     private logger: LoggerService,
     private settings: SettingsService,
     private zoomIn: ZoomIn,
-    private zoomOut: ZoomOut
+    private zoomOut: ZoomOut,
+    private zoomHistory: ZoomHistoryNav
   ) {}
 
   public showHeader(view: EditorView, breadcrumbs: Breadcrumb[]) {
@@ -129,6 +139,7 @@ export class RenderNavigationHeader {
           onClick: this.onClick,
           onDoubleClick: this.onDoubleClick,
           onDelimiterClick: this.onDelimiterClick,
+          getHistory: this.getHistory,
           renderOptions: this.getRenderOptions(),
         }),
       ],
@@ -149,6 +160,15 @@ export class RenderNavigationHeader {
       effects: [hideHeaderEffect.of()],
     });
   }
+
+  private getHistory = (view: EditorView): HeaderHistoryControls => {
+    return {
+      canGoBack: this.zoomHistory.canZoomBack(view),
+      canGoForward: this.zoomHistory.canZoomForward(view),
+      onBack: () => this.zoomHistory.zoomBack(view),
+      onForward: () => this.zoomHistory.zoomForward(view),
+    };
+  };
 
   private getRenderOptions() {
     return {

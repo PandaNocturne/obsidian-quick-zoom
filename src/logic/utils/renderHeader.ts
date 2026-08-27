@@ -17,12 +17,47 @@ export interface RenderHeaderOptions extends RenderOutlineTitleOptions {
   itemMaxWidthPx: number;
 }
 
+export interface HeaderHistoryControls {
+  canGoBack: boolean;
+  canGoForward: boolean;
+  onBack: () => void;
+  onForward: () => void;
+}
+
 function appendTitleIcon(container: HTMLElement, item: OutlineIconTarget) {
   const iconSpan = container.ownerDocument.createElement("span");
   iconSpan.className = `zoom-plugin-title-icon ${outlineIconColorClass(item)}`;
   iconSpan.setAttribute("aria-hidden", "true");
   setIcon(iconSpan, outlineIconName(item));
   container.appendChild(iconSpan);
+}
+
+function appendHistoryButton(
+  container: HTMLElement,
+  options: {
+    icon: string;
+    label: string;
+    disabled: boolean;
+    onClick: () => void;
+  }
+) {
+  const button = container.ownerDocument.createElement("button");
+  button.type = "button";
+  button.className = "zoom-plugin-history-btn clickable-icon";
+  button.setAttribute("aria-label", options.label);
+  button.disabled = options.disabled;
+  if (options.disabled) {
+    button.addClass("is-disabled");
+  }
+  setIcon(button, options.icon);
+  button.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!options.disabled) {
+      options.onClick();
+    }
+  });
+  container.appendChild(button);
 }
 
 export function renderHeader(
@@ -44,6 +79,7 @@ export function renderHeader(
       event: MouseEvent,
       children: SiblingItem[]
     ) => void;
+    history?: HeaderHistoryControls;
     renderOptions: RenderHeaderOptions;
   }
 ) {
@@ -52,11 +88,15 @@ export function renderHeader(
     onClick,
     onDoubleClick,
     onDelimiterClick,
+    history,
     renderOptions,
   } = ctx;
 
   const h = doc.createElement("div");
   h.classList.add("zoom-plugin-header");
+
+  const trail = doc.createElement("div");
+  trail.classList.add("zoom-plugin-header-trail");
 
   for (let i = 0; i < breadcrumbs.length; i++) {
     const breadcrumb = breadcrumbs[i];
@@ -130,7 +170,30 @@ export function renderHeader(
     setIcon(d, "chevron-right");
     crumb.appendChild(d);
 
-    h.appendChild(crumb);
+    trail.appendChild(crumb);
+  }
+
+  h.appendChild(trail);
+
+  if (history) {
+    const historyEl = doc.createElement("div");
+    historyEl.classList.add("zoom-plugin-header-history");
+
+    appendHistoryButton(historyEl, {
+      icon: "arrow-left",
+      label: "后退到上一次缩放",
+      disabled: !history.canGoBack,
+      onClick: history.onBack,
+    });
+
+    appendHistoryButton(historyEl, {
+      icon: "arrow-right",
+      label: "前进到下一次缩放",
+      disabled: !history.canGoForward,
+      onClick: history.onForward,
+    });
+
+    h.appendChild(historyEl);
   }
 
   return h;

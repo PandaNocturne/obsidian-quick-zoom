@@ -1,12 +1,63 @@
 .zoom-plugin-header {
   --zoom-header-row-height: var(--icon-size);
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--size-4-2);
   margin: var(--file-margins);
   margin-top: var(--size-4-2);
   margin-bottom: var(--size-4-2);
   line-height: var(--zoom-header-row-height);
+}
+
+.zoom-plugin-header-trail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.zoom-plugin-header-history {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.zoom-plugin-history-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--zoom-header-row-height);
+  height: var(--zoom-header-row-height);
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-s);
+  line-height: 0;
+}
+
+.zoom-plugin-history-btn svg {
+  width: var(--zoom-header-row-height);
+  height: var(--zoom-header-row-height);
+  display: block;
+}
+
+.zoom-plugin-history-btn:hover:not(:disabled):not(.is-disabled) {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+}
+
+.zoom-plugin-history-btn:disabled,
+.zoom-plugin-history-btn.is-disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .zoom-plugin-crumb {

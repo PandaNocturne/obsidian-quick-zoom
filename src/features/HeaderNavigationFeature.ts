@@ -9,7 +9,10 @@ import { getEditorViewFromEditorState } from "./utils/getEditorViewFromEditorSta
 
 import { CollectBreadcrumbs } from "../logic/CollectBreadcrumbs";
 import { DetectRangeBeforeVisibleRangeChanged } from "../logic/DetectRangeBeforeVisibleRangeChanged";
-import { RenderNavigationHeader } from "../logic/RenderNavigationHeader";
+import {
+  RenderNavigationHeader,
+  ZoomHistoryNav,
+} from "../logic/RenderNavigationHeader";
 import { LoggerService } from "../services/LoggerService";
 import { SettingsService } from "../services/SettingsService";
 
@@ -61,14 +64,27 @@ class ShowHeaderAfterZoomIn implements Feature {
   async unload() {}
 }
 
-class HideHeaderAfterZoomOut implements Feature {
+class HideOrShowHistoryHeaderAfterZoomOut implements Feature {
   constructor(
     private notifyAfterZoomOut: NotifyAfterZoomOut,
-    private renderNavigationHeader: RenderNavigationHeader
+    private collectBreadcrumbs: CollectBreadcrumbs,
+    private renderNavigationHeader: RenderNavigationHeader,
+    private zoomHistory: ZoomHistoryNav
   ) {}
 
   async load() {
     this.notifyAfterZoomOut.notifyAfterZoomOut((view) => {
+      if (
+        this.zoomHistory.canZoomBack(view) ||
+        this.zoomHistory.canZoomForward(view)
+      ) {
+        const breadcrumbs = this.collectBreadcrumbs.collectDocumentBreadcrumb(
+          view.state
+        );
+        this.renderNavigationHeader.showHeader(view, breadcrumbs);
+        return;
+      }
+
       this.renderNavigationHeader.hideHeader(view);
     });
   }
@@ -129,7 +145,8 @@ export class HeaderNavigationFeature implements Feature {
     this.logger,
     this.settings,
     this.zoomIn,
-    this.zoomOut
+    this.zoomOut,
+    this.zoomHistory
   );
 
   private showHeaderAfterZoomIn = new ShowHeaderAfterZoomIn(
@@ -138,10 +155,13 @@ export class HeaderNavigationFeature implements Feature {
     this.renderNavigationHeader
   );
 
-  private hideHeaderAfterZoomOut = new HideHeaderAfterZoomOut(
-    this.notifyAfterZoomOut,
-    this.renderNavigationHeader
-  );
+  private hideOrShowHistoryHeaderAfterZoomOut =
+    new HideOrShowHistoryHeaderAfterZoomOut(
+      this.notifyAfterZoomOut,
+      this.collectBreadcrumbs,
+      this.renderNavigationHeader,
+      this.zoomHistory
+    );
 
   private updateHeaderAfterRangeBeforeVisibleRangeChanged =
     new UpdateHeaderAfterRangeBeforeVisibleRangeChanged(
@@ -161,7 +181,8 @@ export class HeaderNavigationFeature implements Feature {
     private zoomIn: ZoomIn,
     private zoomOut: ZoomOut,
     private notifyAfterZoomIn: NotifyAfterZoomIn,
-    private notifyAfterZoomOut: NotifyAfterZoomOut
+    private notifyAfterZoomOut: NotifyAfterZoomOut,
+    private zoomHistory: ZoomHistoryNav
   ) {}
 
   async load() {
@@ -170,13 +191,13 @@ export class HeaderNavigationFeature implements Feature {
     );
 
     this.showHeaderAfterZoomIn.load();
-    this.hideHeaderAfterZoomOut.load();
+    this.hideOrShowHistoryHeaderAfterZoomOut.load();
     this.updateHeaderAfterRangeBeforeVisibleRangeChanged.load();
   }
 
   async unload() {
     this.showHeaderAfterZoomIn.unload();
-    this.hideHeaderAfterZoomOut.unload();
+    this.hideOrShowHistoryHeaderAfterZoomOut.unload();
     this.updateHeaderAfterRangeBeforeVisibleRangeChanged.unload();
   }
 }

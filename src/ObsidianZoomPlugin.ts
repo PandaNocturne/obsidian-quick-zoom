@@ -55,6 +55,7 @@ export default class ObsidianZoomPlugin extends Plugin {
       this.zoomFeature,
       this.zoomFeature,
       this.zoomFeature,
+      this.zoomFeature,
       this.zoomFeature
     );
     const zoomOnClickFeature = new ZoomOnClickFeature(

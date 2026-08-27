@@ -8,6 +8,7 @@ import { isFoldingEnabled } from "./utils/isFoldingEnabled";
 
 import { CalculateRangeForZooming } from "../logic/CalculateRangeForZooming";
 import { KeepOnlyZoomedContentVisible } from "../logic/KeepOnlyZoomedContentVisible";
+import { ZoomHistory } from "../logic/ZoomHistory";
 import { LoggerService } from "../services/LoggerService";
 import { SettingsService } from "../services/SettingsService";
 import { getEditorViewFromEditor } from "../utils/getEditorViewFromEditor";
@@ -24,6 +25,7 @@ export class ZoomFeature implements Feature {
   );
 
   private calculateRangeForZooming = new CalculateRangeForZooming();
+  private zoomHistory = new ZoomHistory();
 
   constructor(
     private plugin: Plugin,
@@ -49,6 +51,40 @@ export class ZoomFeature implements Feature {
 
   public notifyAfterZoomOut(cb: ZoomOutCallback) {
     this.zoomOutCallbacks.push(cb);
+  }
+
+  public canZoomBack(view: EditorView) {
+    return this.zoomHistory.canGoBack(view);
+  }
+
+  public canZoomForward(view: EditorView) {
+    return this.zoomHistory.canGoForward(view);
+  }
+
+  public zoomBack(view: EditorView) {
+    if (!this.zoomHistory.canGoBack(view)) {
+      return;
+    }
+    const entry = this.zoomHistory.goBack(view);
+    this.applyHistoryEntry(view, entry);
+  }
+
+  public zoomForward(view: EditorView) {
+    if (!this.zoomHistory.canGoForward(view)) {
+      return;
+    }
+    const entry = this.zoomHistory.goForward(view);
+    this.applyHistoryEntry(view, entry);
+  }
+
+  private applyHistoryEntry(view: EditorView, entry: number | null) {
+    this.zoomHistory.runWithoutRecording(() => {
+      if (entry === null) {
+        this.zoomOut(view);
+      } else {
+        this.zoomIn(view, entry);
+      }
+    });
   }
 
   public refreshZoom(view: EditorView) {
@@ -108,16 +144,19 @@ export class ZoomFeature implements Feature {
       { scrollTo: pos }
     );
 
+    this.zoomHistory.record(view, pos);
+
     for (const cb of this.zoomInCallbacks) {
       cb(view, pos);
     }
   }
 
   public zoomOut(view: EditorView) {
-    const l = this.logger.bind("ZoomFeature:zoomIn");
+    const l = this.logger.bind("ZoomFeature:zoomOut");
     l("zooming out");
 
     this.keepOnlyZoomedContentVisible.showAllContent(view);
+    this.zoomHistory.record(view, null);
 
     for (const cb of this.zoomOutCallbacks) {
       cb(view);
@@ -156,6 +195,22 @@ export class ZoomFeature implements Feature {
           key: ".",
         },
       ],
+    });
+
+    this.plugin.addCommand({
+      id: "zoom-back",
+      name: "Zoom back",
+      icon: "arrow-left",
+      editorCallback: (editor) =>
+        this.zoomBack(getEditorViewFromEditor(editor)),
+    });
+
+    this.plugin.addCommand({
+      id: "zoom-forward",
+      name: "Zoom forward",
+      icon: "arrow-right",
+      editorCallback: (editor) =>
+        this.zoomForward(getEditorViewFromEditor(editor)),
     });
   }
 
