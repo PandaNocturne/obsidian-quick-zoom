@@ -127,9 +127,9 @@
 }
 
 .zoom-plugin-title-text {
-  display: flex;
-  align-items: center;
+  display: block;
   min-width: 0;
+  max-width: 100%;
   height: var(--zoom-header-row-height);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -297,8 +297,7 @@
 }
 
 .menu.zoom-plugin-outline-menu .zoom-plugin-outline-title {
-  display: flex;
-  align-items: center;
+  display: block;
   align-self: center;
   min-width: 0;
   overflow: hidden;
