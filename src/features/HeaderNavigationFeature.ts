@@ -146,37 +146,22 @@ class UpdateHeaderAfterRangeBeforeVisibleRangeChanged implements Feature {
 }
 
 class FollowViewportInDefaultMode implements Feature {
-  private scrollHandlers = new WeakMap<EditorView, () => void>();
   private debounceTimers = new WeakMap<
     EditorView,
     ReturnType<typeof setTimeout>
   >();
 
   private extension = ViewPlugin.define((view) => {
-    const onScroll = () => this.scheduleRefresh(view);
-    this.scrollHandlers.set(view, onScroll);
-    view.scrollDOM.addEventListener("scroll", onScroll, { passive: true });
-
     // Initial paint after editor mounts
     this.scheduleRefresh(view);
 
     return {
       update: (update: ViewUpdate) => {
-        if (
-          update.docChanged ||
-          update.selectionSet ||
-          update.viewportChanged ||
-          update.geometryChanged
-        ) {
+        if (update.docChanged || update.selectionSet) {
           this.scheduleRefresh(update.view);
         }
       },
       destroy: () => {
-        const handler = this.scrollHandlers.get(view);
-        if (handler) {
-          view.scrollDOM.removeEventListener("scroll", handler);
-          this.scrollHandlers.delete(view);
-        }
         const timer = this.debounceTimers.get(view);
         if (timer) {
           clearTimeout(timer);

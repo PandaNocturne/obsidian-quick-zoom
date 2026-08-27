@@ -85,7 +85,7 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Show breadcrumbs in default mode")
       .setDesc(
-        "Always show the top outline breadcrumbs without zooming. They follow the current viewport heading (like VS Code sticky breadcrumbs). Clicks jump to headings instead of zooming."
+        "Always show the top outline breadcrumbs without zooming. They follow the cursor heading. Clicks jump to headings instead of zooming."
       )
       .addToggle((toggle) => {
         toggle
