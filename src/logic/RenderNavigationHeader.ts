@@ -1,3 +1,5 @@
+import { Menu } from "obsidian";
+
 import { StateEffect, StateField } from "@codemirror/state";
 import { EditorView, showPanel } from "@codemirror/view";
 
@@ -8,6 +10,7 @@ import { LoggerService } from "../services/LoggerService";
 export interface Breadcrumb {
   title: string;
   pos: number | null;
+  siblings: Array<{ title: string; pos: number }>;
 }
 
 export interface ZoomIn {
@@ -20,7 +23,12 @@ export interface ZoomOut {
 
 interface HeaderState {
   breadcrumbs: Breadcrumb[];
-  onClick: (view: EditorView, pos: number | null) => void;
+  onClick: (
+    view: EditorView,
+    pos: number | null,
+    event: MouseEvent,
+    siblings: Array<{ title: string; pos: number }>
+  ) => void;
 }
 
 const showHeaderEffect = StateEffect.define<HeaderState>();
@@ -49,7 +57,8 @@ const headerState = StateField.define<HeaderState | null>({
         top: true,
         dom: renderHeader(view.dom.ownerDocument, {
           breadcrumbs: state.breadcrumbs,
-          onClick: (pos) => state.onClick(view, pos),
+          onClick: (pos, event, siblings) =>
+            state.onClick(view, pos, event, siblings),
         }),
       });
     }),
@@ -89,11 +98,43 @@ export class RenderNavigationHeader {
     });
   }
 
-  private onClick = (view: EditorView, pos: number | null) => {
+  private onClick = (
+    view: EditorView,
+    pos: number | null,
+    event: MouseEvent,
+    siblings: Array<{ title: string; pos: number }>
+  ) => {
     if (pos === null) {
       this.zoomOut.zoomOut(view);
-    } else {
-      this.zoomIn.zoomIn(view, pos);
+      return;
     }
+
+    if (siblings.length > 1) {
+      this.showSiblingMenu(view, pos, siblings, event);
+      return;
+    }
+
+    this.zoomIn.zoomIn(view, pos);
   };
+
+  private showSiblingMenu(
+    view: EditorView,
+    currentPos: number,
+    siblings: Array<{ title: string; pos: number }>,
+    event: MouseEvent
+  ) {
+    const menu = new Menu();
+
+    for (const sibling of siblings) {
+      menu.addItem((item) => {
+        item.setTitle(sibling.title || "(empty)");
+        item.setChecked(sibling.pos === currentPos);
+        item.onClick(() => {
+          this.zoomIn.zoomIn(view, sibling.pos);
+        });
+      });
+    }
+
+    menu.showAtMouseEvent(event);
+  }
 }

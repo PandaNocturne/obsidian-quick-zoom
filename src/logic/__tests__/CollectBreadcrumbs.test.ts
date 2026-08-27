@@ -33,11 +33,38 @@ test("should return breadcrumbs based on folable zones that should include input
   const b = collectBreadcrumbs.collectBreadcrumbs(state, 28);
 
   expect(b).toStrictEqual([
-    { title: "Document", pos: null },
-    { title: "b", pos: 5 },
-    { title: "c", pos: 10 },
-    { title: "1", pos: 16 },
-    { title: "2", pos: 20 },
-    { title: "3", pos: 25 },
+    { title: "Document", pos: null, siblings: [] },
+    {
+      title: "b",
+      pos: 5,
+      siblings: [
+        { title: "a", pos: 0 },
+        { title: "b", pos: 5 },
+        { title: "e", pos: 39 },
+      ],
+    },
+    {
+      title: "c",
+      pos: 10,
+      siblings: [{ title: "c", pos: 10 }],
+    },
+    {
+      title: "1",
+      pos: 16,
+      siblings: [
+        { title: "1", pos: 16 },
+        { title: "d", pos: 32 },
+      ],
+    },
+    {
+      title: "2",
+      pos: 20,
+      siblings: [{ title: "2", pos: 20 }],
+    },
+    {
+      title: "3",
+      pos: 25,
+      siblings: [{ title: "3", pos: 25 }],
+    },
   ]);
 });

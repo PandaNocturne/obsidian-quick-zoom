@@ -1,19 +1,46 @@
 .zoom-plugin-header {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   margin: var(--file-margins);
   margin-top: var(--size-4-2);
   margin-bottom: var(--size-4-2);
 }
 
 .zoom-plugin-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 16em;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-decoration: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-s);
+  padding: 0 2px;
+}
+
+.zoom-plugin-title:hover {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+}
+
+.zoom-plugin-title-has-siblings {
+  color: var(--text-normal);
+}
+
+.zoom-plugin-title-chevron {
+  flex-shrink: 0;
+  font-size: 0.75em;
+  opacity: 0.7;
 }
 
 .zoom-plugin-delimiter {
   display: inline-block;
   padding: 0 var(--size-4-2);
+  color: var(--text-faint);
 }
 
 .zoom-plugin-bls-zoom .cm-editor .cm-formatting-list-ol,
