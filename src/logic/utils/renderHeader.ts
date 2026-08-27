@@ -149,26 +149,30 @@ export function renderHeader(
 
     crumb.appendChild(b);
 
-    const d = doc.createElement("span");
-    d.classList.add("zoom-plugin-delimiter");
-    if (isLast) {
-      d.classList.add("zoom-plugin-delimiter--trailing");
+    // Last crumb only shows `>` when it has children to expand.
+    // Intermediate crumbs always show `>` as hierarchy separators.
+    if (!isLast || children.length > 0) {
+      const d = doc.createElement("span");
+      d.classList.add("zoom-plugin-delimiter");
+      if (isLast) {
+        d.classList.add("zoom-plugin-delimiter--trailing");
+      }
+      if (children.length > 0) {
+        d.classList.add("zoom-plugin-delimiter--clickable");
+        d.setAttribute("role", "button");
+        d.setAttribute("aria-label", "展开子菜单");
+        d.tabIndex = 0;
+        d.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDelimiterClick?.(breadcrumb.pos, e, children);
+        });
+      } else {
+        d.setAttribute("aria-hidden", "true");
+      }
+      setIcon(d, "chevron-right");
+      crumb.appendChild(d);
     }
-    if (children.length > 0) {
-      d.classList.add("zoom-plugin-delimiter--clickable");
-      d.setAttribute("role", "button");
-      d.setAttribute("aria-label", "展开子菜单");
-      d.tabIndex = 0;
-      d.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onDelimiterClick?.(breadcrumb.pos, e, children);
-      });
-    } else {
-      d.setAttribute("aria-hidden", "true");
-    }
-    setIcon(d, "chevron-right");
-    crumb.appendChild(d);
 
     trail.appendChild(crumb);
   }
