@@ -6,6 +6,7 @@ import { EditorView, showPanel } from "@codemirror/view";
 import { Breadcrumb } from "./CollectBreadcrumbs";
 import { SiblingItem } from "./CollectSiblings";
 import { OutlineHoverMenu } from "./OutlineHoverMenu";
+import { ZoomHistory } from "./ZoomHistory";
 import { HeaderHistoryControls, renderHeader } from "./utils/renderHeader";
 
 import { LoggerService } from "../services/LoggerService";
@@ -134,6 +135,7 @@ export class RenderNavigationHeader {
   private menuComponent: Component | null = null;
   private lastBreadcrumbKey: string | null = null;
   private lastMode: HeaderInteractionMode | null = null;
+  private lastHistoryKey: string | null = null;
 
   getExtension() {
     return headerState;
@@ -145,7 +147,9 @@ export class RenderNavigationHeader {
     private settings: SettingsService,
     private zoomIn: ZoomIn,
     private zoomOut: ZoomOut,
-    private zoomHistory: ZoomHistoryNav
+    private zoomHistory: ZoomHistoryNav,
+    private cursorHistory: ZoomHistory,
+    private onCursorHistoryNavigated?: (view: EditorView) => void
   ) {}
 
   public showHeader(
@@ -156,15 +160,18 @@ export class RenderNavigationHeader {
     const key = breadcrumbs
       .map((b) => `${b.pos}:${b.title}:${b.dimmed ? 1 : 0}`)
       .join("|");
+    const historyKey = this.getHistoryKey(view, mode);
     if (
       this.lastBreadcrumbKey === key &&
       this.lastMode === mode &&
+      this.lastHistoryKey === historyKey &&
       this.headerComponent
     ) {
       return;
     }
     this.lastBreadcrumbKey = key;
     this.lastMode = mode;
+    this.lastHistoryKey = historyKey;
 
     const l = this.logger.bind("ToggleNavigationHeaderLogic:showHeader");
     l("show header", mode);
@@ -194,6 +201,7 @@ export class RenderNavigationHeader {
 
     this.lastBreadcrumbKey = null;
     this.lastMode = null;
+    this.lastHistoryKey = null;
     this.outlineMenu.hideAll();
     this.menuComponent?.unload();
     this.menuComponent = null;
@@ -205,6 +213,11 @@ export class RenderNavigationHeader {
     });
   }
 
+  /** Record an outline/cursor anchor for default-mode back/forward. */
+  public recordCursorVisit(view: EditorView, pos: number | null) {
+    this.cursorHistory.record(view, pos);
+  }
+
   private navigateTo(view: EditorView, pos: number) {
     const safePos = Math.max(0, Math.min(pos, view.state.doc.length));
     view.dispatch({
@@ -214,14 +227,62 @@ export class RenderNavigationHeader {
     view.focus();
   }
 
+  private getHistoryKey(view: EditorView, mode: HeaderInteractionMode) {
+    if (mode === "navigate") {
+      return `c:${this.cursorHistory.canGoBack(view) ? 1 : 0}${
+        this.cursorHistory.canGoForward(view) ? 1 : 0
+      }`;
+    }
+    return `z:${this.zoomHistory.canZoomBack(view) ? 1 : 0}${
+      this.zoomHistory.canZoomForward(view) ? 1 : 0
+    }`;
+  }
+
   private getHistory = (view: EditorView): HeaderHistoryControls => {
+    if (this.lastMode === "navigate") {
+      return {
+        canGoBack: this.cursorHistory.canGoBack(view),
+        canGoForward: this.cursorHistory.canGoForward(view),
+        onBack: () => this.cursorBack(view),
+        onForward: () => this.cursorForward(view),
+        backLabel: "后退到上一光标位置",
+        forwardLabel: "前进到下一光标位置",
+      };
+    }
+
     return {
       canGoBack: this.zoomHistory.canZoomBack(view),
       canGoForward: this.zoomHistory.canZoomForward(view),
       onBack: () => this.zoomHistory.zoomBack(view),
       onForward: () => this.zoomHistory.zoomForward(view),
+      backLabel: "后退到上一次缩放",
+      forwardLabel: "前进到下一次缩放",
     };
   };
+
+  private cursorBack(view: EditorView) {
+    if (!this.cursorHistory.canGoBack(view)) {
+      return;
+    }
+    const entry = this.cursorHistory.goBack(view);
+    this.lastBreadcrumbKey = null;
+    this.cursorHistory.runWithoutRecording(() => {
+      this.navigateTo(view, entry ?? 0);
+    });
+    this.onCursorHistoryNavigated?.(view);
+  }
+
+  private cursorForward(view: EditorView) {
+    if (!this.cursorHistory.canGoForward(view)) {
+      return;
+    }
+    const entry = this.cursorHistory.goForward(view);
+    this.lastBreadcrumbKey = null;
+    this.cursorHistory.runWithoutRecording(() => {
+      this.navigateTo(view, entry ?? 0);
+    });
+    this.onCursorHistoryNavigated?.(view);
+  }
 
   private getRenderOptions() {
     return {

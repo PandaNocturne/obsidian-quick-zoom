@@ -31,7 +31,16 @@ export class ZoomFeature implements Feature {
     private plugin: Plugin,
     private logger: LoggerService,
     private settings: SettingsService
-  ) {}
+  ) {
+    this.syncHistoryLimit();
+    this.settings.onChange("historyMaxEntries", () => {
+      this.syncHistoryLimit();
+    });
+  }
+
+  private syncHistoryLimit() {
+    this.zoomHistory.setMaxEntries(this.settings.historyMaxEntries);
+  }
 
   public calculateVisibleContentRange(state: EditorState) {
     return this.keepOnlyZoomedContentVisible.calculateVisibleContentRange(

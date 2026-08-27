@@ -48,13 +48,19 @@ test("skips recording while navigating", () => {
   expect(history.getCurrent(view)).toBe(10);
 });
 
-test("ignores duplicate consecutive entries", () => {
+test("trims oldest entries when exceeding max", () => {
   const history = new ZoomHistory();
+  history.setMaxEntries(3);
   const view = {} as import("@codemirror/view").EditorView;
 
   history.record(view, 10);
-  history.record(view, 10);
+  history.record(view, 20);
+  history.record(view, 30);
+  // stack is [null, 10, 20, 30] then trimmed to last 3: [10, 20, 30]
+  history.record(view, 40);
 
-  expect(history.goBack(view)).toBe(null);
+  expect(history.getCurrent(view)).toBe(40);
+  expect(history.goBack(view)).toBe(30);
+  expect(history.goBack(view)).toBe(20);
   expect(history.canGoBack(view)).toBe(false);
 });

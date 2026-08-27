@@ -7,6 +7,8 @@ interface ViewHistory {
   index: number;
 }
 
+const DEFAULT_MAX_ENTRIES = 50;
+
 /**
  * Per-editor zoom visit history (browser-like back/forward).
  * `null` means the full document (zoomed out).
@@ -14,9 +16,18 @@ interface ViewHistory {
 export class ZoomHistory {
   private byView = new WeakMap<EditorView, ViewHistory>();
   private navigating = false;
+  private maxEntries = DEFAULT_MAX_ENTRIES;
 
   isNavigating(): boolean {
     return this.navigating;
+  }
+
+  setMaxEntries(max: number) {
+    this.maxEntries = Math.max(1, Math.floor(max));
+  }
+
+  getMaxEntries() {
+    return this.maxEntries;
   }
 
   private getOrCreate(view: EditorView): ViewHistory {
@@ -68,6 +79,16 @@ export class ZoomHistory {
     history.entries = history.entries.slice(0, history.index + 1);
     history.entries.push(pos);
     history.index = history.entries.length - 1;
+    this.trim(history);
+  }
+
+  private trim(history: ViewHistory) {
+    if (history.entries.length <= this.maxEntries) {
+      return;
+    }
+    const overflow = history.entries.length - this.maxEntries;
+    history.entries = history.entries.slice(overflow);
+    history.index = Math.max(0, history.index - overflow);
   }
 
   goBack(view: EditorView): ZoomHistoryEntry | null {

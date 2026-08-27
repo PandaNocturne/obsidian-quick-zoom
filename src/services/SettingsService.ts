@@ -13,6 +13,7 @@ export interface ObsidianZoomPluginSettings {
   outlineItemMaxWidthPx: number;
   showBreadcrumbsInDefaultMode: boolean;
   trackCursorWhileZoomed: boolean;
+  historyMaxEntries: number;
 }
 
 interface ObsidianZoomPluginSettingsJson {
@@ -27,6 +28,7 @@ interface ObsidianZoomPluginSettingsJson {
   outlineItemMaxWidthPx: number;
   showBreadcrumbsInDefaultMode: boolean;
   trackCursorWhileZoomed: boolean;
+  historyMaxEntries: number;
 }
 
 const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
@@ -41,6 +43,7 @@ const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
   outlineItemMaxWidthPx: 300,
   showBreadcrumbsInDefaultMode: false,
   trackCursorWhileZoomed: false,
+  historyMaxEntries: 50,
 };
 
 export interface Storage {
@@ -134,6 +137,13 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     this.set("trackCursorWhileZoomed", value);
   }
 
+  get historyMaxEntries() {
+    return this.values.historyMaxEntries;
+  }
+  set historyMaxEntries(value: number) {
+    this.set("historyMaxEntries", value);
+  }
+
   getListRecognitionOptions(): ListRecognitionOptions {
     return {
       recognizeUnorderedLists: this.recognizeUnorderedLists,
@@ -205,6 +215,9 @@ export class SettingsService implements ObsidianZoomPluginSettings {
         break;
       case "trackCursorWhileZoomed":
         this.values.trackCursorWhileZoomed = value as boolean;
+        break;
+      case "historyMaxEntries":
+        this.values.historyMaxEntries = value as number;
         break;
     }
 

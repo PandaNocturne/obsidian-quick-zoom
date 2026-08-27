@@ -13,6 +13,7 @@ import {
   RenderNavigationHeader,
   ZoomHistoryNav,
 } from "../logic/RenderNavigationHeader";
+import { ZoomHistory } from "../logic/ZoomHistory";
 import { getActiveOutlinePos } from "../logic/utils/getActiveOutlinePos";
 import { LoggerService } from "../services/LoggerService";
 import { SettingsService } from "../services/SettingsService";
@@ -275,11 +276,19 @@ class FollowViewportInDefaultMode implements Feature {
       view.state,
       pos
     );
+
+    const anchor =
+      [...breadcrumbs].reverse().find((b) => typeof b.pos === "number")?.pos ??
+      null;
+    this.renderNavigationHeader.recordCursorVisit(view, anchor);
+
     this.renderNavigationHeader.showHeader(view, breadcrumbs, "navigate");
   }
 }
 
 export class HeaderNavigationFeature implements Feature {
+  private cursorHistory = new ZoomHistory();
+
   private collectBreadcrumbs = new CollectBreadcrumbs(
     {
       getDocumentTitle: getDocumentTitle,
@@ -293,7 +302,9 @@ export class HeaderNavigationFeature implements Feature {
     this.settings,
     this.zoomIn,
     this.zoomOut,
-    this.zoomHistory
+    this.zoomHistory,
+    this.cursorHistory,
+    (view) => this.followViewportInDefaultMode.refreshView(view)
   );
 
   private followViewportInDefaultMode = new FollowViewportInDefaultMode(
@@ -345,7 +356,16 @@ export class HeaderNavigationFeature implements Feature {
     private notifyAfterZoomIn: NotifyAfterZoomIn,
     private notifyAfterZoomOut: NotifyAfterZoomOut,
     private zoomHistory: ZoomHistoryNav
-  ) {}
+  ) {
+    this.syncCursorHistoryLimit();
+    this.settings.onChange("historyMaxEntries", () => {
+      this.syncCursorHistoryLimit();
+    });
+  }
+
+  private syncCursorHistoryLimit() {
+    this.cursorHistory.setMaxEntries(this.settings.historyMaxEntries);
+  }
 
   async load() {
     this.plugin.registerEditorExtension(

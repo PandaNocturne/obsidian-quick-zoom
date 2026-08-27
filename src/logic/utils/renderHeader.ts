@@ -22,6 +22,8 @@ export interface HeaderHistoryControls {
   canGoForward: boolean;
   onBack: () => void;
   onForward: () => void;
+  backLabel?: string;
+  forwardLabel?: string;
 }
 
 function appendTitleIcon(
@@ -207,14 +209,14 @@ export function renderHeader(
 
     appendHistoryButton(historyEl, {
       icon: "arrow-left",
-      label: "后退到上一次缩放",
+      label: history.backLabel ?? "后退到上一次缩放",
       disabled: !history.canGoBack,
       onClick: history.onBack,
     });
 
     appendHistoryButton(historyEl, {
       icon: "arrow-right",
-      label: "前进到下一次缩放",
+      label: history.forwardLabel ?? "前进到下一次缩放",
       disabled: !history.canGoForward,
       onClick: history.onForward,
     });

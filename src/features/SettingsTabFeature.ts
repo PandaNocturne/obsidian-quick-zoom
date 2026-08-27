@@ -111,6 +111,25 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
+      .setName("History max entries")
+      .setDesc(
+        "Maximum number of back/forward history entries for zoom visits and default-mode cursor jumps."
+      )
+      .addText((text) => {
+        text
+          .setPlaceholder("50")
+          .setValue(String(this.settings.historyMaxEntries))
+          .onChange(async (value) => {
+            const parsed = Number.parseInt(value, 10);
+            if (Number.isNaN(parsed) || parsed < 1) {
+              return;
+            }
+            this.settings.historyMaxEntries = Math.min(parsed, 500);
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
       .setName("Render markdown in outline titles")
       .setDesc(
         "Render inline markdown (bold, links, etc.) in breadcrumb and menu titles."
