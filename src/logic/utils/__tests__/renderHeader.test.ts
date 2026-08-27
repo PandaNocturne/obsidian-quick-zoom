@@ -3,30 +3,58 @@
  */
 import { renderHeader } from "../renderHeader";
 
+jest.mock("obsidian", () => ({
+  setIcon: (el: HTMLElement, icon: string) => {
+    el.setAttribute("data-icon", icon);
+  },
+}));
+
 const renderOptions = {
   renderMarkdown: false,
   itemMaxWidthPx: 300,
 };
 
-test("should render html", () => {
+test("should render html with icons", () => {
   const h = renderHeader(document, {
     breadcrumbs: [
-      { title: "Document", pos: null, siblings: [] },
-      { title: "header 1", pos: 10, siblings: [] },
+      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "header 1",
+        pos: 10,
+        siblings: [],
+        kind: "heading",
+        headingLevel: 1,
+      },
     ],
     onClick: () => {},
     renderOptions,
   });
 
-  expect(h.outerHTML).toBe(
-    `<div class="zoom-plugin-header"><a class="zoom-plugin-title" data-pos="null" href="#"><span class="zoom-plugin-title-text" style="max-width: 300px;">Document</span></a><span class="zoom-plugin-delimiter">&gt;</span><a class="zoom-plugin-title" data-pos="10" href="#"><span class="zoom-plugin-title-text" style="max-width: 300px;">header 1</span></a></div>`
+  const titles = h.querySelectorAll(".zoom-plugin-title");
+  expect(titles[0].classList.contains("zoom-plugin-title--document")).toBe(
+    true
   );
+  expect(titles[0].querySelector(".zoom-plugin-title-text")).toBeNull();
+  expect(
+    titles[0]
+      .querySelector(".zoom-plugin-title-icon")
+      ?.getAttribute("data-icon")
+  ).toBe("file-text");
+
+  expect(titles[1].querySelector(".zoom-plugin-title-text")?.textContent).toBe(
+    "header 1"
+  );
+  expect(
+    titles[1]
+      .querySelector(".zoom-plugin-title-icon")
+      ?.getAttribute("data-icon")
+  ).toBe("heading-1");
 });
 
 test("should render chevron when title has siblings", () => {
   const h = renderHeader(document, {
     breadcrumbs: [
-      { title: "Document", pos: null, siblings: [] },
+      { title: "Document", pos: null, siblings: [], kind: "document" },
       {
         title: "header 1",
         pos: 10,
@@ -34,6 +62,8 @@ test("should render chevron when title has siblings", () => {
           { title: "header 1", pos: 10, kind: "heading" },
           { title: "header 2", pos: 20, kind: "heading" },
         ],
+        kind: "heading",
+        headingLevel: 1,
       },
     ],
     onClick: () => {},
@@ -49,8 +79,14 @@ test("should handle click on document link", () => {
   const onClick = jest.fn();
   const h = renderHeader(document, {
     breadcrumbs: [
-      { title: "Document", pos: null, siblings: [] },
-      { title: "header 1", pos: 10, siblings: [] },
+      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "header 1",
+        pos: 10,
+        siblings: [],
+        kind: "heading",
+        headingLevel: 1,
+      },
     ],
     onClick,
     renderOptions,
@@ -69,8 +105,14 @@ test("should handle click on header link with siblings", () => {
   ];
   const h = renderHeader(document, {
     breadcrumbs: [
-      { title: "Document", pos: null, siblings: [] },
-      { title: "header 1", pos: 10, siblings },
+      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "header 1",
+        pos: 10,
+        siblings,
+        kind: "heading",
+        headingLevel: 1,
+      },
     ],
     onClick,
     renderOptions,
@@ -79,4 +121,28 @@ test("should handle click on header link with siblings", () => {
   h.querySelectorAll<HTMLAnchorElement>(".zoom-plugin-title")[1].click();
 
   expect(onClick).toHaveBeenCalledWith(10, expect.any(MouseEvent), siblings);
+});
+
+test("should use list icon for list breadcrumbs", () => {
+  const h = renderHeader(document, {
+    breadcrumbs: [
+      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "item",
+        pos: 10,
+        siblings: [],
+        kind: "list",
+        listType: "unordered",
+      },
+    ],
+    onClick: () => {},
+    renderOptions,
+  });
+
+  expect(
+    h
+      .querySelectorAll(".zoom-plugin-title")[1]
+      .querySelector(".zoom-plugin-title-icon")
+      ?.getAttribute("data-icon")
+  ).toBe("list");
 });

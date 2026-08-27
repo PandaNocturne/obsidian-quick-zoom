@@ -45,6 +45,7 @@ test("should return breadcrumbs based on folable zones that should include input
     {
       title: "Document",
       pos: null,
+      kind: "document",
       siblings: [
         { title: "a", pos: 0, kind: "heading", headingLevel: 1 },
         { title: "b", pos: 5, kind: "heading", headingLevel: 1 },
@@ -54,6 +55,8 @@ test("should return breadcrumbs based on folable zones that should include input
     {
       title: "b",
       pos: 5,
+      kind: "heading",
+      headingLevel: 1,
       siblings: [
         { title: "a", pos: 0, kind: "heading", headingLevel: 1 },
         { title: "b", pos: 5, kind: "heading", headingLevel: 1 },
@@ -63,11 +66,15 @@ test("should return breadcrumbs based on folable zones that should include input
     {
       title: "c",
       pos: 10,
+      kind: "heading",
+      headingLevel: 2,
       siblings: [{ title: "c", pos: 10, kind: "heading", headingLevel: 2 }],
     },
     {
       title: "1",
       pos: 16,
+      kind: "list",
+      listType: "unordered",
       siblings: [
         { title: "1", pos: 16, kind: "list", listType: "unordered" },
         { title: "d", pos: 32, kind: "heading", headingLevel: 3 },
@@ -76,11 +83,15 @@ test("should return breadcrumbs based on folable zones that should include input
     {
       title: "2",
       pos: 20,
+      kind: "list",
+      listType: "unordered",
       siblings: [{ title: "2", pos: 20, kind: "list", listType: "unordered" }],
     },
     {
       title: "3",
       pos: 25,
+      kind: "list",
+      listType: "unordered",
       siblings: [{ title: "3", pos: 25, kind: "list", listType: "unordered" }],
     },
   ]);

@@ -10,13 +10,45 @@
 .zoom-plugin-title {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--size-2-1);
   max-width: none;
   text-decoration: none;
   color: var(--text-muted);
   cursor: pointer;
   border-radius: var(--radius-s);
   padding: 0 2px;
+}
+
+.zoom-plugin-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.zoom-plugin-title-icon svg {
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
+.zoom-plugin-title-icon.zoom-plugin-icon--document {
+  color: var(--text-muted);
+}
+
+.zoom-plugin-title-icon.zoom-plugin-icon--heading {
+  color: var(--color-accent, #7f6df2);
+}
+
+.zoom-plugin-title-icon.zoom-plugin-icon--list {
+  color: var(--color-orange, #e9973f);
+}
+
+.zoom-plugin-title-icon.zoom-plugin-icon--text {
+  color: var(--text-faint);
+}
+
+.zoom-plugin-title--document {
+  color: var(--text-normal);
 }
 
 .zoom-plugin-title-text {
@@ -156,6 +188,30 @@
   color: var(--text-on-accent);
 }
 
+.menu.zoom-plugin-outline-menu .menu-item-icon.zoom-plugin-icon--heading {
+  color: var(--color-accent, #7f6df2);
+}
+
+.menu.zoom-plugin-outline-menu .menu-item-icon.zoom-plugin-icon--list {
+  color: var(--color-orange, #e9973f);
+}
+
+.menu.zoom-plugin-outline-menu .menu-item-icon.zoom-plugin-icon--text {
+  color: var(--text-faint);
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label).selected
+  .menu-item-icon.zoom-plugin-icon--heading,
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label).selected
+  .menu-item-icon.zoom-plugin-icon--list,
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label).selected
+  .menu-item-icon.zoom-plugin-icon--text {
+  color: var(--text-on-accent);
+}
+
 .menu.zoom-plugin-outline-menu
   .menu-item:not(.is-disabled):not(.is-label):hover:not(.selected) {
   background-color: var(--background-primary);
@@ -166,6 +222,18 @@
   .menu-item:not(.is-disabled):not(.is-label):hover:not(.selected)
   .menu-item-icon {
   color: var(--text-muted);
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label):hover:not(.selected)
+  .menu-item-icon.zoom-plugin-icon--heading {
+  color: var(--color-accent, #7f6df2);
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label):hover:not(.selected)
+  .menu-item-icon.zoom-plugin-icon--list {
+  color: var(--color-orange, #e9973f);
 }
 
 .menu.zoom-plugin-outline-menu

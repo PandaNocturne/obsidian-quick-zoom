@@ -1,24 +1,34 @@
+import { setIcon } from "obsidian";
+
 import {
   RenderOutlineTitleOptions,
   renderOutlineTitle,
 } from "./renderOutlineTitle";
 
-import { SiblingItem } from "../CollectSiblings";
-
-export interface BreadcrumbHeaderItem {
-  title: string;
-  pos: number | null;
-  siblings?: SiblingItem[];
-}
+import { Breadcrumb } from "../CollectBreadcrumbs";
+import {
+  OutlineIconTarget,
+  SiblingItem,
+  outlineIconColorClass,
+  outlineIconName,
+} from "../CollectSiblings";
 
 export interface RenderHeaderOptions extends RenderOutlineTitleOptions {
   itemMaxWidthPx: number;
 }
 
+function appendTitleIcon(container: HTMLElement, item: OutlineIconTarget) {
+  const iconSpan = container.ownerDocument.createElement("span");
+  iconSpan.className = `zoom-plugin-title-icon ${outlineIconColorClass(item)}`;
+  iconSpan.setAttribute("aria-hidden", "true");
+  setIcon(iconSpan, outlineIconName(item));
+  container.appendChild(iconSpan);
+}
+
 export function renderHeader(
   doc: Document,
   ctx: {
-    breadcrumbs: BreadcrumbHeaderItem[];
+    breadcrumbs: Breadcrumb[];
     onClick: (
       pos: number | null,
       event: MouseEvent,
@@ -42,20 +52,29 @@ export function renderHeader(
 
     const breadcrumb = breadcrumbs[i];
     const siblings = breadcrumb.siblings ?? [];
+    const isDocument = breadcrumb.kind === "document";
 
     const b = doc.createElement("a");
     b.classList.add("zoom-plugin-title");
+    if (isDocument) {
+      b.classList.add("zoom-plugin-title--document");
+    }
     if (siblings.length > 0) {
       b.classList.add("zoom-plugin-title-has-siblings");
     }
     b.dataset.pos = String(breadcrumb.pos);
     b.href = "#";
+    b.setAttribute("aria-label", breadcrumb.title);
 
-    const titleSpan = doc.createElement("span");
-    titleSpan.classList.add("zoom-plugin-title-text");
-    titleSpan.style.maxWidth = `${renderOptions.itemMaxWidthPx}px`;
-    renderOutlineTitle(titleSpan, breadcrumb.title, renderOptions);
-    b.appendChild(titleSpan);
+    appendTitleIcon(b, breadcrumb);
+
+    if (!isDocument) {
+      const titleSpan = doc.createElement("span");
+      titleSpan.classList.add("zoom-plugin-title-text");
+      titleSpan.style.maxWidth = `${renderOptions.itemMaxWidthPx}px`;
+      renderOutlineTitle(titleSpan, breadcrumb.title, renderOptions);
+      b.appendChild(titleSpan);
+    }
 
     if (siblings.length > 0) {
       const chevron = doc.createElement("span");

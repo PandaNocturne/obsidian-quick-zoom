@@ -2,7 +2,12 @@ import { App, Component, Menu, MenuItem } from "obsidian";
 
 import { EditorView } from "@codemirror/view";
 
-import { SiblingItem, collectSiblings, outlineIcon } from "./CollectSiblings";
+import {
+  SiblingItem,
+  collectSiblings,
+  outlineIcon,
+  outlineIconColorClass,
+} from "./CollectSiblings";
 import { renderOutlineTitle } from "./utils/renderOutlineTitle";
 
 export interface OutlineHoverMenuContext {
@@ -84,6 +89,7 @@ export class OutlineHoverMenu {
       menu.addItem((item) => {
         this.renderMenuItemTitle(item, outlineItem.title, ctx);
         item.setIcon(outlineIcon(outlineItem));
+        this.applyOutlineIconStyle(item, outlineItem);
         if (ctx.selectedPath.has(outlineItem.pos)) {
           item.dom.addClass("selected");
         }
@@ -101,6 +107,16 @@ export class OutlineHoverMenu {
           this.bindChevronSubmenu(item, children, ctx, depth);
         }
       });
+    }
+  }
+
+  private applyOutlineIconStyle(
+    item: MenuItem,
+    target: Pick<SiblingItem, "kind">
+  ) {
+    const iconEl = item.dom.querySelector(".menu-item-icon");
+    if (iconEl instanceof HTMLElement) {
+      iconEl.addClass(outlineIconColorClass(target));
     }
   }
 

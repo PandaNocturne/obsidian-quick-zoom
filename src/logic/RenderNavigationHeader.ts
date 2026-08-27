@@ -3,6 +3,7 @@ import { App, Component } from "obsidian";
 import { StateEffect, StateField } from "@codemirror/state";
 import { EditorView, showPanel } from "@codemirror/view";
 
+import { Breadcrumb } from "./CollectBreadcrumbs";
 import { SiblingItem } from "./CollectSiblings";
 import { OutlineHoverMenu } from "./OutlineHoverMenu";
 import { renderHeader } from "./utils/renderHeader";
@@ -10,11 +11,7 @@ import { renderHeader } from "./utils/renderHeader";
 import { LoggerService } from "../services/LoggerService";
 import { SettingsService } from "../services/SettingsService";
 
-export interface Breadcrumb {
-  title: string;
-  pos: number | null;
-  siblings: SiblingItem[];
-}
+export type { Breadcrumb };
 
 export interface ZoomIn {
   zoomIn(view: EditorView, pos: number): void;

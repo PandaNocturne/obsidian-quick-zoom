@@ -10,6 +10,7 @@ import {
 } from "./utils/listItemParsing";
 
 export type OutlineKind = "heading" | "list";
+export type BreadcrumbKind = "document" | OutlineKind | "text";
 
 export interface SiblingItem {
   title: string;
@@ -18,6 +19,12 @@ export interface SiblingItem {
   /** Present when kind is heading; 1–6 */
   headingLevel?: number;
   /** Present when kind is list */
+  listType?: ListType;
+}
+
+export interface OutlineIconTarget {
+  kind: BreadcrumbKind;
+  headingLevel?: number;
   listType?: ListType;
 }
 
@@ -47,6 +54,35 @@ export function outlineIcon(
   }
   const level = Math.min(6, Math.max(1, item.headingLevel ?? 1));
   return `heading-${level}`;
+}
+
+export function outlineIconName(item: OutlineIconTarget): string {
+  if (item.kind === "document") {
+    return "file-text";
+  }
+  if (item.kind === "text") {
+    return "text";
+  }
+  return outlineIcon({
+    kind: item.kind,
+    headingLevel: item.headingLevel,
+    listType: item.listType,
+  });
+}
+
+export function outlineIconColorClass(
+  item: Pick<OutlineIconTarget, "kind">
+): string {
+  switch (item.kind) {
+    case "document":
+      return "zoom-plugin-icon--document";
+    case "heading":
+      return "zoom-plugin-icon--heading";
+    case "list":
+      return "zoom-plugin-icon--list";
+    default:
+      return "zoom-plugin-icon--text";
+  }
 }
 
 export function collectSiblings(

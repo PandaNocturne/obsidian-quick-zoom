@@ -2,13 +2,19 @@ import { foldable } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 
 import {
+  BreadcrumbKind,
+  OutlineIconTarget,
   SiblingItem,
   collectSiblings,
   detectHeadingLevel,
 } from "./CollectSiblings";
 import { cleanTitle } from "./utils/cleanTitle";
 import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
-import { detectListType } from "./utils/listItemParsing";
+import {
+  ListRecognitionOptions,
+  ListType,
+  detectListType,
+} from "./utils/listItemParsing";
 
 import { SettingsService } from "../services/SettingsService";
 
@@ -16,10 +22,30 @@ export interface Breadcrumb {
   title: string;
   pos: number | null;
   siblings: SiblingItem[];
+  kind: BreadcrumbKind;
+  headingLevel?: number;
+  listType?: ListType;
 }
 
 export interface GetDocumentTitle {
   getDocumentTitle(state: EditorState): string;
+}
+
+function lineBreadcrumbMeta(
+  lineText: string,
+  listOptions: ListRecognitionOptions
+): Pick<Breadcrumb, "kind" | "headingLevel" | "listType"> {
+  const headingLevel = detectHeadingLevel(lineText);
+  if (headingLevel !== null) {
+    return { kind: "heading", headingLevel };
+  }
+
+  const listType = detectListType(lineText, listOptions);
+  if (listType) {
+    return { kind: "list", listType };
+  }
+
+  return { kind: "text" };
 }
 
 export class CollectBreadcrumbs {
@@ -35,6 +61,7 @@ export class CollectBreadcrumbs {
         title: this.getDocumentTitle.getDocumentTitle(state),
         pos: null,
         siblings: [],
+        kind: "document",
       },
     ];
 
@@ -57,6 +84,8 @@ export class CollectBreadcrumbs {
             title: cleanTitle(line.text),
             pos: line.from,
             siblings: [],
+            kind: "heading",
+            headingLevel,
           });
           continue;
         }
@@ -67,6 +96,8 @@ export class CollectBreadcrumbs {
             title: cleanTitle(line.text),
             pos: line.from,
             siblings: [],
+            kind: "list",
+            listType,
           });
         }
       }
@@ -76,6 +107,7 @@ export class CollectBreadcrumbs {
       title: cleanTitle(posLine.text),
       pos: posLine.from,
       siblings: [],
+      ...lineBreadcrumbMeta(posLine.text, listOptions),
     });
 
     breadcrumbs[0].siblings = collectSiblings(state, null, listOptions);
