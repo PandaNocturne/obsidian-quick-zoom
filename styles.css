@@ -74,10 +74,21 @@
   padding-right: 1.75em;
 }
 
-.menu-item.menu-item-has-submenu::after {
-  content: "›";
+.menu-item.menu-item-has-submenu .zoom-plugin-outline-chevron {
   position: absolute;
-  right: var(--size-4-2);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75em;
   color: var(--text-muted);
-  pointer-events: none;
+  cursor: pointer;
+  border-left: 1px solid var(--background-modifier-border);
+}
+
+.menu-item.menu-item-has-submenu .zoom-plugin-outline-chevron:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
 }

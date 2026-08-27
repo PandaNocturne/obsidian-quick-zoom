@@ -43,7 +43,7 @@ export class OutlineHoverMenu {
 
     this.populateMenu(root, items, ctx, 0);
     root.showAtMouseEvent(event);
-    this.bindMenuHover(root, ctx, 0);
+    this.bindMenuHover(root, ctx);
   }
 
   private populateMenu(
@@ -64,30 +64,42 @@ export class OutlineHoverMenu {
 
         const children = collectSiblings(ctx.view.state, outlineItem.pos);
         if (children.length > 0) {
-          item.dom.addClass("menu-item-has-submenu");
-          this.bindItemSubmenuHover(item, children, ctx, depth);
+          this.bindChevronSubmenuHover(item, children, ctx, depth);
         }
       });
     }
   }
 
-  private bindItemSubmenuHover(
+  private bindChevronSubmenuHover(
     item: MenuItem,
     children: SiblingItem[],
     ctx: OutlineHoverMenuContext,
     depth: number
   ) {
-    item.dom.addEventListener("mouseenter", () => {
+    item.dom.addClass("menu-item-has-submenu");
+
+    const chevron = item.dom.createDiv({
+      cls: "zoom-plugin-outline-chevron",
+      text: "›",
+      attr: { "aria-label": "展开子菜单" },
+    });
+
+    chevron.addEventListener("mouseenter", () => {
       this.cancelClose();
-      this.openSubmenu(item.dom, children, ctx, depth + 1);
+      this.openSubmenu(chevron, children, ctx, depth + 1);
+    });
+
+    chevron.addEventListener("mouseleave", () => {
+      this.scheduleClose(ctx.getSubmenuCloseDelayMs());
+    });
+
+    chevron.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
     });
   }
 
-  private bindMenuHover(
-    menu: Menu,
-    ctx: OutlineHoverMenuContext,
-    depth: number
-  ) {
+  private bindMenuHover(menu: Menu, ctx: OutlineHoverMenuContext) {
     menu.dom.addEventListener("mouseenter", () => this.cancelClose());
     menu.dom.addEventListener("mouseleave", () =>
       this.scheduleClose(ctx.getSubmenuCloseDelayMs())
@@ -107,7 +119,7 @@ export class OutlineHoverMenu {
     this.menuStack[depth] = submenu;
 
     this.populateMenu(submenu, items, ctx, depth);
-    this.bindMenuHover(submenu, ctx, depth);
+    this.bindMenuHover(submenu, ctx);
 
     const rect = anchor.getBoundingClientRect();
     submenu.showAtPosition({ x: rect.right - 2, y: rect.top });
