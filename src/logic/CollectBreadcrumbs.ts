@@ -54,6 +54,8 @@ export class CollectBreadcrumbs {
       siblings: [],
     });
 
+    breadcrumbs[0].siblings = collectSiblings(state, null);
+
     for (let i = 1; i < breadcrumbs.length; i++) {
       breadcrumbs[i].siblings = collectSiblings(state, breadcrumbs[i - 1].pos);
     }

@@ -11,5 +11,6 @@
     "importHelpers": true,
     "lib": ["dom", "es5", "scripthost", "es2015"]
   },
-  "include": ["**/*.ts"]
+  "include": ["src/**/*.ts", "jest/**/*.ts"],
+  "exclude": ["tmp", "node_modules", "vault"]
 }

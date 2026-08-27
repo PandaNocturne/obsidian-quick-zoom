@@ -24,6 +24,25 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
+      .setName("Outline submenu close delay")
+      .setDesc(
+        "Milliseconds to wait before closing outline submenus after the mouse leaves."
+      )
+      .addText((text) => {
+        text
+          .setPlaceholder("400")
+          .setValue(String(this.settings.outlineSubmenuCloseDelayMs))
+          .onChange(async (value) => {
+            const parsed = Number.parseInt(value, 10);
+            if (Number.isNaN(parsed) || parsed < 0) {
+              return;
+            }
+            this.settings.outlineSubmenuCloseDelayMs = parsed;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
       .setName("Debug mode")
       .setDesc(
         "Open DevTools (Command+Option+I or Control+Shift+I) to copy the debug logs."

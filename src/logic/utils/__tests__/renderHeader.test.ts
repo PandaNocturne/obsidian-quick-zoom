@@ -25,8 +25,8 @@ test("should render chevron when title has siblings", () => {
         title: "header 1",
         pos: 10,
         siblings: [
-          { title: "header 1", pos: 10 },
-          { title: "header 2", pos: 20 },
+          { title: "header 1", pos: 10, kind: "heading" },
+          { title: "header 2", pos: 20, kind: "heading" },
         ],
       },
     ],
@@ -56,8 +56,8 @@ test("should handle click on document link", () => {
 test("should handle click on header link with siblings", () => {
   const onClick = jest.fn();
   const siblings = [
-    { title: "header 1", pos: 10 },
-    { title: "header 2", pos: 20 },
+    { title: "header 1", pos: 10, kind: "heading" as const },
+    { title: "header 2", pos: 20, kind: "heading" as const },
   ];
   const h = renderHeader(document, {
     breadcrumbs: [

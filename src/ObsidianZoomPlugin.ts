@@ -49,6 +49,7 @@ export default class ObsidianZoomPlugin extends Plugin {
     const headerNavigationFeature = new HeaderNavigationFeature(
       this,
       logger,
+      settings,
       this.zoomFeature,
       this.zoomFeature,
       this.zoomFeature,

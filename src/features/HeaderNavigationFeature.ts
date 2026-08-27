@@ -11,6 +11,7 @@ import { CollectBreadcrumbs } from "../logic/CollectBreadcrumbs";
 import { DetectRangeBeforeVisibleRangeChanged } from "../logic/DetectRangeBeforeVisibleRangeChanged";
 import { RenderNavigationHeader } from "../logic/RenderNavigationHeader";
 import { LoggerService } from "../services/LoggerService";
+import { SettingsService } from "../services/SettingsService";
 
 export interface ZoomIn {
   zoomIn(view: EditorView, pos: number): void;
@@ -122,6 +123,7 @@ export class HeaderNavigationFeature implements Feature {
 
   private renderNavigationHeader = new RenderNavigationHeader(
     this.logger,
+    this.settings,
     this.zoomIn,
     this.zoomOut
   );
@@ -149,6 +151,7 @@ export class HeaderNavigationFeature implements Feature {
   constructor(
     private plugin: Plugin,
     private logger: LoggerService,
+    private settings: SettingsService,
     private calculateHiddenContentRanges: CalculateHiddenContentRanges,
     private calculateVisibleContentRange: CalculateVisibleContentRange,
     private zoomIn: ZoomIn,

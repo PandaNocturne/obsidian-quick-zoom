@@ -68,3 +68,16 @@
 .markdown-source-view.mod-cm6 .cm-panels {
   border-bottom-color: var(--background-modifier-border);
 }
+
+.menu-item.menu-item-has-submenu {
+  position: relative;
+  padding-right: 1.75em;
+}
+
+.menu-item.menu-item-has-submenu::after {
+  content: "›";
+  position: absolute;
+  right: var(--size-4-2);
+  color: var(--text-muted);
+  pointer-events: none;
+}

@@ -1,7 +1,9 @@
+import { SiblingItem } from "../CollectSiblings";
+
 export interface BreadcrumbHeaderItem {
   title: string;
   pos: number | null;
-  siblings?: Array<{ title: string; pos: number }>;
+  siblings?: SiblingItem[];
 }
 
 export function renderHeader(
@@ -11,7 +13,7 @@ export function renderHeader(
     onClick: (
       pos: number | null,
       event: MouseEvent,
-      siblings: Array<{ title: string; pos: number }>
+      siblings: SiblingItem[]
     ) => void;
   }
 ) {
@@ -30,18 +32,17 @@ export function renderHeader(
 
     const breadcrumb = breadcrumbs[i];
     const siblings = breadcrumb.siblings ?? [];
-    const hasSiblingMenu = siblings.length > 1;
 
     const b = doc.createElement("a");
     b.classList.add("zoom-plugin-title");
-    if (hasSiblingMenu) {
+    if (siblings.length > 0) {
       b.classList.add("zoom-plugin-title-has-siblings");
     }
     b.dataset.pos = String(breadcrumb.pos);
     b.href = "#";
     b.appendChild(doc.createTextNode(breadcrumb.title));
 
-    if (hasSiblingMenu) {
+    if (siblings.length > 0) {
       const chevron = doc.createElement("span");
       chevron.classList.add("zoom-plugin-title-chevron");
       chevron.setAttribute("aria-hidden", "true");

@@ -1,16 +1,17 @@
-import { Menu } from "obsidian";
-
 import { StateEffect, StateField } from "@codemirror/state";
 import { EditorView, showPanel } from "@codemirror/view";
 
+import { SiblingItem } from "./CollectSiblings";
+import { OutlineHoverMenu } from "./OutlineHoverMenu";
 import { renderHeader } from "./utils/renderHeader";
 
 import { LoggerService } from "../services/LoggerService";
+import { SettingsService } from "../services/SettingsService";
 
 export interface Breadcrumb {
   title: string;
   pos: number | null;
-  siblings: Array<{ title: string; pos: number }>;
+  siblings: SiblingItem[];
 }
 
 export interface ZoomIn {
@@ -27,7 +28,8 @@ interface HeaderState {
     view: EditorView,
     pos: number | null,
     event: MouseEvent,
-    siblings: Array<{ title: string; pos: number }>
+    siblings: SiblingItem[],
+    breadcrumbs: Breadcrumb[]
   ) => void;
 }
 
@@ -58,19 +60,22 @@ const headerState = StateField.define<HeaderState | null>({
         dom: renderHeader(view.dom.ownerDocument, {
           breadcrumbs: state.breadcrumbs,
           onClick: (pos, event, siblings) =>
-            state.onClick(view, pos, event, siblings),
+            state.onClick(view, pos, event, siblings, state.breadcrumbs),
         }),
       });
     }),
 });
 
 export class RenderNavigationHeader {
+  private outlineMenu = new OutlineHoverMenu();
+
   getExtension() {
     return headerState;
   }
 
   constructor(
     private logger: LoggerService,
+    private settings: SettingsService,
     private zoomIn: ZoomIn,
     private zoomOut: ZoomOut
   ) {}
@@ -93,6 +98,8 @@ export class RenderNavigationHeader {
     const l = this.logger.bind("ToggleNavigationHeaderLogic:hideHeader");
     l("hide header");
 
+    this.outlineMenu.hideAll();
+
     view.dispatch({
       effects: [hideHeaderEffect.of()],
     });
@@ -102,39 +109,52 @@ export class RenderNavigationHeader {
     view: EditorView,
     pos: number | null,
     event: MouseEvent,
-    siblings: Array<{ title: string; pos: number }>
+    siblings: SiblingItem[],
+    breadcrumbs: Breadcrumb[]
   ) => {
+    const selectedPath = new Set(
+      breadcrumbs
+        .map((b) => b.pos)
+        .filter((p): p is number => typeof p === "number")
+    );
+
     if (pos === null) {
-      this.zoomOut.zoomOut(view);
+      if (siblings.length === 0) {
+        this.zoomOut.zoomOut(view);
+        return;
+      }
+      this.showOutlineMenu(view, siblings, selectedPath, event, {
+        includeExitZoom: true,
+      });
       return;
     }
 
-    if (siblings.length > 1) {
-      this.showSiblingMenu(view, pos, siblings, event);
+    if (siblings.length > 0) {
+      this.showOutlineMenu(view, siblings, selectedPath, event);
       return;
     }
 
     this.zoomIn.zoomIn(view, pos);
   };
 
-  private showSiblingMenu(
+  private showOutlineMenu(
     view: EditorView,
-    currentPos: number,
-    siblings: Array<{ title: string; pos: number }>,
-    event: MouseEvent
+    items: SiblingItem[],
+    selectedPath: Set<number>,
+    event: MouseEvent,
+    options?: { includeExitZoom?: boolean }
   ) {
-    const menu = new Menu();
-
-    for (const sibling of siblings) {
-      menu.addItem((item) => {
-        item.setTitle(sibling.title || "(empty)");
-        item.setChecked(sibling.pos === currentPos);
-        item.onClick(() => {
-          this.zoomIn.zoomIn(view, sibling.pos);
-        });
-      });
-    }
-
-    menu.showAtMouseEvent(event);
+    this.outlineMenu.showAtMouseEvent(
+      event,
+      items,
+      {
+        view,
+        selectedPath,
+        zoomIn: (v, p) => this.zoomIn.zoomIn(v, p),
+        zoomOut: (v) => this.zoomOut.zoomOut(v),
+        getSubmenuCloseDelayMs: () => this.settings.outlineSubmenuCloseDelayMs,
+      },
+      options
+    );
   }
 }

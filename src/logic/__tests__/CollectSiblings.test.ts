@@ -26,9 +26,9 @@ test("should collect top-level siblings under document root", () => {
   });
 
   expect(collectSiblings(state, null)).toStrictEqual([
-    { title: "a", pos: 0 },
-    { title: "b", pos: 5 },
-    { title: "e", pos: 39 },
+    { title: "a", pos: 0, kind: "heading", headingLevel: 1 },
+    { title: "b", pos: 5, kind: "heading", headingLevel: 1 },
+    { title: "e", pos: 39, kind: "heading", headingLevel: 1 },
   ]);
 });
 
@@ -48,8 +48,8 @@ test("should collect direct children under a parent heading", () => {
   });
 
   expect(collectSiblings(state, 10)).toStrictEqual([
-    { title: "1", pos: 16 },
-    { title: "d", pos: 32 },
+    { title: "1", pos: 16, kind: "list" },
+    { title: "d", pos: 32, kind: "heading", headingLevel: 3 },
   ]);
 });
 
@@ -70,7 +70,7 @@ test("should skip YAML frontmatter when collecting top-level siblings", () => {
   });
 
   expect(collectSiblings(state, null)).toStrictEqual([
-    { title: "a", pos: headingA },
-    { title: "b", pos: headingB },
+    { title: "a", pos: headingA, kind: "heading", headingLevel: 1 },
+    { title: "b", pos: headingB, kind: "heading", headingLevel: 1 },
   ]);
 });
