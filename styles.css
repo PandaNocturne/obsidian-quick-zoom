@@ -25,6 +25,46 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: bottom;
+  line-height: var(--line-height-normal);
+}
+
+/* MarkdownRenderer wraps content in block elements; keep titles single-line height */
+.zoom-plugin-outline-title-md .markdown-rendered,
+.zoom-plugin-title-text.zoom-plugin-outline-title-md .markdown-rendered {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
+}
+
+.zoom-plugin-outline-title-md p,
+.zoom-plugin-title-text.zoom-plugin-outline-title-md p,
+.zoom-plugin-outline-title-md .el-p,
+.zoom-plugin-title-text.zoom-plugin-outline-title-md .el-p {
+  margin: 0;
+  padding: 0;
+  display: inline;
+  line-height: inherit;
+}
+
+.zoom-plugin-outline-title-md > :is(p, div, ul, ol, blockquote, pre),
+.zoom-plugin-title-text.zoom-plugin-outline-title-md
+  > :is(p, div, ul, ol, blockquote, pre) {
+  margin: 0;
+  padding: 0;
+}
+
+.zoom-plugin-outline-title-md ul,
+.zoom-plugin-outline-title-md ol,
+.zoom-plugin-title-text.zoom-plugin-outline-title-md ul,
+.zoom-plugin-title-text.zoom-plugin-outline-title-md ol {
+  display: inline;
+  list-style: none;
+}
+
+.zoom-plugin-outline-title-md * {
+  line-height: inherit;
+  vertical-align: baseline;
 }
 
 .zoom-plugin-title:hover {
@@ -144,5 +184,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  vertical-align: bottom;
+  vertical-align: middle;
+  line-height: var(--line-height-normal);
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label):has(.zoom-plugin-outline-title-md) {
+  align-items: center;
+  padding-top: var(--size-2-2);
+  padding-bottom: var(--size-2-2);
 }

@@ -37,6 +37,7 @@ export function renderOutlineTitle(
   if (options.renderMarkdown && options.app && options.component) {
     const renderer = getMarkdownRenderer();
     if (renderer) {
+      container.addClass("zoom-plugin-outline-title-md");
       void renderer.render(
         options.app,
         text,
