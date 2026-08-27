@@ -39,25 +39,37 @@ export function renderHeader(
       event: MouseEvent,
       siblings: SiblingItem[]
     ) => void;
+    onDelimiterClick?: (
+      pos: number | null,
+      event: MouseEvent,
+      children: SiblingItem[]
+    ) => void;
     renderOptions: RenderHeaderOptions;
   }
 ) {
-  const { breadcrumbs, onClick, onDoubleClick, renderOptions } = ctx;
+  const {
+    breadcrumbs,
+    onClick,
+    onDoubleClick,
+    onDelimiterClick,
+    renderOptions,
+  } = ctx;
 
   const h = doc.createElement("div");
   h.classList.add("zoom-plugin-header");
 
   for (let i = 0; i < breadcrumbs.length; i++) {
-    if (i > 0) {
-      const d = doc.createElement("span");
-      d.classList.add("zoom-plugin-delimiter");
-      d.textContent = ">";
-      h.append(d);
-    }
-
     const breadcrumb = breadcrumbs[i];
     const siblings = breadcrumb.siblings ?? [];
+    const children = breadcrumb.children ?? [];
     const isDocument = breadcrumb.kind === "document";
+    const isLast = i === breadcrumbs.length - 1;
+
+    const crumb = doc.createElement("span");
+    crumb.classList.add("zoom-plugin-crumb");
+    if (isLast) {
+      crumb.classList.add("zoom-plugin-crumb--last");
+    }
 
     const b = doc.createElement("a");
     b.classList.add("zoom-plugin-title");
@@ -95,7 +107,28 @@ export function renderHeader(
       });
     }
 
-    h.appendChild(b);
+    crumb.appendChild(b);
+
+    const d = doc.createElement("span");
+    d.classList.add("zoom-plugin-delimiter");
+    if (isLast) {
+      d.classList.add("zoom-plugin-delimiter--trailing");
+    }
+    if (children.length > 0) {
+      d.classList.add("zoom-plugin-delimiter--clickable");
+      d.setAttribute("role", "button");
+      d.setAttribute("aria-label", "展开子菜单");
+      d.tabIndex = 0;
+      d.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDelimiterClick?.(breadcrumb.pos, e, children);
+      });
+    }
+    d.textContent = ">";
+    crumb.appendChild(d);
+
+    h.appendChild(crumb);
   }
 
   return h;

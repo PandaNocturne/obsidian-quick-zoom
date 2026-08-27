@@ -51,6 +51,11 @@ test("should return breadcrumbs based on folable zones that should include input
         { title: "b", pos: 5, kind: "heading", headingLevel: 1 },
         { title: "e", pos: 39, kind: "heading", headingLevel: 1 },
       ],
+      children: [
+        { title: "a", pos: 0, kind: "heading", headingLevel: 1 },
+        { title: "b", pos: 5, kind: "heading", headingLevel: 1 },
+        { title: "e", pos: 39, kind: "heading", headingLevel: 1 },
+      ],
     },
     {
       title: "b",
@@ -62,6 +67,7 @@ test("should return breadcrumbs based on folable zones that should include input
         { title: "b", pos: 5, kind: "heading", headingLevel: 1 },
         { title: "e", pos: 39, kind: "heading", headingLevel: 1 },
       ],
+      children: [{ title: "c", pos: 10, kind: "heading", headingLevel: 2 }],
     },
     {
       title: "c",
@@ -69,6 +75,10 @@ test("should return breadcrumbs based on folable zones that should include input
       kind: "heading",
       headingLevel: 2,
       siblings: [{ title: "c", pos: 10, kind: "heading", headingLevel: 2 }],
+      children: [
+        { title: "1", pos: 16, kind: "list", listType: "unordered" },
+        { title: "d", pos: 32, kind: "heading", headingLevel: 3 },
+      ],
     },
     {
       title: "1",
@@ -79,6 +89,7 @@ test("should return breadcrumbs based on folable zones that should include input
         { title: "1", pos: 16, kind: "list", listType: "unordered" },
         { title: "d", pos: 32, kind: "heading", headingLevel: 3 },
       ],
+      children: [{ title: "2", pos: 20, kind: "list", listType: "unordered" }],
     },
     {
       title: "2",
@@ -86,6 +97,7 @@ test("should return breadcrumbs based on folable zones that should include input
       kind: "list",
       listType: "unordered",
       siblings: [{ title: "2", pos: 20, kind: "list", listType: "unordered" }],
+      children: [{ title: "3", pos: 25, kind: "list", listType: "unordered" }],
     },
     {
       title: "3",
@@ -93,6 +105,7 @@ test("should return breadcrumbs based on folable zones that should include input
       kind: "list",
       listType: "unordered",
       siblings: [{ title: "3", pos: 25, kind: "list", listType: "unordered" }],
+      children: [],
     },
   ]);
 });

@@ -7,6 +7,11 @@
   margin-bottom: var(--size-4-2);
 }
 
+.zoom-plugin-crumb {
+  display: inline-flex;
+  align-items: center;
+}
+
 .zoom-plugin-title {
   display: inline-flex;
   align-items: center;
@@ -121,6 +126,27 @@
   padding: 0 var(--size-4-2);
   color: var(--text-faint);
   line-height: var(--line-height-normal);
+  user-select: none;
+}
+
+.zoom-plugin-delimiter--clickable {
+  cursor: pointer;
+  border-radius: var(--radius-s);
+}
+
+.zoom-plugin-delimiter--clickable:hover {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+}
+
+.zoom-plugin-delimiter--trailing {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.zoom-plugin-crumb--last:hover .zoom-plugin-delimiter--trailing,
+.zoom-plugin-delimiter--trailing:focus-visible {
+  opacity: 1;
 }
 
 .zoom-plugin-bls-zoom .cm-editor .cm-formatting-list-ol,

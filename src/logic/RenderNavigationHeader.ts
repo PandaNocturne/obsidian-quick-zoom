@@ -37,6 +37,13 @@ interface HeaderState {
     siblings: SiblingItem[],
     breadcrumbs: Breadcrumb[]
   ) => void;
+  onDelimiterClick: (
+    view: EditorView,
+    pos: number | null,
+    event: MouseEvent,
+    children: SiblingItem[],
+    breadcrumbs: Breadcrumb[]
+  ) => void;
   renderOptions: {
     renderMarkdown: boolean;
     itemMaxWidthPx: number;
@@ -76,6 +83,14 @@ const headerState = StateField.define<HeaderState | null>({
             state.onClick(view, pos, event, siblings, state.breadcrumbs),
           onDoubleClick: (pos, event, siblings) =>
             state.onDoubleClick(view, pos, event, siblings, state.breadcrumbs),
+          onDelimiterClick: (pos, event, children) =>
+            state.onDelimiterClick(
+              view,
+              pos,
+              event,
+              children,
+              state.breadcrumbs
+            ),
           renderOptions: state.renderOptions,
         }),
       });
@@ -113,6 +128,7 @@ export class RenderNavigationHeader {
           breadcrumbs,
           onClick: this.onClick,
           onDoubleClick: this.onDoubleClick,
+          onDelimiterClick: this.onDelimiterClick,
           renderOptions: this.getRenderOptions(),
         }),
       ],
@@ -185,6 +201,26 @@ export class RenderNavigationHeader {
     }
 
     this.zoomIn.zoomIn(view, pos);
+  };
+
+  private onDelimiterClick = (
+    view: EditorView,
+    _pos: number | null,
+    event: MouseEvent,
+    children: SiblingItem[],
+    breadcrumbs: Breadcrumb[]
+  ) => {
+    if (children.length === 0) {
+      return;
+    }
+
+    const selectedPath = new Set(
+      breadcrumbs
+        .map((b) => b.pos)
+        .filter((p): p is number => typeof p === "number")
+    );
+
+    this.showOutlineMenu(view, children, selectedPath, event);
   };
 
   private showOutlineMenu(

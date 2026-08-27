@@ -21,6 +21,8 @@ export interface Breadcrumb {
   title: string;
   pos: number | null;
   siblings: SiblingItem[];
+  /** Direct children under this breadcrumb (for `>` submenu) */
+  children: SiblingItem[];
   kind: BreadcrumbKind;
   headingLevel?: number;
   listType?: ListType;
@@ -60,6 +62,7 @@ export class CollectBreadcrumbs {
         title: this.getDocumentTitle.getDocumentTitle(state),
         pos: null,
         siblings: [],
+        children: [],
         kind: "document",
       },
     ];
@@ -83,6 +86,7 @@ export class CollectBreadcrumbs {
             title: cleanTitle(line.text),
             pos: line.from,
             siblings: [],
+            children: [],
             kind: "heading",
             headingLevel,
           });
@@ -95,6 +99,7 @@ export class CollectBreadcrumbs {
             title: cleanTitle(line.text),
             pos: line.from,
             siblings: [],
+            children: [],
             kind: "list",
             listType,
           });
@@ -106,6 +111,7 @@ export class CollectBreadcrumbs {
       title: cleanTitle(posLine.text),
       pos: posLine.from,
       siblings: [],
+      children: [],
       ...lineBreadcrumbMeta(posLine.text, listOptions),
     });
 
@@ -117,6 +123,10 @@ export class CollectBreadcrumbs {
         breadcrumbs[i - 1].pos,
         listOptions
       );
+    }
+
+    for (const breadcrumb of breadcrumbs) {
+      breadcrumb.children = collectSiblings(state, breadcrumb.pos, listOptions);
     }
 
     return breadcrumbs;

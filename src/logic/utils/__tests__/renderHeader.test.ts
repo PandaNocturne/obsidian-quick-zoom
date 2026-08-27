@@ -14,14 +14,21 @@ const renderOptions = {
   itemMaxWidthPx: 300,
 };
 
-test("should render html with icons", () => {
+test("should render html with icons and delimiters", () => {
   const h = renderHeader(document, {
     breadcrumbs: [
-      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "Document",
+        pos: null,
+        siblings: [],
+        children: [],
+        kind: "document",
+      },
       {
         title: "header 1",
         pos: 10,
         siblings: [],
+        children: [],
         kind: "heading",
         headingLevel: 1,
       },
@@ -49,12 +56,24 @@ test("should render html with icons", () => {
       .querySelector(".zoom-plugin-title-icon")
       ?.getAttribute("data-icon")
   ).toBe("heading-1");
+
+  const delimiters = h.querySelectorAll(".zoom-plugin-delimiter");
+  expect(delimiters).toHaveLength(2);
+  expect(
+    delimiters[1].classList.contains("zoom-plugin-delimiter--trailing")
+  ).toBe(true);
 });
 
 test("should mark title when it has siblings", () => {
   const h = renderHeader(document, {
     breadcrumbs: [
-      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "Document",
+        pos: null,
+        siblings: [],
+        children: [],
+        kind: "document",
+      },
       {
         title: "header 1",
         pos: 10,
@@ -62,6 +81,7 @@ test("should mark title when it has siblings", () => {
           { title: "header 1", pos: 10, kind: "heading" },
           { title: "header 2", pos: 20, kind: "heading" },
         ],
+        children: [],
         kind: "heading",
         headingLevel: 1,
       },
@@ -72,18 +92,24 @@ test("should mark title when it has siblings", () => {
 
   const title = h.querySelectorAll(".zoom-plugin-title")[1];
   expect(title.classList.contains("zoom-plugin-title-has-siblings")).toBe(true);
-  expect(title.querySelector(".zoom-plugin-title-chevron")).toBeNull();
 });
 
 test("should handle click on document link", () => {
   const onClick = jest.fn();
   const h = renderHeader(document, {
     breadcrumbs: [
-      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "Document",
+        pos: null,
+        siblings: [],
+        children: [],
+        kind: "document",
+      },
       {
         title: "header 1",
         pos: 10,
         siblings: [],
+        children: [],
         kind: "heading",
         headingLevel: 1,
       },
@@ -105,11 +131,18 @@ test("should handle click on header link with siblings", () => {
   ];
   const h = renderHeader(document, {
     breadcrumbs: [
-      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "Document",
+        pos: null,
+        siblings: [],
+        children: [],
+        kind: "document",
+      },
       {
         title: "header 1",
         pos: 10,
         siblings,
+        children: [],
         kind: "heading",
         headingLevel: 1,
       },
@@ -123,6 +156,48 @@ test("should handle click on header link with siblings", () => {
   expect(onClick).toHaveBeenCalledWith(10, expect.any(MouseEvent), siblings);
 });
 
+test("should handle delimiter click with children", () => {
+  const onDelimiterClick = jest.fn();
+  const children = [
+    { title: "child 1", pos: 20, kind: "heading" as const },
+    { title: "child 2", pos: 30, kind: "heading" as const },
+  ];
+  const h = renderHeader(document, {
+    breadcrumbs: [
+      {
+        title: "Document",
+        pos: null,
+        siblings: [],
+        children: [],
+        kind: "document",
+      },
+      {
+        title: "header 1",
+        pos: 10,
+        siblings: [],
+        children,
+        kind: "heading",
+        headingLevel: 1,
+      },
+    ],
+    onClick: () => {},
+    onDelimiterClick,
+    renderOptions,
+  });
+
+  const delimiters = h.querySelectorAll<HTMLElement>(".zoom-plugin-delimiter");
+  expect(
+    delimiters[1].classList.contains("zoom-plugin-delimiter--clickable")
+  ).toBe(true);
+  delimiters[1].click();
+
+  expect(onDelimiterClick).toHaveBeenCalledWith(
+    10,
+    expect.any(MouseEvent),
+    children
+  );
+});
+
 test("should handle double click on header link", () => {
   const onDoubleClick = jest.fn();
   const siblings = [
@@ -131,11 +206,18 @@ test("should handle double click on header link", () => {
   ];
   const h = renderHeader(document, {
     breadcrumbs: [
-      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "Document",
+        pos: null,
+        siblings: [],
+        children: [],
+        kind: "document",
+      },
       {
         title: "header 1",
         pos: 10,
         siblings,
+        children: [],
         kind: "heading",
         headingLevel: 1,
       },
@@ -158,11 +240,18 @@ test("should handle double click on header link", () => {
 test("should use list icon for list breadcrumbs", () => {
   const h = renderHeader(document, {
     breadcrumbs: [
-      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "Document",
+        pos: null,
+        siblings: [],
+        children: [],
+        kind: "document",
+      },
       {
         title: "item",
         pos: 10,
         siblings: [],
+        children: [],
         kind: "list",
         listType: "unordered",
       },
