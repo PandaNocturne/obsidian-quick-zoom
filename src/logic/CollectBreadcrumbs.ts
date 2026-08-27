@@ -1,9 +1,16 @@
 import { foldable } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 
-import { SiblingItem, collectSiblings } from "./CollectSiblings";
+import {
+  SiblingItem,
+  collectSiblings,
+  detectHeadingLevel,
+} from "./CollectSiblings";
 import { cleanTitle } from "./utils/cleanTitle";
 import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
+import { detectListType } from "./utils/listItemParsing";
+
+import { SettingsService } from "../services/SettingsService";
 
 export interface Breadcrumb {
   title: string;
@@ -16,9 +23,13 @@ export interface GetDocumentTitle {
 }
 
 export class CollectBreadcrumbs {
-  constructor(private getDocumentTitle: GetDocumentTitle) {}
+  constructor(
+    private getDocumentTitle: GetDocumentTitle,
+    private settings: SettingsService
+  ) {}
 
   public collectBreadcrumbs(state: EditorState, pos: number) {
+    const listOptions = this.settings.getListRecognitionOptions();
     const breadcrumbs: Breadcrumb[] = [
       {
         title: this.getDocumentTitle.getDocumentTitle(state),
@@ -40,11 +51,24 @@ export class CollectBreadcrumbs {
       }
       const f = foldable(state, line.from, line.to);
       if (f && f.to > posLine.from) {
-        breadcrumbs.push({
-          title: cleanTitle(line.text),
-          pos: line.from,
-          siblings: [],
-        });
+        const headingLevel = detectHeadingLevel(line.text);
+        if (headingLevel !== null) {
+          breadcrumbs.push({
+            title: cleanTitle(line.text),
+            pos: line.from,
+            siblings: [],
+          });
+          continue;
+        }
+
+        const listType = detectListType(line.text, listOptions);
+        if (listType) {
+          breadcrumbs.push({
+            title: cleanTitle(line.text),
+            pos: line.from,
+            siblings: [],
+          });
+        }
       }
     }
 
@@ -54,10 +78,14 @@ export class CollectBreadcrumbs {
       siblings: [],
     });
 
-    breadcrumbs[0].siblings = collectSiblings(state, null);
+    breadcrumbs[0].siblings = collectSiblings(state, null, listOptions);
 
     for (let i = 1; i < breadcrumbs.length; i++) {
-      breadcrumbs[i].siblings = collectSiblings(state, breadcrumbs[i - 1].pos);
+      breadcrumbs[i].siblings = collectSiblings(
+        state,
+        breadcrumbs[i - 1].pos,
+        listOptions
+      );
     }
 
     return breadcrumbs;

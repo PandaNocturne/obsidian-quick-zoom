@@ -42,6 +42,79 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
           });
       });
 
+    containerEl.createEl("h3", { text: "Outline lists" });
+
+    new Setting(containerEl)
+      .setName("Recognize unordered lists")
+      .setDesc("Include unordered list items (-, *, +) in the outline.")
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.recognizeUnorderedLists)
+          .onChange(async (value) => {
+            this.settings.recognizeUnorderedLists = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Recognize ordered lists")
+      .setDesc("Include ordered list items (1., 2., ...) in the outline.")
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.recognizeOrderedLists)
+          .onChange(async (value) => {
+            this.settings.recognizeOrderedLists = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Recognize task lists")
+      .setDesc("Include task list items (- [ ], - [x]) in the outline.")
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.recognizeTaskLists)
+          .onChange(async (value) => {
+            this.settings.recognizeTaskLists = value;
+            await this.settings.save();
+          });
+      });
+
+    containerEl.createEl("h3", { text: "Outline display" });
+
+    new Setting(containerEl)
+      .setName("Render markdown in outline titles")
+      .setDesc(
+        "Render inline markdown (bold, links, etc.) in breadcrumb and menu titles."
+      )
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.renderMarkdown)
+          .onChange(async (value) => {
+            this.settings.renderMarkdown = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Outline item max width")
+      .setDesc(
+        "Maximum width of outline titles in pixels. Longer text is truncated with an ellipsis."
+      )
+      .addText((text) => {
+        text
+          .setPlaceholder("300")
+          .setValue(String(this.settings.outlineItemMaxWidthPx))
+          .onChange(async (value) => {
+            const parsed = Number.parseInt(value, 10);
+            if (Number.isNaN(parsed) || parsed < 1) {
+              return;
+            }
+            this.settings.outlineItemMaxWidthPx = parsed;
+            await this.settings.save();
+          });
+      });
+
     new Setting(containerEl)
       .setName("Debug mode")
       .setDesc(

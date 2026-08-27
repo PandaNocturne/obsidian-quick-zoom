@@ -1,9 +1,16 @@
 import { Platform } from "obsidian";
 
+import { ListRecognitionOptions } from "../logic/utils/listItemParsing";
+
 export interface ObsidianZoomPluginSettings {
   debug: boolean;
   zoomOnClick: boolean;
   outlineSubmenuCloseDelayMs: number;
+  recognizeUnorderedLists: boolean;
+  recognizeOrderedLists: boolean;
+  recognizeTaskLists: boolean;
+  renderMarkdown: boolean;
+  outlineItemMaxWidthPx: number;
 }
 
 interface ObsidianZoomPluginSettingsJson {
@@ -11,6 +18,11 @@ interface ObsidianZoomPluginSettingsJson {
   zoomOnClick: boolean;
   zoomOnClickMobile: boolean;
   outlineSubmenuCloseDelayMs: number;
+  recognizeUnorderedLists: boolean;
+  recognizeOrderedLists: boolean;
+  recognizeTaskLists: boolean;
+  renderMarkdown: boolean;
+  outlineItemMaxWidthPx: number;
 }
 
 const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
@@ -18,6 +30,11 @@ const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
   zoomOnClick: true,
   zoomOnClickMobile: false,
   outlineSubmenuCloseDelayMs: 400,
+  recognizeUnorderedLists: false,
+  recognizeOrderedLists: false,
+  recognizeTaskLists: false,
+  renderMarkdown: true,
+  outlineItemMaxWidthPx: 300,
 };
 
 export interface Storage {
@@ -62,6 +79,49 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     this.set("outlineSubmenuCloseDelayMs", value);
   }
 
+  get recognizeUnorderedLists() {
+    return this.values.recognizeUnorderedLists;
+  }
+  set recognizeUnorderedLists(value: boolean) {
+    this.set("recognizeUnorderedLists", value);
+  }
+
+  get recognizeOrderedLists() {
+    return this.values.recognizeOrderedLists;
+  }
+  set recognizeOrderedLists(value: boolean) {
+    this.set("recognizeOrderedLists", value);
+  }
+
+  get recognizeTaskLists() {
+    return this.values.recognizeTaskLists;
+  }
+  set recognizeTaskLists(value: boolean) {
+    this.set("recognizeTaskLists", value);
+  }
+
+  get renderMarkdown() {
+    return this.values.renderMarkdown;
+  }
+  set renderMarkdown(value: boolean) {
+    this.set("renderMarkdown", value);
+  }
+
+  get outlineItemMaxWidthPx() {
+    return this.values.outlineItemMaxWidthPx;
+  }
+  set outlineItemMaxWidthPx(value: number) {
+    this.set("outlineItemMaxWidthPx", value);
+  }
+
+  getListRecognitionOptions(): ListRecognitionOptions {
+    return {
+      recognizeUnorderedLists: this.recognizeUnorderedLists,
+      recognizeOrderedLists: this.recognizeOrderedLists,
+      recognizeTaskLists: this.recognizeTaskLists,
+    };
+  }
+
   onChange<T extends K>(key: T, cb: Callback<T>) {
     if (!this.handlers.has(key)) {
       this.handlers.set(key, new Set());
@@ -104,6 +164,21 @@ export class SettingsService implements ObsidianZoomPluginSettings {
         break;
       case "outlineSubmenuCloseDelayMs":
         this.values.outlineSubmenuCloseDelayMs = value as number;
+        break;
+      case "recognizeUnorderedLists":
+        this.values.recognizeUnorderedLists = value as boolean;
+        break;
+      case "recognizeOrderedLists":
+        this.values.recognizeOrderedLists = value as boolean;
+        break;
+      case "recognizeTaskLists":
+        this.values.recognizeTaskLists = value as boolean;
+        break;
+      case "renderMarkdown":
+        this.values.renderMarkdown = value as boolean;
+        break;
+      case "outlineItemMaxWidthPx":
+        this.values.outlineItemMaxWidthPx = value as number;
         break;
     }
 

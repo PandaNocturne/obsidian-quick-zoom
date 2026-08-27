@@ -1,3 +1,5 @@
+import { App, Component } from "obsidian";
+
 import { StateEffect, StateField } from "@codemirror/state";
 import { EditorView, showPanel } from "@codemirror/view";
 
@@ -31,6 +33,13 @@ interface HeaderState {
     siblings: SiblingItem[],
     breadcrumbs: Breadcrumb[]
   ) => void;
+  renderOptions: {
+    renderMarkdown: boolean;
+    itemMaxWidthPx: number;
+    app: App;
+    sourcePath: string;
+    component: Component;
+  };
 }
 
 const showHeaderEffect = StateEffect.define<HeaderState>();
@@ -61,6 +70,7 @@ const headerState = StateField.define<HeaderState | null>({
           breadcrumbs: state.breadcrumbs,
           onClick: (pos, event, siblings) =>
             state.onClick(view, pos, event, siblings, state.breadcrumbs),
+          renderOptions: state.renderOptions,
         }),
       });
     }),
@@ -68,12 +78,15 @@ const headerState = StateField.define<HeaderState | null>({
 
 export class RenderNavigationHeader {
   private outlineMenu = new OutlineHoverMenu();
+  private headerComponent: Component | null = null;
+  private menuComponent: Component | null = null;
 
   getExtension() {
     return headerState;
   }
 
   constructor(
+    private app: App,
     private logger: LoggerService,
     private settings: SettingsService,
     private zoomIn: ZoomIn,
@@ -84,11 +97,16 @@ export class RenderNavigationHeader {
     const l = this.logger.bind("ToggleNavigationHeaderLogic:showHeader");
     l("show header");
 
+    this.headerComponent?.unload();
+    this.headerComponent = new Component();
+    this.headerComponent.load();
+
     view.dispatch({
       effects: [
         showHeaderEffect.of({
           breadcrumbs,
           onClick: this.onClick,
+          renderOptions: this.getRenderOptions(),
         }),
       ],
     });
@@ -99,10 +117,24 @@ export class RenderNavigationHeader {
     l("hide header");
 
     this.outlineMenu.hideAll();
+    this.menuComponent?.unload();
+    this.menuComponent = null;
+    this.headerComponent?.unload();
+    this.headerComponent = null;
 
     view.dispatch({
       effects: [hideHeaderEffect.of()],
     });
+  }
+
+  private getRenderOptions() {
+    return {
+      renderMarkdown: this.settings.renderMarkdown,
+      itemMaxWidthPx: this.settings.outlineItemMaxWidthPx,
+      app: this.app,
+      sourcePath: this.app.workspace.getActiveFile()?.path ?? "",
+      component: this.headerComponent as Component,
+    };
   }
 
   private onClick = (
@@ -144,6 +176,10 @@ export class RenderNavigationHeader {
     event: MouseEvent,
     options?: { includeExitZoom?: boolean }
   ) {
+    this.menuComponent?.unload();
+    this.menuComponent = new Component();
+    this.menuComponent.load();
+
     this.outlineMenu.showAtMouseEvent(
       event,
       items,
@@ -153,6 +189,16 @@ export class RenderNavigationHeader {
         zoomIn: (v, p) => this.zoomIn.zoomIn(v, p),
         zoomOut: (v) => this.zoomOut.zoomOut(v),
         getSubmenuCloseDelayMs: () => this.settings.outlineSubmenuCloseDelayMs,
+        renderMarkdown: this.settings.renderMarkdown,
+        itemMaxWidthPx: this.settings.outlineItemMaxWidthPx,
+        app: this.app,
+        sourcePath: this.app.workspace.getActiveFile()?.path ?? "",
+        component: this.menuComponent,
+        getListOptions: () => this.settings.getListRecognitionOptions(),
+        onMenuClose: () => {
+          this.menuComponent?.unload();
+          this.menuComponent = null;
+        },
       },
       options
     );

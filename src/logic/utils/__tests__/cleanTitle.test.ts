@@ -11,6 +11,8 @@ test("should clean title", () => {
   expect(cleanTitle("- Some bullet")).toBe("Some bullet");
   expect(cleanTitle("+ Some bullet")).toBe("Some bullet");
   expect(cleanTitle("* Some bullet")).toBe("Some bullet");
+  expect(cleanTitle("- [ ] Task item")).toBe("Task item");
+  expect(cleanTitle("- [x] Done task")).toBe("Done task");
   expect(cleanTitle("  * Some bullet  ")).toBe("Some bullet");
   expect(cleanTitle("\t*\tSome bullet  ")).toBe("Some bullet");
   expect(cleanTitle("\t*Some invalid bullet  ")).toBe("*Some invalid bullet");

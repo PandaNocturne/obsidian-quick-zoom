@@ -1,8 +1,9 @@
-import { Menu, MenuItem } from "obsidian";
+import { App, Component, Menu, MenuItem } from "obsidian";
 
 import { EditorView } from "@codemirror/view";
 
 import { SiblingItem, collectSiblings, outlineIcon } from "./CollectSiblings";
+import { renderOutlineTitle } from "./utils/renderOutlineTitle";
 
 export interface OutlineHoverMenuContext {
   view: EditorView;
@@ -10,6 +11,17 @@ export interface OutlineHoverMenuContext {
   zoomIn: (view: EditorView, pos: number) => void;
   zoomOut: (view: EditorView) => void;
   getSubmenuCloseDelayMs: () => number;
+  renderMarkdown: boolean;
+  itemMaxWidthPx: number;
+  app: App;
+  sourcePath: string;
+  component: Component;
+  getListOptions: () => {
+    recognizeUnorderedLists: boolean;
+    recognizeOrderedLists: boolean;
+    recognizeTaskLists: boolean;
+  };
+  onMenuClose?: () => void;
 }
 
 const CONTAINS_PATCHED = "zoomOutlineContainsPatched";
@@ -20,6 +32,7 @@ export class OutlineHoverMenu {
   private closeTimer: ReturnType<typeof setTimeout> | null = null;
   private expandedChevrons = new Map<number, HTMLElement>();
   private outsideClickHandler: ((e: MouseEvent) => void) | null = null;
+  private onMenuClose: (() => void) | null = null;
 
   showAtMouseEvent(
     event: MouseEvent,
@@ -28,6 +41,8 @@ export class OutlineHoverMenu {
     options?: { includeExitZoom?: boolean }
   ) {
     this.hideAll();
+
+    this.onMenuClose = ctx.onMenuClose ?? null;
 
     const root = this.createMenuPanel(0);
     this.menus = [root];
@@ -67,7 +82,7 @@ export class OutlineHoverMenu {
   ) {
     for (const outlineItem of items) {
       menu.addItem((item) => {
-        item.setTitle(outlineItem.title || "(empty)");
+        this.renderMenuItemTitle(item, outlineItem.title, ctx);
         item.setIcon(outlineIcon(outlineItem));
         if (ctx.selectedPath.has(outlineItem.pos)) {
           item.dom.addClass("selected");
@@ -77,12 +92,38 @@ export class OutlineHoverMenu {
           ctx.zoomIn(ctx.view, outlineItem.pos);
         });
 
-        const children = collectSiblings(ctx.view.state, outlineItem.pos);
+        const children = collectSiblings(
+          ctx.view.state,
+          outlineItem.pos,
+          ctx.getListOptions()
+        );
         if (children.length > 0) {
           this.bindChevronSubmenu(item, children, ctx, depth);
         }
       });
     }
+  }
+
+  private renderMenuItemTitle(
+    item: MenuItem,
+    title: string,
+    ctx: OutlineHoverMenuContext
+  ) {
+    item.setTitle("");
+    const titleEl = item.dom.querySelector(".menu-item-title");
+    if (!(titleEl instanceof HTMLElement)) {
+      item.setTitle(title || "(empty)");
+      return;
+    }
+
+    titleEl.addClass("zoom-plugin-outline-title");
+    titleEl.style.maxWidth = `${ctx.itemMaxWidthPx}px`;
+    renderOutlineTitle(titleEl, title, {
+      renderMarkdown: ctx.renderMarkdown,
+      app: ctx.app,
+      sourcePath: ctx.sourcePath,
+      component: ctx.component,
+    });
   }
 
   private bindChevronSubmenu(
@@ -322,5 +363,7 @@ export class OutlineHoverMenu {
       this.menus[i]?.hide();
     }
     this.menus = [];
+    this.onMenuClose?.();
+    this.onMenuClose = null;
   }
 }

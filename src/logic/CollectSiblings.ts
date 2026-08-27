@@ -3,6 +3,11 @@ import { EditorState } from "@codemirror/state";
 
 import { cleanTitle } from "./utils/cleanTitle";
 import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
+import {
+  ListRecognitionOptions,
+  ListType,
+  detectListType,
+} from "./utils/listItemParsing";
 
 export type OutlineKind = "heading" | "list";
 
@@ -12,9 +17,10 @@ export interface SiblingItem {
   kind: OutlineKind;
   /** Present when kind is heading; 1–6 */
   headingLevel?: number;
+  /** Present when kind is list */
+  listType?: ListType;
 }
 
-const LIST_ITEM_RE = /^\s*([-*+]|\d+\.)\s+/;
 const HEADING_RE = /^\s*(#{1,6})\s/;
 
 export function detectHeadingLevel(lineText: string): number | null {
@@ -27,10 +33,17 @@ export function detectOutlineKind(lineText: string): OutlineKind {
 }
 
 export function outlineIcon(
-  item: Pick<SiblingItem, "kind" | "headingLevel">
+  item: Pick<SiblingItem, "kind" | "headingLevel" | "listType">
 ): string {
   if (item.kind === "list") {
-    return "list";
+    switch (item.listType) {
+      case "ordered":
+        return "list-ordered";
+      case "task":
+        return "check-square";
+      default:
+        return "list";
+    }
   }
   const level = Math.min(6, Math.max(1, item.headingLevel ?? 1));
   return `heading-${level}`;
@@ -38,7 +51,8 @@ export function outlineIcon(
 
 export function collectSiblings(
   state: EditorState,
-  parentPos: number | null
+  parentPos: number | null,
+  listOptions: ListRecognitionOptions
 ): SiblingItem[] {
   const doc = state.doc;
   const frontmatterEnd = getFrontmatterEnd(state);
@@ -76,21 +90,37 @@ export function collectSiblings(
     const f = foldable(state, line.from, line.to);
     if (f && f.to <= parentTo) {
       const headingLevel = detectHeadingLevel(line.text);
-      siblings.push({
-        title: cleanTitle(line.text),
-        pos: line.from,
-        kind: headingLevel !== null ? "heading" : "list",
-        ...(headingLevel !== null ? { headingLevel } : {}),
-      });
-      skipUntil = f.to;
+      if (headingLevel !== null) {
+        siblings.push({
+          title: cleanTitle(line.text),
+          pos: line.from,
+          kind: "heading",
+          headingLevel,
+        });
+        skipUntil = f.to;
+        continue;
+      }
+
+      const listType = detectListType(line.text, listOptions);
+      if (listType) {
+        siblings.push({
+          title: cleanTitle(line.text),
+          pos: line.from,
+          kind: "list",
+          listType,
+        });
+        skipUntil = f.to;
+      }
       continue;
     }
 
-    if (LIST_ITEM_RE.test(line.text)) {
+    const listType = detectListType(line.text, listOptions);
+    if (listType) {
       siblings.push({
         title: cleanTitle(line.text),
         pos: line.from,
         kind: "list",
+        listType,
       });
       skipUntil = line.to;
     }

@@ -1,6 +1,7 @@
 import { EditorState } from "@codemirror/state";
 
 import { collectSiblings } from "../CollectSiblings";
+import { ListRecognitionOptions } from "../utils/listItemParsing";
 
 jest.mock("@codemirror/language", () => {
   return {
@@ -9,6 +10,12 @@ jest.mock("@codemirror/language", () => {
 });
 
 const foldable: jest.Mock = jest.requireMock("@codemirror/language").foldable;
+
+const ALL_LISTS_ON: ListRecognitionOptions = {
+  recognizeUnorderedLists: true,
+  recognizeOrderedLists: true,
+  recognizeTaskLists: true,
+};
 
 test("should collect top-level siblings under document root", () => {
   const state = EditorState.create({
@@ -25,7 +32,7 @@ test("should collect top-level siblings under document root", () => {
     return null;
   });
 
-  expect(collectSiblings(state, null)).toStrictEqual([
+  expect(collectSiblings(state, null, ALL_LISTS_ON)).toStrictEqual([
     { title: "a", pos: 0, kind: "heading", headingLevel: 1 },
     { title: "b", pos: 5, kind: "heading", headingLevel: 1 },
     { title: "e", pos: 39, kind: "heading", headingLevel: 1 },
@@ -47,8 +54,8 @@ test("should collect direct children under a parent heading", () => {
     return null;
   });
 
-  expect(collectSiblings(state, 10)).toStrictEqual([
-    { title: "1", pos: 16, kind: "list" },
+  expect(collectSiblings(state, 10, ALL_LISTS_ON)).toStrictEqual([
+    { title: "1", pos: 16, kind: "list", listType: "unordered" },
     { title: "d", pos: 32, kind: "heading", headingLevel: 3 },
   ]);
 });
@@ -69,8 +76,44 @@ test("should skip YAML frontmatter when collecting top-level siblings", () => {
     return null;
   });
 
-  expect(collectSiblings(state, null)).toStrictEqual([
+  expect(collectSiblings(state, null, ALL_LISTS_ON)).toStrictEqual([
     { title: "a", pos: headingA, kind: "heading", headingLevel: 1 },
     { title: "b", pos: headingB, kind: "heading", headingLevel: 1 },
+  ]);
+});
+
+test("should not collect list items when list recognition is disabled", () => {
+  const state = EditorState.create({
+    doc: "# a\n\n- item\n",
+  });
+  foldable.mockImplementation((_state, from) => {
+    if (from === 0) return { from: 0, to: 12 };
+    return null;
+  });
+
+  expect(
+    collectSiblings(state, 0, {
+      recognizeUnorderedLists: false,
+      recognizeOrderedLists: false,
+      recognizeTaskLists: false,
+    })
+  ).toStrictEqual([]);
+});
+
+test("should collect ordered and task list items by type", () => {
+  const state = EditorState.create({
+    doc: "# a\n\n1. ordered\n- [ ] task\n",
+  });
+  foldable.mockImplementation(() => null);
+
+  expect(
+    collectSiblings(state, 0, {
+      recognizeUnorderedLists: false,
+      recognizeOrderedLists: true,
+      recognizeTaskLists: true,
+    })
+  ).toStrictEqual([
+    { title: "ordered", pos: 5, kind: "list", listType: "ordered" },
+    { title: "task", pos: 16, kind: "list", listType: "task" },
   ]);
 });

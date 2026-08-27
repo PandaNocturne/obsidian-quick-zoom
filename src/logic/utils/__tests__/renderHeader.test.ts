@@ -3,6 +3,11 @@
  */
 import { renderHeader } from "../renderHeader";
 
+const renderOptions = {
+  renderMarkdown: false,
+  itemMaxWidthPx: 300,
+};
+
 test("should render html", () => {
   const h = renderHeader(document, {
     breadcrumbs: [
@@ -10,10 +15,11 @@ test("should render html", () => {
       { title: "header 1", pos: 10, siblings: [] },
     ],
     onClick: () => {},
+    renderOptions,
   });
 
   expect(h.outerHTML).toBe(
-    `<div class="zoom-plugin-header"><a class="zoom-plugin-title" data-pos="null" href="#">Document</a><span class="zoom-plugin-delimiter">&gt;</span><a class="zoom-plugin-title" data-pos="10" href="#">header 1</a></div>`
+    `<div class="zoom-plugin-header"><a class="zoom-plugin-title" data-pos="null" href="#"><span class="zoom-plugin-title-text" style="max-width: 300px;">Document</span></a><span class="zoom-plugin-delimiter">&gt;</span><a class="zoom-plugin-title" data-pos="10" href="#"><span class="zoom-plugin-title-text" style="max-width: 300px;">header 1</span></a></div>`
   );
 });
 
@@ -31,6 +37,7 @@ test("should render chevron when title has siblings", () => {
       },
     ],
     onClick: () => {},
+    renderOptions,
   });
 
   const title = h.querySelectorAll(".zoom-plugin-title")[1];
@@ -46,6 +53,7 @@ test("should handle click on document link", () => {
       { title: "header 1", pos: 10, siblings: [] },
     ],
     onClick,
+    renderOptions,
   });
 
   h.querySelectorAll<HTMLAnchorElement>(".zoom-plugin-title")[0].click();
@@ -65,6 +73,7 @@ test("should handle click on header link with siblings", () => {
       { title: "header 1", pos: 10, siblings },
     ],
     onClick,
+    renderOptions,
   });
 
   h.querySelectorAll<HTMLAnchorElement>(".zoom-plugin-title")[1].click();

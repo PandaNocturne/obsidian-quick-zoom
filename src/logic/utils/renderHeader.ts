@@ -1,9 +1,18 @@
+import {
+  RenderOutlineTitleOptions,
+  renderOutlineTitle,
+} from "./renderOutlineTitle";
+
 import { SiblingItem } from "../CollectSiblings";
 
 export interface BreadcrumbHeaderItem {
   title: string;
   pos: number | null;
   siblings?: SiblingItem[];
+}
+
+export interface RenderHeaderOptions extends RenderOutlineTitleOptions {
+  itemMaxWidthPx: number;
 }
 
 export function renderHeader(
@@ -15,9 +24,10 @@ export function renderHeader(
       event: MouseEvent,
       siblings: SiblingItem[]
     ) => void;
+    renderOptions: RenderHeaderOptions;
   }
 ) {
-  const { breadcrumbs, onClick } = ctx;
+  const { breadcrumbs, onClick, renderOptions } = ctx;
 
   const h = doc.createElement("div");
   h.classList.add("zoom-plugin-header");
@@ -40,7 +50,12 @@ export function renderHeader(
     }
     b.dataset.pos = String(breadcrumb.pos);
     b.href = "#";
-    b.appendChild(doc.createTextNode(breadcrumb.title));
+
+    const titleSpan = doc.createElement("span");
+    titleSpan.classList.add("zoom-plugin-title-text");
+    titleSpan.style.maxWidth = `${renderOptions.itemMaxWidthPx}px`;
+    renderOutlineTitle(titleSpan, breadcrumb.title, renderOptions);
+    b.appendChild(titleSpan);
 
     if (siblings.length > 0) {
       const chevron = doc.createElement("span");

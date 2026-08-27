@@ -9,6 +9,7 @@ import { isFoldingEnabled } from "./utils/isFoldingEnabled";
 import { CalculateRangeForZooming } from "../logic/CalculateRangeForZooming";
 import { KeepOnlyZoomedContentVisible } from "../logic/KeepOnlyZoomedContentVisible";
 import { LoggerService } from "../services/LoggerService";
+import { SettingsService } from "../services/SettingsService";
 import { getEditorViewFromEditor } from "../utils/getEditorViewFromEditor";
 
 export type ZoomInCallback = (view: EditorView, pos: number) => void;
@@ -24,7 +25,11 @@ export class ZoomFeature implements Feature {
 
   private calculateRangeForZooming = new CalculateRangeForZooming();
 
-  constructor(private plugin: Plugin, private logger: LoggerService) {}
+  constructor(
+    private plugin: Plugin,
+    private logger: LoggerService,
+    private settings: SettingsService
+  ) {}
 
   public calculateVisibleContentRange(state: EditorState) {
     return this.keepOnlyZoomedContentVisible.calculateVisibleContentRange(
@@ -58,7 +63,8 @@ export class ZoomFeature implements Feature {
 
     const newRange = this.calculateRangeForZooming.calculateRangeForZooming(
       view.state,
-      prevRange.from
+      prevRange.from,
+      this.settings.getListRecognitionOptions()
     );
 
     if (!newRange) {
@@ -86,7 +92,8 @@ export class ZoomFeature implements Feature {
 
     const range = this.calculateRangeForZooming.calculateRangeForZooming(
       view.state,
-      pos
+      pos,
+      this.settings.getListRecognitionOptions()
     );
 
     if (!range) {

@@ -1,5 +1,6 @@
 import { EditorState } from "@codemirror/state";
 
+import { SettingsService } from "../../services/SettingsService";
 import { CollectBreadcrumbs } from "../CollectBreadcrumbs";
 
 jest.mock("@codemirror/language", () => {
@@ -10,6 +11,14 @@ jest.mock("@codemirror/language", () => {
 
 const getDocumentTitle = { getDocumentTitle: () => "Document" };
 const foldable: jest.Mock = jest.requireMock("@codemirror/language").foldable;
+
+const settings = {
+  getListRecognitionOptions: () => ({
+    recognizeUnorderedLists: true,
+    recognizeOrderedLists: true,
+    recognizeTaskLists: true,
+  }),
+} as SettingsService;
 
 test("should return breadcrumbs based on folable zones that should include input position", () => {
   const state = EditorState.create({
@@ -28,7 +37,7 @@ test("should return breadcrumbs based on folable zones that should include input
     return null;
   });
 
-  const collectBreadcrumbs = new CollectBreadcrumbs(getDocumentTitle);
+  const collectBreadcrumbs = new CollectBreadcrumbs(getDocumentTitle, settings);
 
   const b = collectBreadcrumbs.collectBreadcrumbs(state, 28);
 
@@ -60,19 +69,19 @@ test("should return breadcrumbs based on folable zones that should include input
       title: "1",
       pos: 16,
       siblings: [
-        { title: "1", pos: 16, kind: "list" },
+        { title: "1", pos: 16, kind: "list", listType: "unordered" },
         { title: "d", pos: 32, kind: "heading", headingLevel: 3 },
       ],
     },
     {
       title: "2",
       pos: 20,
-      siblings: [{ title: "2", pos: 20, kind: "list" }],
+      siblings: [{ title: "2", pos: 20, kind: "list", listType: "unordered" }],
     },
     {
       title: "3",
       pos: 25,
-      siblings: [{ title: "3", pos: 25, kind: "list" }],
+      siblings: [{ title: "3", pos: 25, kind: "list", listType: "unordered" }],
     },
   ]);
 });

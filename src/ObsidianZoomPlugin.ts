@@ -33,7 +33,7 @@ export default class ObsidianZoomPlugin extends Plugin {
     const logger = new LoggerService(settings);
 
     const settingsTabFeature = new SettingsTabFeature(this, settings);
-    this.zoomFeature = new ZoomFeature(this, logger);
+    this.zoomFeature = new ZoomFeature(this, logger, settings);
     const limitSelectionFeature = new LimitSelectionFeature(
       this,
       logger,

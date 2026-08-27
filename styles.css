@@ -11,15 +11,20 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  max-width: 16em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  max-width: none;
   text-decoration: none;
   color: var(--text-muted);
   cursor: pointer;
   border-radius: var(--radius-s);
   padding: 0 2px;
+}
+
+.zoom-plugin-title-text {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
 }
 
 .zoom-plugin-title:hover {
@@ -132,4 +137,12 @@
   .menu-item:not(.is-disabled):not(.is-label):hover.selected
   .menu-item-icon {
   color: var(--text-on-accent);
+}
+
+.menu.zoom-plugin-outline-menu .zoom-plugin-outline-title {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
 }

@@ -117,11 +117,15 @@ class UpdateHeaderAfterRangeBeforeVisibleRangeChanged implements Feature {
 }
 
 export class HeaderNavigationFeature implements Feature {
-  private collectBreadcrumbs = new CollectBreadcrumbs({
-    getDocumentTitle: getDocumentTitle,
-  });
+  private collectBreadcrumbs = new CollectBreadcrumbs(
+    {
+      getDocumentTitle: getDocumentTitle,
+    },
+    this.settings
+  );
 
   private renderNavigationHeader = new RenderNavigationHeader(
+    this.plugin.app,
     this.logger,
     this.settings,
     this.zoomIn,
