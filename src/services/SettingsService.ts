@@ -2,6 +2,8 @@ import { Platform } from "obsidian";
 
 import { ListRecognitionOptions } from "../logic/utils/listItemParsing";
 
+export type HeaderWidthMode = "note" | "page";
+
 export interface ObsidianZoomPluginSettings {
   debug: boolean;
   zoomOnClick: boolean;
@@ -14,6 +16,7 @@ export interface ObsidianZoomPluginSettings {
   showBreadcrumbsInDefaultMode: boolean;
   trackCursorWhileZoomed: boolean;
   historyMaxEntries: number;
+  headerWidthMode: HeaderWidthMode;
 }
 
 interface ObsidianZoomPluginSettingsJson {
@@ -29,6 +32,7 @@ interface ObsidianZoomPluginSettingsJson {
   showBreadcrumbsInDefaultMode: boolean;
   trackCursorWhileZoomed: boolean;
   historyMaxEntries: number;
+  headerWidthMode: HeaderWidthMode;
 }
 
 const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
@@ -44,6 +48,7 @@ const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
   showBreadcrumbsInDefaultMode: false,
   trackCursorWhileZoomed: false,
   historyMaxEntries: 50,
+  headerWidthMode: "note",
 };
 
 export interface Storage {
@@ -144,6 +149,13 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     this.set("historyMaxEntries", value);
   }
 
+  get headerWidthMode() {
+    return this.values.headerWidthMode;
+  }
+  set headerWidthMode(value: HeaderWidthMode) {
+    this.set("headerWidthMode", value);
+  }
+
   getListRecognitionOptions(): ListRecognitionOptions {
     return {
       recognizeUnorderedLists: this.recognizeUnorderedLists,
@@ -218,6 +230,9 @@ export class SettingsService implements ObsidianZoomPluginSettings {
         break;
       case "historyMaxEntries":
         this.values.historyMaxEntries = value as number;
+        break;
+      case "headerWidthMode":
+        this.values.headerWidthMode = value as HeaderWidthMode;
         break;
     }
 

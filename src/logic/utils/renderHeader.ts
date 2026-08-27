@@ -5,6 +5,7 @@ import {
   renderOutlineTitle,
 } from "./renderOutlineTitle";
 
+import type { HeaderWidthMode } from "../../services/SettingsService";
 import { Breadcrumb } from "../CollectBreadcrumbs";
 import {
   OutlineIconTarget,
@@ -15,6 +16,7 @@ import {
 
 export interface RenderHeaderOptions extends RenderOutlineTitleOptions {
   itemMaxWidthPx: number;
+  headerWidthMode?: HeaderWidthMode;
 }
 
 export interface HeaderHistoryControls {

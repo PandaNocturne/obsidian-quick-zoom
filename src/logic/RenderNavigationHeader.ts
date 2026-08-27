@@ -62,6 +62,7 @@ interface HeaderState {
   renderOptions: {
     renderMarkdown: boolean;
     itemMaxWidthPx: number;
+    headerWidthMode: import("../services/SettingsService").HeaderWidthMode;
     app: App;
     sourcePath: string;
     component: Component;
@@ -136,6 +137,7 @@ export class RenderNavigationHeader {
   private lastBreadcrumbKey: string | null = null;
   private lastMode: HeaderInteractionMode | null = null;
   private lastHistoryKey: string | null = null;
+  private lastWidthKey: string | null = null;
 
   getExtension() {
     return headerState;
@@ -161,10 +163,12 @@ export class RenderNavigationHeader {
       .map((b) => `${b.pos}:${b.title}:${b.dimmed ? 1 : 0}`)
       .join("|");
     const historyKey = this.getHistoryKey(view, mode);
+    const widthKey = this.settings.headerWidthMode;
     if (
       this.lastBreadcrumbKey === key &&
       this.lastMode === mode &&
       this.lastHistoryKey === historyKey &&
+      this.lastWidthKey === widthKey &&
       this.headerComponent
     ) {
       return;
@@ -172,6 +176,7 @@ export class RenderNavigationHeader {
     this.lastBreadcrumbKey = key;
     this.lastMode = mode;
     this.lastHistoryKey = historyKey;
+    this.lastWidthKey = widthKey;
 
     const l = this.logger.bind("ToggleNavigationHeaderLogic:showHeader");
     l("show header", mode);
@@ -202,6 +207,7 @@ export class RenderNavigationHeader {
     this.lastBreadcrumbKey = null;
     this.lastMode = null;
     this.lastHistoryKey = null;
+    this.lastWidthKey = null;
     this.outlineMenu.hideAll();
     this.menuComponent?.unload();
     this.menuComponent = null;
@@ -288,6 +294,7 @@ export class RenderNavigationHeader {
     return {
       renderMarkdown: this.settings.renderMarkdown,
       itemMaxWidthPx: this.settings.outlineItemMaxWidthPx,
+      headerWidthMode: this.settings.headerWidthMode,
       app: this.app,
       sourcePath: this.app.workspace.getActiveFile()?.path ?? "",
       component: this.headerComponent as Component,

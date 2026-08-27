@@ -196,6 +196,7 @@ class FollowViewportInDefaultMode implements Feature {
 
   async load() {
     this.plugin.registerEditorExtension(this.extension);
+    this.syncHeaderWidthClass();
 
     this.settings.onChange("showBreadcrumbsInDefaultMode", () => {
       this.refreshAllEditors();
@@ -203,12 +204,33 @@ class FollowViewportInDefaultMode implements Feature {
     this.settings.onChange("trackCursorWhileZoomed", () => {
       this.refreshAllEditors();
     });
+    this.settings.onChange("headerWidthMode", () => {
+      this.syncHeaderWidthClass();
+      this.refreshAllEditors();
+    });
   }
 
-  async unload() {}
+  async unload() {
+    document.body.classList.remove(
+      "zoom-plugin-header-width-note",
+      "zoom-plugin-header-width-page"
+    );
+  }
 
   public refreshView(view: EditorView) {
     this.refreshNow(view, { syncZoomRoot: true });
+  }
+
+  private syncHeaderWidthClass() {
+    const mode = this.settings.headerWidthMode;
+    document.body.classList.toggle(
+      "zoom-plugin-header-width-note",
+      mode === "note"
+    );
+    document.body.classList.toggle(
+      "zoom-plugin-header-width-page",
+      mode === "page"
+    );
   }
 
   private refreshAllEditors() {

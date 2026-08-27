@@ -97,6 +97,22 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
+      .setName("Header width")
+      .setDesc(
+        "Width of the top breadcrumb bar: match the note content column, or span the full editor page pane."
+      )
+      .addDropdown((dropdown) => {
+        dropdown
+          .addOption("note", "Note area width")
+          .addOption("page", "Page area width")
+          .setValue(this.settings.headerWidthMode)
+          .onChange(async (value) => {
+            this.settings.headerWidthMode = value === "page" ? "page" : "note";
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
       .setName("Track cursor while zoomed")
       .setDesc(
         "While zoomed, keep following the cursor heading beyond the zoom root. Levels below the zoom root are shown dimmed."
