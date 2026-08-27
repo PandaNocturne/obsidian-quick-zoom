@@ -12,12 +12,14 @@ export interface OutlineHoverMenuContext {
   getSubmenuCloseDelayMs: () => number;
 }
 
+const CONTAINS_PATCHED = "zoomOutlineContainsPatched";
+
 export class OutlineHoverMenu {
-  /** Index = depth; root menu at 0 */
-  private menuStack: (Menu | null)[] = [];
+  /** menus[0] = root, menus[1] = first submenu, ... */
+  private menus: Menu[] = [];
   private closeTimer: ReturnType<typeof setTimeout> | null = null;
-  private expandedChevron: HTMLElement | null = null;
-  private expandedDepth: number | null = null;
+  private expandedChevrons = new Map<number, HTMLElement>();
+  private outsideClickHandler: ((e: MouseEvent) => void) | null = null;
 
   showAtMouseEvent(
     event: MouseEvent,
@@ -27,10 +29,8 @@ export class OutlineHoverMenu {
   ) {
     this.hideAll();
 
-    const root = new Menu();
-    root.setUseNativeMenu?.(false);
-    root.dom.addClass("zoom-plugin-outline-menu");
-    this.menuStack = [root];
+    const root = this.createMenuPanel(0);
+    this.menus = [root];
 
     if (options?.includeExitZoom) {
       root.addItem((item) => {
@@ -46,7 +46,17 @@ export class OutlineHoverMenu {
 
     this.populateMenu(root, items, ctx, 0);
     root.showAtMouseEvent(event);
-    this.bindMenuHover(root, ctx);
+    this.bindMenuHover(root, ctx, 0);
+    this.installMenuTreeContains();
+    this.bindOutsideClick();
+  }
+
+  private createMenuPanel(depth: number): Menu {
+    const menu = new Menu();
+    menu.setUseNativeMenu?.(false);
+    menu.dom.addClass("zoom-plugin-outline-menu");
+    menu.dom.style.zIndex = String(1000 + depth);
+    return menu;
   }
 
   private populateMenu(
@@ -79,7 +89,7 @@ export class OutlineHoverMenu {
     item: MenuItem,
     children: SiblingItem[],
     ctx: OutlineHoverMenuContext,
-    depth: number
+    parentDepth: number
   ) {
     item.dom.addClass("menu-item-has-submenu");
 
@@ -89,11 +99,13 @@ export class OutlineHoverMenu {
       attr: { "aria-label": "展开/折叠子菜单" },
     });
 
+    const submenuDepth = parentDepth + 1;
+
     chevron.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       this.cancelClose();
-      this.toggleSubmenu(chevron, children, ctx, depth + 1);
+      this.toggleSubmenu(chevron, children, ctx, submenuDepth);
     });
   }
 
@@ -103,8 +115,8 @@ export class OutlineHoverMenu {
     ctx: OutlineHoverMenuContext,
     depth: number
   ) {
-    if (this.expandedChevron === anchor && this.menuStack[depth]) {
-      this.setChevronExpanded(anchor, false);
+    if (this.expandedChevrons.get(depth) === anchor && this.menus[depth]) {
+      this.setChevronExpanded(anchor, depth, false);
       this.closeFromDepth(depth);
       return;
     }
@@ -114,36 +126,133 @@ export class OutlineHoverMenu {
 
   private setChevronExpanded(
     chevron: HTMLElement,
-    expanded: boolean,
-    depth?: number
+    depth: number,
+    expanded: boolean
   ) {
     chevron.toggleClass("is-expanded", expanded);
     if (expanded) {
-      this.expandedChevron = chevron;
-      this.expandedDepth = depth ?? this.expandedDepth;
-    } else if (this.expandedChevron === chevron) {
-      this.expandedChevron = null;
-      this.expandedDepth = null;
+      this.expandedChevrons.set(depth, chevron);
+    } else {
+      this.expandedChevrons.delete(depth);
     }
   }
 
-  private bindMenuHover(menu: Menu, ctx: OutlineHoverMenuContext) {
-    menu.dom.addEventListener("mouseenter", () => this.cancelClose());
-    menu.dom.addEventListener("mouseleave", () =>
-      this.scheduleClose(ctx.getSubmenuCloseDelayMs())
-    );
+  private clearExpandedFromDepth(depth: number) {
+    for (const [d, chevron] of this.expandedChevrons) {
+      if (d >= depth) {
+        chevron.toggleClass("is-expanded", false);
+        this.expandedChevrons.delete(d);
+      }
+    }
   }
 
-  /** True while the pointer is over any open outline menu panel. */
-  private isPointerOverMenuTree(): boolean {
-    for (const menu of this.menuStack) {
-      if (!menu) {
+  /**
+   * Obsidian closes parent menus when a sibling menu opens unless the parent
+   * dom.contains() includes descendant menu panels (see Quick Explorer).
+   */
+  private installMenuTreeContains() {
+    for (let i = 0; i < this.menus.length; i++) {
+      const menu = this.menus[i];
+      const dom = menu.dom as HTMLElement & {
+        [CONTAINS_PATCHED]?: boolean;
+      };
+      if (dom[CONTAINS_PATCHED]) {
         continue;
       }
+
+      const originalContains = dom.contains.bind(dom);
+      dom.contains = (target: Node) => {
+        if (originalContains(target)) {
+          return true;
+        }
+        for (let j = i + 1; j < this.menus.length; j++) {
+          if (this.menus[j].dom.contains(target)) {
+            return true;
+          }
+        }
+        return false;
+      };
+      dom[CONTAINS_PATCHED] = true;
+    }
+  }
+
+  private bindMenuHover(
+    menu: Menu,
+    ctx: OutlineHoverMenuContext,
+    depth: number
+  ) {
+    menu.dom.addEventListener("mouseenter", () => this.cancelClose());
+    menu.dom.addEventListener("mouseleave", (e) => {
+      const related = e.relatedTarget as Node | null;
+      if (this.isNodeInMenuTree(related)) {
+        this.cancelClose();
+        return;
+      }
+
+      if (this.hasOpenSubmenu() && depth < this.deepestOpenDepth()) {
+        return;
+      }
+
+      this.scheduleClose(ctx.getSubmenuCloseDelayMs(), e.clientX, e.clientY);
+    });
+  }
+
+  private bindOutsideClick() {
+    this.unbindOutsideClick();
+    this.outsideClickHandler = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (!this.isNodeInMenuTree(target)) {
+        this.hideAll();
+      }
+    };
+    document.addEventListener("mousedown", this.outsideClickHandler, true);
+  }
+
+  private unbindOutsideClick() {
+    if (this.outsideClickHandler) {
+      document.removeEventListener("mousedown", this.outsideClickHandler, true);
+      this.outsideClickHandler = null;
+    }
+  }
+
+  private deepestOpenDepth(): number {
+    return this.menus.length - 1;
+  }
+
+  private hasOpenSubmenu(): boolean {
+    return this.menus.length > 1;
+  }
+
+  private isNodeInMenuTree(node: Node | null): boolean {
+    if (!node) {
+      return false;
+    }
+    for (const menu of this.menus) {
+      if (menu.dom.contains(node)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private isPointerOverMenuTree(clientX?: number, clientY?: number): boolean {
+    for (const menu of this.menus) {
       if (menu.dom.matches(":hover") || menu.dom.querySelector(":hover")) {
         return true;
       }
     }
+
+    if (
+      clientX !== undefined &&
+      clientY !== undefined &&
+      typeof document !== "undefined"
+    ) {
+      const under = document.elementFromPoint(clientX, clientY);
+      if (under && this.isNodeInMenuTree(under)) {
+        return true;
+      }
+    }
+
     return false;
   }
 
@@ -153,44 +262,45 @@ export class OutlineHoverMenu {
     ctx: OutlineHoverMenuContext,
     depth: number
   ) {
-    if (this.expandedChevron && this.expandedChevron !== anchor) {
-      this.setChevronExpanded(this.expandedChevron, false);
-    }
-
     this.closeFromDepth(depth);
 
-    const submenu = new Menu();
-    submenu.setUseNativeMenu?.(false);
-    submenu.dom.addClass("zoom-plugin-outline-menu");
-    this.menuStack[depth] = submenu;
+    const submenu = this.createMenuPanel(depth);
+    this.menus[depth] = submenu;
 
     this.populateMenu(submenu, items, ctx, depth);
-    this.bindMenuHover(submenu, ctx);
+    this.bindMenuHover(submenu, ctx, depth);
 
     const rect = anchor.getBoundingClientRect();
     submenu.showAtPosition({ x: rect.right - 2, y: rect.top });
-    this.setChevronExpanded(anchor, true, depth);
+    this.setChevronExpanded(anchor, depth, true);
+    this.installMenuTreeContains();
+    this.ensureAncestorsVisible(depth);
+  }
+
+  /** Keep ancestor panels attached when deeper submenus open. */
+  private ensureAncestorsVisible(upToDepth: number) {
+    for (let i = 0; i < upToDepth; i++) {
+      const menu = this.menus[i];
+      if (!menu.dom.isConnected) {
+        document.body.appendChild(menu.dom);
+      }
+      menu.dom.style.display = "";
+    }
   }
 
   private closeFromDepth(depth: number) {
-    for (let i = depth; i < this.menuStack.length; i++) {
-      this.menuStack[i]?.hide();
-      this.menuStack[i] = null;
+    for (let i = depth; i < this.menus.length; i++) {
+      this.menus[i]?.hide();
     }
-    this.menuStack.length = depth;
-
-    if (this.expandedDepth !== null && depth <= this.expandedDepth) {
-      if (this.expandedChevron) {
-        this.setChevronExpanded(this.expandedChevron, false);
-      }
-    }
+    this.menus.length = depth;
+    this.clearExpandedFromDepth(depth);
   }
 
-  private scheduleClose(delayMs: number) {
+  private scheduleClose(delayMs: number, clientX?: number, clientY?: number) {
     this.cancelClose();
     this.closeTimer = setTimeout(() => {
       this.closeTimer = null;
-      if (this.isPointerOverMenuTree()) {
+      if (this.isPointerOverMenuTree(clientX, clientY)) {
         return;
       }
       this.hideAll();
@@ -206,12 +316,11 @@ export class OutlineHoverMenu {
 
   hideAll() {
     this.cancelClose();
-    if (this.expandedChevron) {
-      this.setChevronExpanded(this.expandedChevron, false);
+    this.unbindOutsideClick();
+    this.clearExpandedFromDepth(0);
+    for (let i = this.menus.length - 1; i >= 0; i--) {
+      this.menus[i]?.hide();
     }
-    for (const menu of this.menuStack) {
-      menu?.hide();
-    }
-    this.menuStack = [];
+    this.menus = [];
   }
 }
