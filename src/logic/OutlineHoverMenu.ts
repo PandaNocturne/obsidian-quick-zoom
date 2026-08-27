@@ -109,6 +109,19 @@ export class OutlineHoverMenu {
     );
   }
 
+  /** True while the pointer is over any open outline menu panel. */
+  private isPointerOverMenuTree(): boolean {
+    for (const menu of this.menuStack) {
+      if (!menu) {
+        continue;
+      }
+      if (menu.dom.matches(":hover") || menu.dom.querySelector(":hover")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private openSubmenu(
     anchor: HTMLElement,
     items: SiblingItem[],
@@ -139,7 +152,13 @@ export class OutlineHoverMenu {
 
   private scheduleClose(delayMs: number) {
     this.cancelClose();
-    this.closeTimer = setTimeout(() => this.hideAll(), delayMs);
+    this.closeTimer = setTimeout(() => {
+      this.closeTimer = null;
+      if (this.isPointerOverMenuTree()) {
+        return;
+      }
+      this.hideAll();
+    }, delayMs);
   }
 
   private cancelClose() {
