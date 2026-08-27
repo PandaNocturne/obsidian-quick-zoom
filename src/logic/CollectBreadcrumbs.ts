@@ -3,6 +3,7 @@ import { EditorState } from "@codemirror/state";
 
 import { SiblingItem, collectSiblings } from "./CollectSiblings";
 import { cleanTitle } from "./utils/cleanTitle";
+import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
 
 export interface Breadcrumb {
   title: string;
@@ -26,10 +27,17 @@ export class CollectBreadcrumbs {
       },
     ];
 
+    const frontmatterEnd = getFrontmatterEnd(state);
     const posLine = state.doc.lineAt(pos);
 
     for (let i = 1; i < posLine.number; i++) {
       const line = state.doc.line(i);
+      if (line.from < frontmatterEnd) {
+        continue;
+      }
+      if (line.text.trim() === "---") {
+        continue;
+      }
       const f = foldable(state, line.from, line.to);
       if (f && f.to > posLine.from) {
         breadcrumbs.push({

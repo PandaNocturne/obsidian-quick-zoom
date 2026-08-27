@@ -2,6 +2,7 @@ import { foldable } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 
 import { cleanTitle } from "./utils/cleanTitle";
+import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
 
 export interface SiblingItem {
   title: string;
@@ -15,12 +16,13 @@ export function collectSiblings(
   parentPos: number | null
 ): SiblingItem[] {
   const doc = state.doc;
+  const frontmatterEnd = getFrontmatterEnd(state);
 
   let startLine: number;
   let parentTo: number;
 
   if (parentPos === null) {
-    startLine = 1;
+    startLine = frontmatterEnd > 0 ? doc.lineAt(frontmatterEnd).number : 1;
     parentTo = doc.length;
   } else {
     const parentLine = doc.lineAt(parentPos);
@@ -30,7 +32,7 @@ export function collectSiblings(
   }
 
   const siblings: SiblingItem[] = [];
-  let skipUntil = -1;
+  let skipUntil = Math.max(frontmatterEnd, -1);
 
   for (let i = startLine; i <= doc.lines; i++) {
     const line = doc.line(i);
@@ -38,6 +40,11 @@ export function collectSiblings(
       break;
     }
     if (line.from < skipUntil) {
+      continue;
+    }
+
+    // Frontmatter fences / horizontal rules must not appear as outline items
+    if (line.text.trim() === "---") {
       continue;
     }
 

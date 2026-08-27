@@ -52,3 +52,25 @@ test("should collect direct children under a parent heading", () => {
     { title: "d", pos: 32 },
   ]);
 });
+
+test("should skip YAML frontmatter when collecting top-level siblings", () => {
+  const doc = "---\ntitle: note\ntags:\n  - a\n---\n\n# a\n\n# b\n";
+  const state = EditorState.create({ doc });
+  const headingA = doc.indexOf("# a");
+  const headingB = doc.indexOf("# b");
+  const frontmatterFrom = 0;
+  const frontmatterTo = doc.indexOf("---\n\n# a") + 3;
+
+  foldable.mockImplementation((_state, from) => {
+    if (from === frontmatterFrom)
+      return { from: frontmatterFrom, to: frontmatterTo };
+    if (from === headingA) return { from: headingA, to: headingB };
+    if (from === headingB) return { from: headingB, to: doc.length };
+    return null;
+  });
+
+  expect(collectSiblings(state, null)).toStrictEqual([
+    { title: "a", pos: headingA },
+    { title: "b", pos: headingB },
+  ]);
+});
