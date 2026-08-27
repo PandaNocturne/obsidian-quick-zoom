@@ -16,6 +16,8 @@ export class OutlineHoverMenu {
   /** Index = depth; root menu at 0 */
   private menuStack: (Menu | null)[] = [];
   private closeTimer: ReturnType<typeof setTimeout> | null = null;
+  private expandedChevron: HTMLElement | null = null;
+  private expandedDepth: number | null = null;
 
   showAtMouseEvent(
     event: MouseEvent,
@@ -67,13 +69,13 @@ export class OutlineHoverMenu {
 
         const children = collectSiblings(ctx.view.state, outlineItem.pos);
         if (children.length > 0) {
-          this.bindChevronSubmenuHover(item, children, ctx, depth);
+          this.bindChevronSubmenu(item, children, ctx, depth);
         }
       });
     }
   }
 
-  private bindChevronSubmenuHover(
+  private bindChevronSubmenu(
     item: MenuItem,
     children: SiblingItem[],
     ctx: OutlineHoverMenuContext,
@@ -84,22 +86,45 @@ export class OutlineHoverMenu {
     const chevron = item.dom.createDiv({
       cls: "zoom-plugin-outline-chevron",
       text: "›",
-      attr: { "aria-label": "展开子菜单" },
-    });
-
-    chevron.addEventListener("mouseenter", () => {
-      this.cancelClose();
-      this.openSubmenu(chevron, children, ctx, depth + 1);
-    });
-
-    chevron.addEventListener("mouseleave", () => {
-      this.scheduleClose(ctx.getSubmenuCloseDelayMs());
+      attr: { "aria-label": "展开/折叠子菜单" },
     });
 
     chevron.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
+      this.cancelClose();
+      this.toggleSubmenu(chevron, children, ctx, depth + 1);
     });
+  }
+
+  private toggleSubmenu(
+    anchor: HTMLElement,
+    items: SiblingItem[],
+    ctx: OutlineHoverMenuContext,
+    depth: number
+  ) {
+    if (this.expandedChevron === anchor && this.menuStack[depth]) {
+      this.setChevronExpanded(anchor, false);
+      this.closeFromDepth(depth);
+      return;
+    }
+
+    this.openSubmenu(anchor, items, ctx, depth);
+  }
+
+  private setChevronExpanded(
+    chevron: HTMLElement,
+    expanded: boolean,
+    depth?: number
+  ) {
+    chevron.toggleClass("is-expanded", expanded);
+    if (expanded) {
+      this.expandedChevron = chevron;
+      this.expandedDepth = depth ?? this.expandedDepth;
+    } else if (this.expandedChevron === chevron) {
+      this.expandedChevron = null;
+      this.expandedDepth = null;
+    }
   }
 
   private bindMenuHover(menu: Menu, ctx: OutlineHoverMenuContext) {
@@ -128,6 +153,10 @@ export class OutlineHoverMenu {
     ctx: OutlineHoverMenuContext,
     depth: number
   ) {
+    if (this.expandedChevron && this.expandedChevron !== anchor) {
+      this.setChevronExpanded(this.expandedChevron, false);
+    }
+
     this.closeFromDepth(depth);
 
     const submenu = new Menu();
@@ -140,6 +169,7 @@ export class OutlineHoverMenu {
 
     const rect = anchor.getBoundingClientRect();
     submenu.showAtPosition({ x: rect.right - 2, y: rect.top });
+    this.setChevronExpanded(anchor, true, depth);
   }
 
   private closeFromDepth(depth: number) {
@@ -148,6 +178,12 @@ export class OutlineHoverMenu {
       this.menuStack[i] = null;
     }
     this.menuStack.length = depth;
+
+    if (this.expandedDepth !== null && depth <= this.expandedDepth) {
+      if (this.expandedChevron) {
+        this.setChevronExpanded(this.expandedChevron, false);
+      }
+    }
   }
 
   private scheduleClose(delayMs: number) {
@@ -170,6 +206,9 @@ export class OutlineHoverMenu {
 
   hideAll() {
     this.cancelClose();
+    if (this.expandedChevron) {
+      this.setChevronExpanded(this.expandedChevron, false);
+    }
     for (const menu of this.menuStack) {
       menu?.hide();
     }

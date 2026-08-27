@@ -88,7 +88,8 @@
   border-left: 1px solid var(--background-modifier-border);
 }
 
-.menu-item.menu-item-has-submenu .zoom-plugin-outline-chevron:hover {
+.menu-item.menu-item-has-submenu .zoom-plugin-outline-chevron:hover,
+.menu-item.menu-item-has-submenu .zoom-plugin-outline-chevron.is-expanded {
   background-color: var(--background-modifier-hover);
   color: var(--text-normal);
 }

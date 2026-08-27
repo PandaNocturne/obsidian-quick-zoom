@@ -29,18 +29,6 @@ type K = keyof ObsidianZoomPluginSettings;
 type V<T extends K> = ObsidianZoomPluginSettings[T];
 type Callback<T extends K> = (cb: V<T>) => void;
 
-const zoomOnClickProp = Platform.isDesktop
-  ? "zoomOnClick"
-  : "zoomOnClickMobile";
-
-const mappingToJson = {
-  zoomOnClick: zoomOnClickProp,
-  debug: "debug",
-  outlineSubmenuCloseDelayMs: "outlineSubmenuCloseDelayMs",
-} as {
-  [key in keyof ObsidianZoomPluginSettings]: keyof ObsidianZoomPluginSettingsJson;
-};
-
 export class SettingsService implements ObsidianZoomPluginSettings {
   private storage: Storage;
   private values: ObsidianZoomPluginSettingsJson;
@@ -58,8 +46,10 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     this.set("debug", value);
   }
 
-  get zoomOnClick() {
-    return this.values[mappingToJson.zoomOnClick];
+  get zoomOnClick(): boolean {
+    return Platform.isDesktop
+      ? this.values.zoomOnClick
+      : this.values.zoomOnClickMobile;
   }
   set zoomOnClick(value: boolean) {
     this.set("zoomOnClick", value);
@@ -101,8 +91,22 @@ export class SettingsService implements ObsidianZoomPluginSettings {
   }
 
   private set<T extends K>(key: T, value: V<T>): void {
-    // mappingToJson bridges public settings keys to persisted json keys
-    (this.values as Record<string, V<T>>)[mappingToJson[key]] = value;
+    switch (key) {
+      case "debug":
+        this.values.debug = value as boolean;
+        break;
+      case "zoomOnClick":
+        if (Platform.isDesktop) {
+          this.values.zoomOnClick = value as boolean;
+        } else {
+          this.values.zoomOnClickMobile = value as boolean;
+        }
+        break;
+      case "outlineSubmenuCloseDelayMs":
+        this.values.outlineSubmenuCloseDelayMs = value as number;
+        break;
+    }
+
     const callbacks = this.handlers.get(key);
 
     if (!callbacks) {
