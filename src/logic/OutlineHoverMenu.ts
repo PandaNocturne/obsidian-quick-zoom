@@ -39,8 +39,8 @@ export class OutlineHoverMenu {
   private outsideClickHandler: ((e: MouseEvent) => void) | null = null;
   private onMenuClose: (() => void) | null = null;
 
-  showAtMouseEvent(
-    event: MouseEvent,
+  showAtElement(
+    anchor: HTMLElement,
     items: SiblingItem[],
     ctx: OutlineHoverMenuContext,
     options?: { includeExitZoom?: boolean }
@@ -65,10 +65,20 @@ export class OutlineHoverMenu {
     }
 
     this.populateMenu(root, items, ctx, 0);
-    root.showAtMouseEvent(event);
+    this.showMenuBelowAnchor(root, anchor);
     this.bindMenuHover(root, ctx, 0);
     this.installMenuTreeContains();
     this.bindOutsideClick();
+  }
+
+  private showMenuBelowAnchor(menu: Menu, anchor: HTMLElement) {
+    const rect = anchor.getBoundingClientRect();
+    menu.showAtPosition({ x: rect.left, y: rect.bottom + 2 });
+  }
+
+  private showMenuBesideAnchor(menu: Menu, anchor: HTMLElement) {
+    const rect = anchor.getBoundingClientRect();
+    menu.showAtPosition({ x: rect.right - 2, y: rect.top });
   }
 
   private createMenuPanel(depth: number): Menu {
@@ -162,23 +172,24 @@ export class OutlineHoverMenu {
       e.preventDefault();
       e.stopPropagation();
       this.cancelClose();
-      this.toggleSubmenu(chevron, children, ctx, submenuDepth);
+      this.toggleSubmenu(chevron, item.dom, children, ctx, submenuDepth);
     });
   }
 
   private toggleSubmenu(
-    anchor: HTMLElement,
+    chevron: HTMLElement,
+    positionAnchor: HTMLElement,
     items: SiblingItem[],
     ctx: OutlineHoverMenuContext,
     depth: number
   ) {
-    if (this.expandedChevrons.get(depth) === anchor && this.menus[depth]) {
-      this.setChevronExpanded(anchor, depth, false);
+    if (this.expandedChevrons.get(depth) === chevron && this.menus[depth]) {
+      this.setChevronExpanded(chevron, depth, false);
       this.closeFromDepth(depth);
       return;
     }
 
-    this.openSubmenu(anchor, items, ctx, depth);
+    this.openSubmenu(chevron, positionAnchor, items, ctx, depth);
   }
 
   private setChevronExpanded(
@@ -314,7 +325,8 @@ export class OutlineHoverMenu {
   }
 
   private openSubmenu(
-    anchor: HTMLElement,
+    chevron: HTMLElement,
+    positionAnchor: HTMLElement,
     items: SiblingItem[],
     ctx: OutlineHoverMenuContext,
     depth: number
@@ -327,9 +339,8 @@ export class OutlineHoverMenu {
     this.populateMenu(submenu, items, ctx, depth);
     this.bindMenuHover(submenu, ctx, depth);
 
-    const rect = anchor.getBoundingClientRect();
-    submenu.showAtPosition({ x: rect.right - 2, y: rect.top });
-    this.setChevronExpanded(anchor, depth, true);
+    this.showMenuBesideAnchor(submenu, positionAnchor);
+    this.setChevronExpanded(chevron, depth, true);
     this.installMenuTreeContains();
     this.ensureAncestorsVisible(depth);
   }

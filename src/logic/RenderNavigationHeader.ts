@@ -234,8 +234,19 @@ export class RenderNavigationHeader {
     this.menuComponent = new Component();
     this.menuComponent.load();
 
-    this.outlineMenu.showAtMouseEvent(
-      event,
+    const anchor =
+      event.currentTarget instanceof HTMLElement
+        ? event.currentTarget
+        : event.target instanceof HTMLElement
+        ? event.target
+        : null;
+
+    if (!anchor) {
+      return;
+    }
+
+    this.outlineMenu.showAtElement(
+      anchor,
       items,
       {
         view,
