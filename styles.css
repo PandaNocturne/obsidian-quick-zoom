@@ -92,3 +92,43 @@
   background-color: var(--background-modifier-hover);
   color: var(--text-normal);
 }
+
+.menu.zoom-plugin-outline-menu .menu-item:not(.is-disabled):not(.is-label) {
+  display: flex;
+  align-items: center;
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label).selected {
+  background-color: var(--interactive-accent-hover);
+  color: var(--text-on-accent);
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label).selected
+  .menu-item-icon {
+  color: var(--text-on-accent);
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label):hover:not(.selected) {
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label):hover:not(.selected)
+  .menu-item-icon {
+  color: var(--text-muted);
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label):hover.selected {
+  color: var(--text-on-accent);
+}
+
+.menu.zoom-plugin-outline-menu
+  .menu-item:not(.is-disabled):not(.is-label):hover.selected
+  .menu-item-icon {
+  color: var(--text-on-accent);
+}

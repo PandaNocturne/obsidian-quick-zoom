@@ -27,6 +27,7 @@ export class OutlineHoverMenu {
 
     const root = new Menu();
     root.setUseNativeMenu?.(false);
+    root.dom.addClass("zoom-plugin-outline-menu");
     this.menuStack = [root];
 
     if (options?.includeExitZoom) {
@@ -56,7 +57,9 @@ export class OutlineHoverMenu {
       menu.addItem((item) => {
         item.setTitle(outlineItem.title || "(empty)");
         item.setIcon(outlineIcon(outlineItem));
-        item.setChecked(ctx.selectedPath.has(outlineItem.pos));
+        if (ctx.selectedPath.has(outlineItem.pos)) {
+          item.dom.addClass("selected");
+        }
         item.onClick(() => {
           this.hideAll();
           ctx.zoomIn(ctx.view, outlineItem.pos);
@@ -116,6 +119,7 @@ export class OutlineHoverMenu {
 
     const submenu = new Menu();
     submenu.setUseNativeMenu?.(false);
+    submenu.dom.addClass("zoom-plugin-outline-menu");
     this.menuStack[depth] = submenu;
 
     this.populateMenu(submenu, items, ctx, depth);
