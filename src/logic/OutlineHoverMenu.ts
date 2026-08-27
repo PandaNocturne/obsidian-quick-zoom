@@ -1,4 +1,4 @@
-import { App, Component, Menu, MenuItem } from "obsidian";
+import { App, Component, Menu, MenuItem, setIcon } from "obsidian";
 
 import { EditorView } from "@codemirror/view";
 
@@ -162,9 +162,9 @@ export class OutlineHoverMenu {
 
     const chevron = item.dom.createDiv({
       cls: "zoom-plugin-outline-chevron",
-      text: "›",
       attr: { "aria-label": "展开/折叠子菜单" },
     });
+    setIcon(chevron, "chevron-right");
 
     const submenuDepth = parentDepth + 1;
 

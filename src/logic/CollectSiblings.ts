@@ -58,7 +58,7 @@ export function outlineIcon(
 
 export function outlineIconName(item: OutlineIconTarget): string {
   if (item.kind === "document") {
-    return "file-text";
+    return "file-output";
   }
   if (item.kind === "text") {
     return "text";

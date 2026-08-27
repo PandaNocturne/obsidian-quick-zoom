@@ -124,8 +124,10 @@ export function renderHeader(
         e.stopPropagation();
         onDelimiterClick?.(breadcrumb.pos, e, children);
       });
+    } else {
+      d.setAttribute("aria-hidden", "true");
     }
-    d.textContent = ">";
+    setIcon(d, "chevron-right");
     crumb.appendChild(d);
 
     h.appendChild(crumb);

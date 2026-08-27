@@ -46,7 +46,7 @@ test("should render html with icons and delimiters", () => {
     titles[0]
       .querySelector(".zoom-plugin-title-icon")
       ?.getAttribute("data-icon")
-  ).toBe("file-text");
+  ).toBe("file-output");
 
   expect(titles[1].querySelector(".zoom-plugin-title-text")?.textContent).toBe(
     "header 1"
@@ -59,6 +59,8 @@ test("should render html with icons and delimiters", () => {
 
   const delimiters = h.querySelectorAll(".zoom-plugin-delimiter");
   expect(delimiters).toHaveLength(2);
+  expect(delimiters[0].getAttribute("data-icon")).toBe("chevron-right");
+  expect(delimiters[1].getAttribute("data-icon")).toBe("chevron-right");
   expect(
     delimiters[1].classList.contains("zoom-plugin-delimiter--trailing")
   ).toBe(true);

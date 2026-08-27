@@ -1,15 +1,18 @@
 .zoom-plugin-header {
+  --zoom-header-row-height: var(--icon-size);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   margin: var(--file-margins);
   margin-top: var(--size-4-2);
   margin-bottom: var(--size-4-2);
+  line-height: var(--zoom-header-row-height);
 }
 
 .zoom-plugin-crumb {
   display: inline-flex;
   align-items: center;
+  height: var(--zoom-header-row-height);
 }
 
 .zoom-plugin-title {
@@ -17,13 +20,15 @@
   align-items: center;
   gap: var(--size-2-1);
   max-width: none;
+  height: var(--zoom-header-row-height);
+  min-height: var(--zoom-header-row-height);
   text-decoration: none;
   color: var(--text-muted);
   cursor: pointer;
   border-radius: var(--radius-s);
   padding: 0 2px;
-  line-height: var(--line-height-normal);
-  min-height: var(--icon-size);
+  line-height: var(--zoom-header-row-height);
+  box-sizing: border-box;
 }
 
 .zoom-plugin-title-icon {
@@ -31,17 +36,23 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  align-self: center;
+  width: var(--zoom-header-row-height);
+  height: var(--zoom-header-row-height);
   line-height: 0;
 }
 
 .zoom-plugin-title-icon svg {
-  width: var(--icon-size);
-  height: var(--icon-size);
+  width: var(--zoom-header-row-height);
+  height: var(--zoom-header-row-height);
+  display: block;
 }
 
 .zoom-plugin-title-icon.zoom-plugin-icon--document {
   color: var(--text-muted);
+}
+
+.zoom-plugin-title--document {
+  color: var(--text-normal);
 }
 
 .zoom-plugin-title-icon.zoom-plugin-icon--heading {
@@ -56,19 +67,15 @@
   color: var(--text-faint);
 }
 
-.zoom-plugin-title--document {
-  color: var(--text-normal);
-}
-
 .zoom-plugin-title-text {
   display: flex;
   align-items: center;
-  align-self: center;
   min-width: 0;
+  height: var(--zoom-header-row-height);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: var(--line-height-normal);
+  line-height: var(--zoom-header-row-height);
 }
 
 /* MarkdownRenderer wraps content in block elements; keep titles single-line height */
@@ -122,11 +129,21 @@
 .zoom-plugin-delimiter {
   display: inline-flex;
   align-items: center;
-  align-self: center;
-  padding: 0 var(--size-4-2);
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--zoom-header-row-height);
+  height: var(--zoom-header-row-height);
+  padding: 0;
   color: var(--text-faint);
-  line-height: var(--line-height-normal);
+  line-height: 0;
   user-select: none;
+  box-sizing: border-box;
+}
+
+.zoom-plugin-delimiter svg {
+  width: var(--zoom-header-row-height);
+  height: var(--zoom-header-row-height);
+  display: block;
 }
 
 .zoom-plugin-delimiter--clickable {
@@ -192,6 +209,12 @@
   color: var(--text-muted);
   cursor: pointer;
   border-left: 1px solid var(--background-modifier-border);
+  line-height: 0;
+}
+
+.menu-item.menu-item-has-submenu .zoom-plugin-outline-chevron svg {
+  width: calc(var(--icon-size) * 0.75);
+  height: calc(var(--icon-size) * 0.75);
 }
 
 .menu-item.menu-item-has-submenu .zoom-plugin-outline-chevron:hover,
