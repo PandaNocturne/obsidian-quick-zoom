@@ -287,63 +287,13 @@ class FollowViewportInDefaultMode implements Feature {
 }
 
 export class HeaderNavigationFeature implements Feature {
-  private cursorHistory = new ZoomHistory();
-
-  private collectBreadcrumbs = new CollectBreadcrumbs(
-    {
-      getDocumentTitle: getDocumentTitle,
-    },
-    this.settings
-  );
-
-  private renderNavigationHeader = new RenderNavigationHeader(
-    this.plugin.app,
-    this.logger,
-    this.settings,
-    this.zoomIn,
-    this.zoomOut,
-    this.zoomHistory,
-    this.cursorHistory,
-    (view) => this.followViewportInDefaultMode.refreshView(view)
-  );
-
-  private followViewportInDefaultMode = new FollowViewportInDefaultMode(
-    this.plugin,
-    this.settings,
-    this.collectBreadcrumbs,
-    this.renderNavigationHeader,
-    this.calculateVisibleContentRange
-  );
-
-  private showHeaderAfterZoomIn = new ShowHeaderAfterZoomIn(
-    this.notifyAfterZoomIn,
-    this.collectBreadcrumbs,
-    this.renderNavigationHeader,
-    this.settings,
-    (view) => this.followViewportInDefaultMode.refreshView(view)
-  );
-
-  private hideOrShowHistoryHeaderAfterZoomOut =
-    new HideOrShowHistoryHeaderAfterZoomOut(
-      this.notifyAfterZoomOut,
-      this.collectBreadcrumbs,
-      this.renderNavigationHeader,
-      this.zoomHistory,
-      this.settings,
-      this.calculateVisibleContentRange,
-      (view) => this.followViewportInDefaultMode.refreshView(view)
-    );
-
-  private updateHeaderAfterRangeBeforeVisibleRangeChanged =
-    new UpdateHeaderAfterRangeBeforeVisibleRangeChanged(
-      this.plugin,
-      this.calculateHiddenContentRanges,
-      this.calculateVisibleContentRange,
-      this.collectBreadcrumbs,
-      this.renderNavigationHeader,
-      this.settings,
-      (view) => this.followViewportInDefaultMode.refreshView(view)
-    );
+  private cursorHistory: ZoomHistory;
+  private collectBreadcrumbs: CollectBreadcrumbs;
+  private renderNavigationHeader: RenderNavigationHeader;
+  private followViewportInDefaultMode: FollowViewportInDefaultMode;
+  private showHeaderAfterZoomIn: ShowHeaderAfterZoomIn;
+  private hideOrShowHistoryHeaderAfterZoomOut: HideOrShowHistoryHeaderAfterZoomOut;
+  private updateHeaderAfterRangeBeforeVisibleRangeChanged: UpdateHeaderAfterRangeBeforeVisibleRangeChanged;
 
   constructor(
     private plugin: Plugin,
@@ -357,6 +307,67 @@ export class HeaderNavigationFeature implements Feature {
     private notifyAfterZoomOut: NotifyAfterZoomOut,
     private zoomHistory: ZoomHistoryNav
   ) {
+    this.cursorHistory = new ZoomHistory();
+    this.collectBreadcrumbs = new CollectBreadcrumbs(
+      {
+        getDocumentTitle: getDocumentTitle,
+      },
+      this.settings
+    );
+
+    const refreshHeader = (view: EditorView) => {
+      this.followViewportInDefaultMode.refreshView(view);
+    };
+
+    this.renderNavigationHeader = new RenderNavigationHeader(
+      this.plugin.app,
+      this.logger,
+      this.settings,
+      this.zoomIn,
+      this.zoomOut,
+      this.zoomHistory,
+      this.cursorHistory,
+      refreshHeader
+    );
+
+    this.followViewportInDefaultMode = new FollowViewportInDefaultMode(
+      this.plugin,
+      this.settings,
+      this.collectBreadcrumbs,
+      this.renderNavigationHeader,
+      this.calculateVisibleContentRange
+    );
+
+    this.showHeaderAfterZoomIn = new ShowHeaderAfterZoomIn(
+      this.notifyAfterZoomIn,
+      this.collectBreadcrumbs,
+      this.renderNavigationHeader,
+      this.settings,
+      refreshHeader
+    );
+
+    this.hideOrShowHistoryHeaderAfterZoomOut =
+      new HideOrShowHistoryHeaderAfterZoomOut(
+        this.notifyAfterZoomOut,
+        this.collectBreadcrumbs,
+        this.renderNavigationHeader,
+        this.zoomHistory,
+        this.settings,
+        this.calculateVisibleContentRange,
+        refreshHeader
+      );
+
+    this.updateHeaderAfterRangeBeforeVisibleRangeChanged =
+      new UpdateHeaderAfterRangeBeforeVisibleRangeChanged(
+        this.plugin,
+        this.calculateHiddenContentRanges,
+        this.calculateVisibleContentRange,
+        this.collectBreadcrumbs,
+        this.renderNavigationHeader,
+        this.settings,
+        refreshHeader
+      );
+
     this.syncCursorHistoryLimit();
     this.settings.onChange("historyMaxEntries", () => {
       this.syncCursorHistoryLimit();
