@@ -55,6 +55,19 @@ export class CollectBreadcrumbs {
     private settings: SettingsService
   ) {}
 
+  public collectStickyBreadcrumbs(state: EditorState, pos: number) {
+    const breadcrumbs = this.collectBreadcrumbs(state, pos);
+
+    while (
+      breadcrumbs.length > 1 &&
+      breadcrumbs[breadcrumbs.length - 1].kind === "text"
+    ) {
+      breadcrumbs.pop();
+    }
+
+    return breadcrumbs;
+  }
+
   public collectDocumentBreadcrumb(state: EditorState): Breadcrumb[] {
     const listOptions = this.settings.getListRecognitionOptions();
     const rootSiblings = collectSiblings(state, null, listOptions);

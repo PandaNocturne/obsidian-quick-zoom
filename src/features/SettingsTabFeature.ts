@@ -83,6 +83,20 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
     containerEl.createEl("h3", { text: "Outline display" });
 
     new Setting(containerEl)
+      .setName("Show breadcrumbs in default mode")
+      .setDesc(
+        "Always show the top outline breadcrumbs without zooming. They follow the current viewport heading (like VS Code sticky breadcrumbs). Clicks jump to headings instead of zooming."
+      )
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.showBreadcrumbsInDefaultMode)
+          .onChange(async (value) => {
+            this.settings.showBreadcrumbsInDefaultMode = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
       .setName("Render markdown in outline titles")
       .setDesc(
         "Render inline markdown (bold, links, etc.) in breadcrumb and menu titles."

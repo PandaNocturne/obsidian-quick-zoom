@@ -15,6 +15,8 @@ export interface OutlineHoverMenuContext {
   selectedPath: Set<number>;
   zoomIn: (view: EditorView, pos: number) => void;
   zoomOut: (view: EditorView) => void;
+  /** When set, menu items jump/scroll instead of zooming */
+  navigateTo?: (view: EditorView, pos: number) => void;
   getSubmenuCloseDelayMs: () => number;
   renderMarkdown: boolean;
   itemMaxWidthPx: number;
@@ -105,7 +107,11 @@ export class OutlineHoverMenu {
         }
         item.onClick(() => {
           this.hideAll();
-          ctx.zoomIn(ctx.view, outlineItem.pos);
+          if (ctx.navigateTo) {
+            ctx.navigateTo(ctx.view, outlineItem.pos);
+          } else {
+            ctx.zoomIn(ctx.view, outlineItem.pos);
+          }
         });
 
         const children = collectSiblings(

@@ -1,7 +1,7 @@
 import { Plugin } from "obsidian";
 
 import { EditorState } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
+import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 
 import { Feature } from "./Feature";
 import { getDocumentTitle } from "./utils/getDocumentTitle";
@@ -13,6 +13,7 @@ import {
   RenderNavigationHeader,
   ZoomHistoryNav,
 } from "../logic/RenderNavigationHeader";
+import { getActiveOutlinePos } from "../logic/utils/getActiveOutlinePos";
 import { LoggerService } from "../services/LoggerService";
 import { SettingsService } from "../services/SettingsService";
 
@@ -57,7 +58,7 @@ class ShowHeaderAfterZoomIn implements Feature {
         view.state,
         pos
       );
-      this.renderNavigationHeader.showHeader(view, breadcrumbs);
+      this.renderNavigationHeader.showHeader(view, breadcrumbs, "zoom");
     });
   }
 
@@ -69,11 +70,19 @@ class HideOrShowHistoryHeaderAfterZoomOut implements Feature {
     private notifyAfterZoomOut: NotifyAfterZoomOut,
     private collectBreadcrumbs: CollectBreadcrumbs,
     private renderNavigationHeader: RenderNavigationHeader,
-    private zoomHistory: ZoomHistoryNav
+    private zoomHistory: ZoomHistoryNav,
+    private settings: SettingsService,
+    private calculateVisibleContentRange: CalculateVisibleContentRange,
+    private refreshDefaultModeHeader: (view: EditorView) => void
   ) {}
 
   async load() {
     this.notifyAfterZoomOut.notifyAfterZoomOut((view) => {
+      if (this.settings.showBreadcrumbsInDefaultMode) {
+        this.refreshDefaultModeHeader(view);
+        return;
+      }
+
       if (
         this.zoomHistory.canZoomBack(view) ||
         this.zoomHistory.canZoomForward(view)
@@ -81,7 +90,7 @@ class HideOrShowHistoryHeaderAfterZoomOut implements Feature {
         const breadcrumbs = this.collectBreadcrumbs.collectDocumentBreadcrumb(
           view.state
         );
-        this.renderNavigationHeader.showHeader(view, breadcrumbs);
+        this.renderNavigationHeader.showHeader(view, breadcrumbs, "zoom");
         return;
       }
 
@@ -121,14 +130,127 @@ class UpdateHeaderAfterRangeBeforeVisibleRangeChanged implements Feature {
   private rangeBeforeVisibleRangeChanged(state: EditorState) {
     const view = getEditorViewFromEditorState(state);
 
-    const pos =
+    const visible =
+      this.calculateVisibleContentRange.calculateVisibleContentRange(state);
+    if (!visible) {
+      return;
+    }
+
+    const breadcrumbs = this.collectBreadcrumbs.collectBreadcrumbs(
+      state,
+      visible.from
+    );
+
+    this.renderNavigationHeader.showHeader(view, breadcrumbs, "zoom");
+  }
+}
+
+class FollowViewportInDefaultMode implements Feature {
+  private scrollHandlers = new WeakMap<EditorView, () => void>();
+  private debounceTimers = new WeakMap<
+    EditorView,
+    ReturnType<typeof setTimeout>
+  >();
+
+  private extension = ViewPlugin.define((view) => {
+    const onScroll = () => this.scheduleRefresh(view);
+    this.scrollHandlers.set(view, onScroll);
+    view.scrollDOM.addEventListener("scroll", onScroll, { passive: true });
+
+    // Initial paint after editor mounts
+    this.scheduleRefresh(view);
+
+    return {
+      update: (update: ViewUpdate) => {
+        if (
+          update.docChanged ||
+          update.selectionSet ||
+          update.viewportChanged ||
+          update.geometryChanged
+        ) {
+          this.scheduleRefresh(update.view);
+        }
+      },
+      destroy: () => {
+        const handler = this.scrollHandlers.get(view);
+        if (handler) {
+          view.scrollDOM.removeEventListener("scroll", handler);
+          this.scrollHandlers.delete(view);
+        }
+        const timer = this.debounceTimers.get(view);
+        if (timer) {
+          clearTimeout(timer);
+          this.debounceTimers.delete(view);
+        }
+      },
+    };
+  });
+
+  constructor(
+    private plugin: Plugin,
+    private settings: SettingsService,
+    private collectBreadcrumbs: CollectBreadcrumbs,
+    private renderNavigationHeader: RenderNavigationHeader,
+    private calculateVisibleContentRange: CalculateVisibleContentRange
+  ) {}
+
+  async load() {
+    this.plugin.registerEditorExtension(this.extension);
+
+    this.settings.onChange("showBreadcrumbsInDefaultMode", () => {
+      this.refreshAllEditors();
+    });
+  }
+
+  async unload() {}
+
+  public refreshView(view: EditorView) {
+    this.refreshNow(view);
+  }
+
+  private refreshAllEditors() {
+    const leaves = this.plugin.app.workspace.getLeavesOfType("markdown");
+    for (const leaf of leaves) {
+      const view = (leaf.view as { editor?: { cm?: EditorView } }).editor?.cm;
+      if (view) {
+        this.refreshNow(view);
+      }
+    }
+  }
+
+  private scheduleRefresh(view: EditorView) {
+    const prev = this.debounceTimers.get(view);
+    if (prev) {
+      clearTimeout(prev);
+    }
+    const timer = setTimeout(() => {
+      this.debounceTimers.delete(view);
+      this.refreshNow(view);
+    }, 60);
+    this.debounceTimers.set(view, timer);
+  }
+
+  private refreshNow(view: EditorView) {
+    const isZoomed =
       this.calculateVisibleContentRange.calculateVisibleContentRange(
-        state
-      ).from;
+        view.state
+      ) !== null;
 
-    const breadcrumbs = this.collectBreadcrumbs.collectBreadcrumbs(state, pos);
+    if (isZoomed) {
+      return;
+    }
 
-    this.renderNavigationHeader.showHeader(view, breadcrumbs);
+    if (!this.settings.showBreadcrumbsInDefaultMode) {
+      this.renderNavigationHeader.hideHeader(view);
+      return;
+    }
+
+    const pos = getActiveOutlinePos(view);
+    const breadcrumbs = this.collectBreadcrumbs.collectStickyBreadcrumbs(
+      view.state,
+      pos
+    );
+    this.renderNavigationHeader.showHeader(view, breadcrumbs, "navigate");
   }
 }
 
@@ -149,6 +271,14 @@ export class HeaderNavigationFeature implements Feature {
     this.zoomHistory
   );
 
+  private followViewportInDefaultMode = new FollowViewportInDefaultMode(
+    this.plugin,
+    this.settings,
+    this.collectBreadcrumbs,
+    this.renderNavigationHeader,
+    this.calculateVisibleContentRange
+  );
+
   private showHeaderAfterZoomIn = new ShowHeaderAfterZoomIn(
     this.notifyAfterZoomIn,
     this.collectBreadcrumbs,
@@ -160,7 +290,10 @@ export class HeaderNavigationFeature implements Feature {
       this.notifyAfterZoomOut,
       this.collectBreadcrumbs,
       this.renderNavigationHeader,
-      this.zoomHistory
+      this.zoomHistory,
+      this.settings,
+      this.calculateVisibleContentRange,
+      (view) => this.followViewportInDefaultMode.refreshView(view)
     );
 
   private updateHeaderAfterRangeBeforeVisibleRangeChanged =
@@ -193,11 +326,13 @@ export class HeaderNavigationFeature implements Feature {
     this.showHeaderAfterZoomIn.load();
     this.hideOrShowHistoryHeaderAfterZoomOut.load();
     this.updateHeaderAfterRangeBeforeVisibleRangeChanged.load();
+    this.followViewportInDefaultMode.load();
   }
 
   async unload() {
     this.showHeaderAfterZoomIn.unload();
     this.hideOrShowHistoryHeaderAfterZoomOut.unload();
     this.updateHeaderAfterRangeBeforeVisibleRangeChanged.unload();
+    this.followViewportInDefaultMode.unload();
   }
 }

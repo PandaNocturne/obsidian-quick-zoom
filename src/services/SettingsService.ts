@@ -11,6 +11,7 @@ export interface ObsidianZoomPluginSettings {
   recognizeTaskLists: boolean;
   renderMarkdown: boolean;
   outlineItemMaxWidthPx: number;
+  showBreadcrumbsInDefaultMode: boolean;
 }
 
 interface ObsidianZoomPluginSettingsJson {
@@ -23,6 +24,7 @@ interface ObsidianZoomPluginSettingsJson {
   recognizeTaskLists: boolean;
   renderMarkdown: boolean;
   outlineItemMaxWidthPx: number;
+  showBreadcrumbsInDefaultMode: boolean;
 }
 
 const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
@@ -35,6 +37,7 @@ const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
   recognizeTaskLists: false,
   renderMarkdown: true,
   outlineItemMaxWidthPx: 300,
+  showBreadcrumbsInDefaultMode: false,
 };
 
 export interface Storage {
@@ -114,6 +117,13 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     this.set("outlineItemMaxWidthPx", value);
   }
 
+  get showBreadcrumbsInDefaultMode() {
+    return this.values.showBreadcrumbsInDefaultMode;
+  }
+  set showBreadcrumbsInDefaultMode(value: boolean) {
+    this.set("showBreadcrumbsInDefaultMode", value);
+  }
+
   getListRecognitionOptions(): ListRecognitionOptions {
     return {
       recognizeUnorderedLists: this.recognizeUnorderedLists,
@@ -179,6 +189,9 @@ export class SettingsService implements ObsidianZoomPluginSettings {
         break;
       case "outlineItemMaxWidthPx":
         this.values.outlineItemMaxWidthPx = value as number;
+        break;
+      case "showBreadcrumbsInDefaultMode":
+        this.values.showBreadcrumbsInDefaultMode = value as boolean;
         break;
     }
 
