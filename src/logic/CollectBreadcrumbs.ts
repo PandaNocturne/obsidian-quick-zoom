@@ -3,7 +3,6 @@ import { EditorState } from "@codemirror/state";
 
 import {
   BreadcrumbKind,
-  OutlineIconTarget,
   SiblingItem,
   collectSiblings,
   detectHeadingLevel,

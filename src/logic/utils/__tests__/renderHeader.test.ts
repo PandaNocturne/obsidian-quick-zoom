@@ -51,7 +51,7 @@ test("should render html with icons", () => {
   ).toBe("heading-1");
 });
 
-test("should render chevron when title has siblings", () => {
+test("should mark title when it has siblings", () => {
   const h = renderHeader(document, {
     breadcrumbs: [
       { title: "Document", pos: null, siblings: [], kind: "document" },
@@ -72,7 +72,7 @@ test("should render chevron when title has siblings", () => {
 
   const title = h.querySelectorAll(".zoom-plugin-title")[1];
   expect(title.classList.contains("zoom-plugin-title-has-siblings")).toBe(true);
-  expect(title.querySelector(".zoom-plugin-title-chevron")).not.toBeNull();
+  expect(title.querySelector(".zoom-plugin-title-chevron")).toBeNull();
 });
 
 test("should handle click on document link", () => {

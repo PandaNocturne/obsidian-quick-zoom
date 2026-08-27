@@ -76,14 +76,6 @@ export function renderHeader(
       b.appendChild(titleSpan);
     }
 
-    if (siblings.length > 0) {
-      const chevron = doc.createElement("span");
-      chevron.classList.add("zoom-plugin-title-chevron");
-      chevron.setAttribute("aria-hidden", "true");
-      chevron.textContent = "▾";
-      b.appendChild(chevron);
-    }
-
     b.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
