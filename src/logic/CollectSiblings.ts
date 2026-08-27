@@ -1,7 +1,6 @@
 import { foldable } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 
-import { calculateParagraphRange } from "./utils/calculateParagraphRange";
 import { cleanTitle } from "./utils/cleanTitle";
 import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
 import {
@@ -175,24 +174,7 @@ export function collectSiblings(
         listType,
       });
       skipUntil = line.to;
-      continue;
     }
-
-    // Paragraph or blank line — only as children under a parent, not at document root
-    // (root menus would be flooded with every loose paragraph). Cursor zoom still works.
-    if (parentPos === null) {
-      continue;
-    }
-
-    const para = calculateParagraphRange(state, line.from, listOptions);
-    const title =
-      line.text.trim() === "" ? "(empty)" : cleanTitle(line.text) || "(empty)";
-    siblings.push({
-      title,
-      pos: line.from,
-      kind: "text",
-    });
-    skipUntil = para.to;
   }
 
   return siblings;
