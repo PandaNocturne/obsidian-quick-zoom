@@ -152,7 +152,9 @@ export class RenderNavigationHeader {
     breadcrumbs: Breadcrumb[],
     mode: HeaderInteractionMode = "zoom"
   ) {
-    const key = breadcrumbs.map((b) => `${b.pos}:${b.title}`).join("|");
+    const key = breadcrumbs
+      .map((b) => `${b.pos}:${b.title}:${b.dimmed ? 1 : 0}`)
+      .join("|");
     if (
       this.lastBreadcrumbKey === key &&
       this.lastMode === mode &&

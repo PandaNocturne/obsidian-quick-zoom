@@ -26,6 +26,8 @@ export interface Breadcrumb {
   kind: BreadcrumbKind;
   headingLevel?: number;
   listType?: ListType;
+  /** Levels below the current zoom root (cursor tracking while zoomed) */
+  dimmed?: boolean;
 }
 
 export interface GetDocumentTitle {
@@ -63,6 +65,37 @@ export class CollectBreadcrumbs {
       breadcrumbs[breadcrumbs.length - 1].kind === "text"
     ) {
       breadcrumbs.pop();
+    }
+
+    return breadcrumbs;
+  }
+
+  /**
+   * Zoom-mode path that also follows the cursor deeper than `zoomRootPos`.
+   * Crumbs after the zoom root are marked `dimmed`.
+   */
+  public collectZoomTrackedBreadcrumbs(
+    state: EditorState,
+    zoomRootPos: number,
+    cursorPos: number
+  ) {
+    const zoomRootLineFrom = state.doc.lineAt(zoomRootPos).from;
+    const breadcrumbs = this.collectStickyBreadcrumbs(state, cursorPos);
+
+    let pastZoomRoot = false;
+    let foundZoomRoot = false;
+    for (const breadcrumb of breadcrumbs) {
+      if (pastZoomRoot) {
+        breadcrumb.dimmed = true;
+      }
+      if (breadcrumb.pos === zoomRootLineFrom) {
+        foundZoomRoot = true;
+        pastZoomRoot = true;
+      }
+    }
+
+    if (!foundZoomRoot) {
+      return this.collectBreadcrumbs(state, zoomRootLineFrom);
     }
 
     return breadcrumbs;

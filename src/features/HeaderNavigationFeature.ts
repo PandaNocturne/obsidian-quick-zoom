@@ -49,11 +49,18 @@ class ShowHeaderAfterZoomIn implements Feature {
   constructor(
     private notifyAfterZoomIn: NotifyAfterZoomIn,
     private collectBreadcrumbs: CollectBreadcrumbs,
-    private renderNavigationHeader: RenderNavigationHeader
+    private renderNavigationHeader: RenderNavigationHeader,
+    private settings: SettingsService,
+    private refreshHeader: (view: EditorView) => void
   ) {}
 
   async load() {
     this.notifyAfterZoomIn.notifyAfterZoomIn((view, pos) => {
+      if (this.settings.trackCursorWhileZoomed) {
+        this.refreshHeader(view);
+        return;
+      }
+
       const breadcrumbs = this.collectBreadcrumbs.collectBreadcrumbs(
         view.state,
         pos
@@ -116,7 +123,9 @@ class UpdateHeaderAfterRangeBeforeVisibleRangeChanged implements Feature {
     private calculateHiddenContentRanges: CalculateHiddenContentRanges,
     private calculateVisibleContentRange: CalculateVisibleContentRange,
     private collectBreadcrumbs: CollectBreadcrumbs,
-    private renderNavigationHeader: RenderNavigationHeader
+    private renderNavigationHeader: RenderNavigationHeader,
+    private settings: SettingsService,
+    private refreshHeader: (view: EditorView) => void
   ) {}
 
   async load() {
@@ -129,6 +138,11 @@ class UpdateHeaderAfterRangeBeforeVisibleRangeChanged implements Feature {
 
   private rangeBeforeVisibleRangeChanged(state: EditorState) {
     const view = getEditorViewFromEditorState(state);
+
+    if (this.settings.trackCursorWhileZoomed) {
+      this.refreshHeader(view);
+      return;
+    }
 
     const visible =
       this.calculateVisibleContentRange.calculateVisibleContentRange(state);
@@ -185,12 +199,15 @@ class FollowViewportInDefaultMode implements Feature {
     this.settings.onChange("showBreadcrumbsInDefaultMode", () => {
       this.refreshAllEditors();
     });
+    this.settings.onChange("trackCursorWhileZoomed", () => {
+      this.refreshAllEditors();
+    });
   }
 
   async unload() {}
 
   public refreshView(view: EditorView) {
-    this.refreshNow(view);
+    this.refreshNow(view, { syncZoomRoot: true });
   }
 
   private refreshAllEditors() {
@@ -198,7 +215,7 @@ class FollowViewportInDefaultMode implements Feature {
     for (const leaf of leaves) {
       const view = (leaf.view as { editor?: { cm?: EditorView } }).editor?.cm;
       if (view) {
-        this.refreshNow(view);
+        this.refreshNow(view, { syncZoomRoot: true });
       }
     }
   }
@@ -215,13 +232,36 @@ class FollowViewportInDefaultMode implements Feature {
     this.debounceTimers.set(view, timer);
   }
 
-  private refreshNow(view: EditorView) {
-    const isZoomed =
+  private refreshNow(
+    view: EditorView,
+    options: { syncZoomRoot?: boolean } = {}
+  ) {
+    const visible =
       this.calculateVisibleContentRange.calculateVisibleContentRange(
         view.state
-      ) !== null;
+      );
+    const isZoomed = visible !== null;
 
     if (isZoomed) {
+      if (this.settings.trackCursorWhileZoomed) {
+        const pos = getActiveOutlinePos(view);
+        const breadcrumbs =
+          this.collectBreadcrumbs.collectZoomTrackedBreadcrumbs(
+            view.state,
+            visible.from,
+            pos
+          );
+        this.renderNavigationHeader.showHeader(view, breadcrumbs, "zoom");
+        return;
+      }
+
+      if (options.syncZoomRoot) {
+        const breadcrumbs = this.collectBreadcrumbs.collectBreadcrumbs(
+          view.state,
+          visible.from
+        );
+        this.renderNavigationHeader.showHeader(view, breadcrumbs, "zoom");
+      }
       return;
     }
 
@@ -267,7 +307,9 @@ export class HeaderNavigationFeature implements Feature {
   private showHeaderAfterZoomIn = new ShowHeaderAfterZoomIn(
     this.notifyAfterZoomIn,
     this.collectBreadcrumbs,
-    this.renderNavigationHeader
+    this.renderNavigationHeader,
+    this.settings,
+    (view) => this.followViewportInDefaultMode.refreshView(view)
   );
 
   private hideOrShowHistoryHeaderAfterZoomOut =
@@ -287,7 +329,9 @@ export class HeaderNavigationFeature implements Feature {
       this.calculateHiddenContentRanges,
       this.calculateVisibleContentRange,
       this.collectBreadcrumbs,
-      this.renderNavigationHeader
+      this.renderNavigationHeader,
+      this.settings,
+      (view) => this.followViewportInDefaultMode.refreshView(view)
     );
 
   constructor(

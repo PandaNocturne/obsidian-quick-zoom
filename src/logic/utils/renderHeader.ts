@@ -110,6 +110,9 @@ export function renderHeader(
     if (isLast) {
       crumb.classList.add("zoom-plugin-crumb--last");
     }
+    if (breadcrumb.dimmed) {
+      crumb.classList.add("zoom-plugin-crumb--dimmed");
+    }
 
     const b = doc.createElement("a");
     b.classList.add("zoom-plugin-title");

@@ -12,6 +12,7 @@ export interface ObsidianZoomPluginSettings {
   renderMarkdown: boolean;
   outlineItemMaxWidthPx: number;
   showBreadcrumbsInDefaultMode: boolean;
+  trackCursorWhileZoomed: boolean;
 }
 
 interface ObsidianZoomPluginSettingsJson {
@@ -25,6 +26,7 @@ interface ObsidianZoomPluginSettingsJson {
   renderMarkdown: boolean;
   outlineItemMaxWidthPx: number;
   showBreadcrumbsInDefaultMode: boolean;
+  trackCursorWhileZoomed: boolean;
 }
 
 const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
@@ -38,6 +40,7 @@ const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
   renderMarkdown: true,
   outlineItemMaxWidthPx: 300,
   showBreadcrumbsInDefaultMode: false,
+  trackCursorWhileZoomed: false,
 };
 
 export interface Storage {
@@ -124,6 +127,13 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     this.set("showBreadcrumbsInDefaultMode", value);
   }
 
+  get trackCursorWhileZoomed() {
+    return this.values.trackCursorWhileZoomed;
+  }
+  set trackCursorWhileZoomed(value: boolean) {
+    this.set("trackCursorWhileZoomed", value);
+  }
+
   getListRecognitionOptions(): ListRecognitionOptions {
     return {
       recognizeUnorderedLists: this.recognizeUnorderedLists,
@@ -192,6 +202,9 @@ export class SettingsService implements ObsidianZoomPluginSettings {
         break;
       case "showBreadcrumbsInDefaultMode":
         this.values.showBreadcrumbsInDefaultMode = value as boolean;
+        break;
+      case "trackCursorWhileZoomed":
+        this.values.trackCursorWhileZoomed = value as boolean;
         break;
     }
 

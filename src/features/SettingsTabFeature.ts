@@ -97,6 +97,20 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
+      .setName("Track cursor while zoomed")
+      .setDesc(
+        "While zoomed, keep following the cursor heading beyond the zoom root. Levels below the zoom root are shown dimmed."
+      )
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.trackCursorWhileZoomed)
+          .onChange(async (value) => {
+            this.settings.trackCursorWhileZoomed = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
       .setName("Render markdown in outline titles")
       .setDesc(
         "Render inline markdown (bold, links, etc.) in breadcrumb and menu titles."

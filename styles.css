@@ -66,6 +66,14 @@
   height: var(--zoom-header-row-height);
 }
 
+.zoom-plugin-crumb--dimmed {
+  opacity: 0.45;
+}
+
+.zoom-plugin-crumb--dimmed .zoom-plugin-title {
+  color: var(--text-faint);
+}
+
 .zoom-plugin-title {
   display: inline-flex;
   align-items: center;
