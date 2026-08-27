@@ -30,6 +30,13 @@ interface HeaderState {
     siblings: SiblingItem[],
     breadcrumbs: Breadcrumb[]
   ) => void;
+  onDoubleClick: (
+    view: EditorView,
+    pos: number | null,
+    event: MouseEvent,
+    siblings: SiblingItem[],
+    breadcrumbs: Breadcrumb[]
+  ) => void;
   renderOptions: {
     renderMarkdown: boolean;
     itemMaxWidthPx: number;
@@ -67,6 +74,8 @@ const headerState = StateField.define<HeaderState | null>({
           breadcrumbs: state.breadcrumbs,
           onClick: (pos, event, siblings) =>
             state.onClick(view, pos, event, siblings, state.breadcrumbs),
+          onDoubleClick: (pos, event, siblings) =>
+            state.onDoubleClick(view, pos, event, siblings, state.breadcrumbs),
           renderOptions: state.renderOptions,
         }),
       });
@@ -103,6 +112,7 @@ export class RenderNavigationHeader {
         showHeaderEffect.of({
           breadcrumbs,
           onClick: this.onClick,
+          onDoubleClick: this.onDoubleClick,
           renderOptions: this.getRenderOptions(),
         }),
       ],
@@ -154,6 +164,23 @@ export class RenderNavigationHeader {
 
     if (siblings.length > 0) {
       this.showOutlineMenu(view, siblings, selectedPath, event);
+      return;
+    }
+
+    this.zoomIn.zoomIn(view, pos);
+  };
+
+  private onDoubleClick = (
+    view: EditorView,
+    pos: number | null,
+    _event: MouseEvent,
+    _siblings: SiblingItem[],
+    _breadcrumbs: Breadcrumb[]
+  ) => {
+    this.outlineMenu.hideAll();
+
+    if (pos === null) {
+      this.zoomOut.zoomOut(view);
       return;
     }
 

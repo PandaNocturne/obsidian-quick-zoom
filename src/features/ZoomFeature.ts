@@ -104,7 +104,8 @@ export class ZoomFeature implements Feature {
     this.keepOnlyZoomedContentVisible.keepOnlyZoomedContentVisible(
       view,
       range.from,
-      range.to
+      range.to,
+      { scrollTo: pos }
     );
 
     for (const cb of this.zoomInCallbacks) {

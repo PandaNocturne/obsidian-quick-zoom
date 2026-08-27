@@ -34,10 +34,15 @@ export function renderHeader(
       event: MouseEvent,
       siblings: SiblingItem[]
     ) => void;
+    onDoubleClick?: (
+      pos: number | null,
+      event: MouseEvent,
+      siblings: SiblingItem[]
+    ) => void;
     renderOptions: RenderHeaderOptions;
   }
 ) {
-  const { breadcrumbs, onClick, renderOptions } = ctx;
+  const { breadcrumbs, onClick, onDoubleClick, renderOptions } = ctx;
 
   const h = doc.createElement("div");
   h.classList.add("zoom-plugin-header");
@@ -81,6 +86,15 @@ export function renderHeader(
       e.stopPropagation();
       onClick(breadcrumb.pos, e, siblings);
     });
+
+    if (onDoubleClick) {
+      b.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDoubleClick(breadcrumb.pos, e, siblings);
+      });
+    }
+
     h.appendChild(b);
   }
 

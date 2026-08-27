@@ -1,4 +1,9 @@
-import { EditorState, Extension, StateField } from "@codemirror/state";
+import {
+  EditorSelection,
+  EditorState,
+  Extension,
+  StateField,
+} from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
 
 import { zoomInEffect, zoomOutEffect } from "./utils/effects";
@@ -81,9 +86,13 @@ export class KeepOnlyZoomedContentVisible {
     view: EditorView,
     from: number,
     to: number,
-    options: { scrollIntoView?: boolean } = {}
+    options: { scrollIntoView?: boolean; scrollTo?: number } = {}
   ) {
-    const { scrollIntoView } = { ...{ scrollIntoView: true }, ...options };
+    const { scrollIntoView, scrollTo } = {
+      scrollIntoView: true,
+      scrollTo: undefined,
+      ...options,
+    };
 
     const effect = zoomInEffect.of({ from, to });
 
@@ -99,9 +108,13 @@ export class KeepOnlyZoomedContentVisible {
     });
 
     if (scrollIntoView) {
+      const anchor = scrollTo ?? view.state.selection.main.head;
       view.dispatch({
+        ...(scrollTo !== undefined
+          ? { selection: EditorSelection.cursor(scrollTo) }
+          : {}),
         effects: [
-          EditorView.scrollIntoView(view.state.selection.main, {
+          EditorView.scrollIntoView(anchor, {
             y: "start",
           }),
         ],

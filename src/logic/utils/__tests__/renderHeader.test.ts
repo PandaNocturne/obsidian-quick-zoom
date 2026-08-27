@@ -123,6 +123,38 @@ test("should handle click on header link with siblings", () => {
   expect(onClick).toHaveBeenCalledWith(10, expect.any(MouseEvent), siblings);
 });
 
+test("should handle double click on header link", () => {
+  const onDoubleClick = jest.fn();
+  const siblings = [
+    { title: "header 1", pos: 10, kind: "heading" as const },
+    { title: "header 2", pos: 20, kind: "heading" as const },
+  ];
+  const h = renderHeader(document, {
+    breadcrumbs: [
+      { title: "Document", pos: null, siblings: [], kind: "document" },
+      {
+        title: "header 1",
+        pos: 10,
+        siblings,
+        kind: "heading",
+        headingLevel: 1,
+      },
+    ],
+    onClick: () => {},
+    onDoubleClick,
+    renderOptions,
+  });
+
+  const title = h.querySelectorAll<HTMLAnchorElement>(".zoom-plugin-title")[1];
+  title.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+
+  expect(onDoubleClick).toHaveBeenCalledWith(
+    10,
+    expect.any(MouseEvent),
+    siblings
+  );
+});
+
 test("should use list icon for list breadcrumbs", () => {
   const h = renderHeader(document, {
     breadcrumbs: [
