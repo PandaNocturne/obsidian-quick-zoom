@@ -14,7 +14,7 @@
 .zoom-plugin-header-trail {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   min-width: 0;
   flex: 1 1 auto;
 }
@@ -62,7 +62,7 @@
 
 .zoom-plugin-crumb {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-end;
   height: var(--zoom-header-row-height);
 }
 
@@ -76,7 +76,7 @@
 
 .zoom-plugin-title {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--size-2-1);
   max-width: none;
   height: var(--zoom-header-row-height);
@@ -92,7 +92,7 @@
 
 .zoom-plugin-title-icon {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   flex-shrink: 0;
   width: var(--zoom-header-row-height);
@@ -134,11 +134,13 @@
   display: block;
   min-width: 0;
   max-width: 100%;
-  height: var(--zoom-header-row-height);
+  height: auto;
+  max-height: var(--zoom-header-row-height);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: var(--zoom-header-row-height);
+  line-height: 1.25;
+  align-self: flex-end;
 }
 
 /* MarkdownRenderer wraps content in block elements; keep titles single-line height */
@@ -191,7 +193,7 @@
 
 .zoom-plugin-delimiter {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   flex-shrink: 0;
   width: var(--zoom-header-row-height);
