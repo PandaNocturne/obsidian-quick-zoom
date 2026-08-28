@@ -6,7 +6,7 @@ import { EditorView, showPanel } from "@codemirror/view";
 import { Breadcrumb } from "./CollectBreadcrumbs";
 import { SiblingItem } from "./CollectSiblings";
 import { OutlineHoverMenu } from "./OutlineHoverMenu";
-import { ZoomHistory } from "./ZoomHistory";
+import { ZoomHistory, ZoomHistoryEntry } from "./ZoomHistory";
 import { HeaderHistoryControls, renderHeader } from "./utils/renderHeader";
 
 import { t } from "../i18n";
@@ -274,7 +274,7 @@ export class RenderNavigationHeader {
     const entry = this.cursorHistory.goBack(view);
     this.lastBreadcrumbKey = null;
     this.cursorHistory.runWithoutRecording(() => {
-      this.navigateTo(view, entry ?? 0);
+      this.navigateTo(view, this.cursorHistoryPos(entry));
     });
     this.onCursorHistoryNavigated?.(view);
   }
@@ -286,9 +286,20 @@ export class RenderNavigationHeader {
     const entry = this.cursorHistory.goForward(view);
     this.lastBreadcrumbKey = null;
     this.cursorHistory.runWithoutRecording(() => {
-      this.navigateTo(view, entry ?? 0);
+      this.navigateTo(view, this.cursorHistoryPos(entry));
     });
     this.onCursorHistoryNavigated?.(view);
+  }
+
+  /** Cursor history stores positions; coerce shared ZoomHistoryEntry to a pos. */
+  private cursorHistoryPos(entry: ZoomHistoryEntry): number {
+    if (entry == null) {
+      return 0;
+    }
+    if (typeof entry === "number") {
+      return entry;
+    }
+    return entry.from;
   }
 
   private getRenderOptions() {
@@ -438,7 +449,6 @@ export class RenderNavigationHeader {
         zoomOut: (v) => this.zoomOut.zoomOut(v),
         navigateTo:
           mode === "navigate" ? (v, p) => this.navigateTo(v, p) : undefined,
-        getSubmenuCloseDelayMs: () => this.settings.outlineSubmenuCloseDelayMs,
         renderMarkdown: this.settings.renderMarkdown,
         itemMaxWidthPx: this.settings.outlineItemMaxWidthPx,
         app: this.app,

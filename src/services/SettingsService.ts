@@ -7,7 +7,6 @@ export type HeaderWidthMode = "note" | "page";
 export interface ObsidianZoomPluginSettings {
   debug: boolean;
   zoomOnClick: boolean;
-  outlineSubmenuCloseDelayMs: number;
   recognizeUnorderedLists: boolean;
   recognizeOrderedLists: boolean;
   recognizeTaskLists: boolean;
@@ -23,7 +22,6 @@ interface ObsidianZoomPluginSettingsJson {
   debug: boolean;
   zoomOnClick: boolean;
   zoomOnClickMobile: boolean;
-  outlineSubmenuCloseDelayMs: number;
   recognizeUnorderedLists: boolean;
   recognizeOrderedLists: boolean;
   recognizeTaskLists: boolean;
@@ -39,7 +37,6 @@ const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
   debug: false,
   zoomOnClick: true,
   zoomOnClickMobile: false,
-  outlineSubmenuCloseDelayMs: 400,
   recognizeUnorderedLists: false,
   recognizeOrderedLists: false,
   recognizeTaskLists: false,
@@ -84,13 +81,6 @@ export class SettingsService implements ObsidianZoomPluginSettings {
   }
   set zoomOnClick(value: boolean) {
     this.set("zoomOnClick", value);
-  }
-
-  get outlineSubmenuCloseDelayMs() {
-    return this.values.outlineSubmenuCloseDelayMs;
-  }
-  set outlineSubmenuCloseDelayMs(value: number) {
-    this.set("outlineSubmenuCloseDelayMs", value);
   }
 
   get recognizeUnorderedLists() {
@@ -186,6 +176,9 @@ export class SettingsService implements ObsidianZoomPluginSettings {
       DEFAULT_SETTINGS,
       await this.storage.loadData()
     );
+    // Drop removed setting if present in older data.json
+    delete (this.values as { outlineSubmenuCloseDelayMs?: number })
+      .outlineSubmenuCloseDelayMs;
   }
 
   async save() {
@@ -203,9 +196,6 @@ export class SettingsService implements ObsidianZoomPluginSettings {
         } else {
           this.values.zoomOnClickMobile = value as boolean;
         }
-        break;
-      case "outlineSubmenuCloseDelayMs":
-        this.values.outlineSubmenuCloseDelayMs = value as number;
         break;
       case "recognizeUnorderedLists":
         this.values.recognizeUnorderedLists = value as boolean;

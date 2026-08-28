@@ -19,7 +19,6 @@ export interface OutlineHoverMenuContext {
   zoomOut: (view: EditorView) => void;
   /** When set, menu items jump/scroll instead of zooming */
   navigateTo?: (view: EditorView, pos: number) => void;
-  getSubmenuCloseDelayMs: () => number;
   renderMarkdown: boolean;
   itemMaxWidthPx: number;
   app: App;
@@ -34,6 +33,8 @@ export interface OutlineHoverMenuContext {
 }
 
 const CONTAINS_PATCHED = "zoomOutlineContainsPatched";
+/** Fixed delay before closing outline submenus after the pointer leaves. */
+const SUBMENU_CLOSE_DELAY_MS = 400;
 
 export class OutlineHoverMenu {
   /** menus[0] = root, menus[1] = first submenu, ... */
@@ -269,7 +270,7 @@ export class OutlineHoverMenu {
         return;
       }
 
-      this.scheduleClose(ctx.getSubmenuCloseDelayMs(), e.clientX, e.clientY);
+      this.scheduleClose(SUBMENU_CLOSE_DELAY_MS, e.clientX, e.clientY);
     });
   }
 

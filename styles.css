@@ -322,7 +322,9 @@ body.zoom-plugin-header-width-note .markdown-source-view.mod-cm6 .cm-panels {
 }
 
 .menu.zoom-plugin-outline-menu
-  .menu-item:not(.is-disabled):not(.is-label):has(.zoom-plugin-outline-title-md) {
+  .menu-item:not(.is-disabled):not(.is-label):has(
+    .zoom-plugin-outline-title-md
+  ) {
   align-items: center;
   padding-top: var(--size-2-2);
   padding-bottom: var(--size-2-2);
@@ -397,4 +399,22 @@ body.zoom-plugin-header-width-note .markdown-source-view.mod-cm6 .cm-panels {
   .menu-item:not(.is-disabled):not(.is-label):hover.selected
   .menu-item-icon {
   color: var(--text-on-accent);
+}
+
+/* Settings tab: original plugin attribution */
+.zoom-plugin-settings-source {
+  margin-top: 2em;
+  padding-top: 1em;
+  border-top: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.5;
+}
+
+.zoom-plugin-settings-source__note {
+  margin-bottom: 0.35em;
+}
+
+.zoom-plugin-settings-source a {
+  color: var(--text-accent);
 }

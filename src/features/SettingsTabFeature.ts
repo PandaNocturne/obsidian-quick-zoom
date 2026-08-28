@@ -5,6 +5,8 @@ import { Feature } from "./Feature";
 import { t } from "../i18n";
 import { SettingsService } from "../services/SettingsService";
 
+const ORIGINAL_PLUGIN_URL = "https://github.com/vslinko/obsidian-zoom";
+
 class ObsidianZoomPluginSettingTab extends PluginSettingTab {
   constructor(app: App, plugin: Plugin, private settings: SettingsService) {
     super(app, plugin);
@@ -15,6 +17,8 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
 
     containerEl.empty();
 
+    this.addHeading(t("settings.outlineLists"));
+
     new Setting(containerEl)
       .setName(t("settings.zoomOnClick"))
       .addToggle((toggle) => {
@@ -23,25 +27,6 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
           await this.settings.save();
         });
       });
-
-    new Setting(containerEl)
-      .setName(t("settings.submenuCloseDelay"))
-      .setDesc(t("settings.submenuCloseDelayDesc"))
-      .addText((text) => {
-        text
-          .setPlaceholder("400")
-          .setValue(String(this.settings.outlineSubmenuCloseDelayMs))
-          .onChange(async (value) => {
-            const parsed = Number.parseInt(value, 10);
-            if (Number.isNaN(parsed) || parsed < 0) {
-              return;
-            }
-            this.settings.outlineSubmenuCloseDelayMs = parsed;
-            await this.settings.save();
-          });
-      });
-
-    containerEl.createEl("h3", { text: t("settings.outlineLists") });
 
     new Setting(containerEl)
       .setName(t("settings.recognizeUnordered"))
@@ -79,19 +64,7 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
           });
       });
 
-    containerEl.createEl("h3", { text: t("settings.outlineDisplay") });
-
-    new Setting(containerEl)
-      .setName(t("settings.showBreadcrumbsDefault"))
-      .setDesc(t("settings.showBreadcrumbsDefaultDesc"))
-      .addToggle((toggle) => {
-        toggle
-          .setValue(this.settings.showBreadcrumbsInDefaultMode)
-          .onChange(async (value) => {
-            this.settings.showBreadcrumbsInDefaultMode = value;
-            await this.settings.save();
-          });
-      });
+    this.addHeading(t("settings.outlineDisplay"));
 
     new Setting(containerEl)
       .setName(t("settings.headerWidth"))
@@ -108,35 +81,6 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName(t("settings.trackCursorZoomed"))
-      .setDesc(t("settings.trackCursorZoomedDesc"))
-      .addToggle((toggle) => {
-        toggle
-          .setValue(this.settings.trackCursorWhileZoomed)
-          .onChange(async (value) => {
-            this.settings.trackCursorWhileZoomed = value;
-            await this.settings.save();
-          });
-      });
-
-    new Setting(containerEl)
-      .setName(t("settings.historyMaxEntries"))
-      .setDesc(t("settings.historyMaxEntriesDesc"))
-      .addText((text) => {
-        text
-          .setPlaceholder("50")
-          .setValue(String(this.settings.historyMaxEntries))
-          .onChange(async (value) => {
-            const parsed = Number.parseInt(value, 10);
-            if (Number.isNaN(parsed) || parsed < 1) {
-              return;
-            }
-            this.settings.historyMaxEntries = Math.min(parsed, 500);
-            await this.settings.save();
-          });
-      });
-
-    new Setting(containerEl)
       .setName(t("settings.renderMarkdown"))
       .setDesc(t("settings.renderMarkdownDesc"))
       .addToggle((toggle) => {
@@ -144,6 +88,30 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
           .setValue(this.settings.renderMarkdown)
           .onChange(async (value) => {
             this.settings.renderMarkdown = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName(t("settings.showBreadcrumbsDefault"))
+      .setDesc(t("settings.showBreadcrumbsDefaultDesc"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.showBreadcrumbsInDefaultMode)
+          .onChange(async (value) => {
+            this.settings.showBreadcrumbsInDefaultMode = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName(t("settings.trackCursorZoomed"))
+      .setDesc(t("settings.trackCursorZoomedDesc"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.trackCursorWhileZoomed)
+          .onChange(async (value) => {
+            this.settings.trackCursorWhileZoomed = value;
             await this.settings.save();
           });
       });
@@ -165,6 +133,27 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
           });
       });
 
+    this.addHeading(t("settings.groupHistory"));
+
+    new Setting(containerEl)
+      .setName(t("settings.historyMaxEntries"))
+      .setDesc(t("settings.historyMaxEntriesDesc"))
+      .addText((text) => {
+        text
+          .setPlaceholder("50")
+          .setValue(String(this.settings.historyMaxEntries))
+          .onChange(async (value) => {
+            const parsed = Number.parseInt(value, 10);
+            if (Number.isNaN(parsed) || parsed < 1) {
+              return;
+            }
+            this.settings.historyMaxEntries = Math.min(parsed, 500);
+            await this.settings.save();
+          });
+      });
+
+    this.addHeading(t("settings.groupAdvanced"));
+
     new Setting(containerEl)
       .setName(t("settings.debug"))
       .setDesc(t("settings.debugDesc"))
@@ -174,6 +163,31 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
           await this.settings.save();
         });
       });
+
+    this.renderSourceFooter();
+  }
+
+  private addHeading(text: string) {
+    new Setting(this.containerEl).setName(text).setHeading();
+  }
+
+  private renderSourceFooter() {
+    const footer = this.containerEl.createDiv({
+      cls: "zoom-plugin-settings-source",
+    });
+
+    footer.createDiv({
+      cls: "zoom-plugin-settings-source__note",
+      text: t("settings.sourceNote"),
+    });
+
+    const link = footer.createEl("a", {
+      cls: "external-link",
+      text: t("settings.sourceLink"),
+      href: ORIGINAL_PLUGIN_URL,
+    });
+    link.setAttr("target", "_blank");
+    link.setAttr("rel", "noopener noreferrer");
   }
 }
 

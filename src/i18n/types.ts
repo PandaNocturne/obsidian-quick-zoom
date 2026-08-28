@@ -1,7 +1,7 @@
 export type LocaleKey =
+  | "settings.groupHistory"
+  | "settings.groupAdvanced"
   | "settings.zoomOnClick"
-  | "settings.submenuCloseDelay"
-  | "settings.submenuCloseDelayDesc"
   | "settings.outlineLists"
   | "settings.recognizeUnordered"
   | "settings.recognizeUnorderedDesc"
@@ -26,6 +26,8 @@ export type LocaleKey =
   | "settings.outlineItemMaxWidthDesc"
   | "settings.debug"
   | "settings.debugDesc"
+  | "settings.sourceNote"
+  | "settings.sourceLink"
   | "commands.zoomIn"
   | "commands.zoomOut"
   | "commands.zoomBack"

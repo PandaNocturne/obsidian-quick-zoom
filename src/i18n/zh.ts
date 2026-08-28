@@ -1,10 +1,9 @@
 import { LocaleTable } from "./types";
 
 export const zh: LocaleTable = {
+  "settings.groupHistory": "历史记录",
+  "settings.groupAdvanced": "高级",
   "settings.zoomOnClick": "点击列表标记时缩放",
-  "settings.submenuCloseDelay": "大纲子菜单关闭延迟",
-  "settings.submenuCloseDelayDesc":
-    "鼠标移出后，等待多少毫秒再关闭大纲子菜单。",
   "settings.outlineLists": "大纲列表",
   "settings.recognizeUnordered": "识别无序列表",
   "settings.recognizeUnorderedDesc": "在大纲中包含无序列表项（-、*、+）。",
@@ -12,13 +11,13 @@ export const zh: LocaleTable = {
   "settings.recognizeOrderedDesc": "在大纲中包含有序列表项（1.、2.、…）。",
   "settings.recognizeTask": "识别任务列表",
   "settings.recognizeTaskDesc": "在大纲中包含任务列表项（- [ ]、- [x]）。",
-  "settings.outlineDisplay": "大纲显示",
+  "settings.outlineDisplay": "导航栏设置",
   "settings.showBreadcrumbsDefault": "默认模式显示面包屑",
   "settings.showBreadcrumbsDefaultDesc":
-    "未缩放时也始终显示顶部大纲面包屑，并跟随光标所在标题。点击跳转到标题，而不是缩放。",
-  "settings.headerWidth": "顶部栏宽度",
+    "未缩放时也始终显示顶部导航面包屑，并跟随光标所在标题。点击跳转到标题，而不是缩放。",
+  "settings.headerWidth": "顶部导航栏宽度",
   "settings.headerWidthDesc":
-    "顶部面包屑栏的宽度：与笔记正文列对齐，或铺满整个编辑页面区域。",
+    "顶部导航栏的宽度：与笔记正文列对齐，或铺满整个编辑页面区域。",
   "settings.headerWidthNote": "笔记区域宽度",
   "settings.headerWidthPage": "页面区域宽度",
   "settings.trackCursorZoomed": "缩放时跟踪光标",
@@ -27,15 +26,17 @@ export const zh: LocaleTable = {
   "settings.historyMaxEntries": "历史记录最大条数",
   "settings.historyMaxEntriesDesc":
     "缩放访问与默认模式光标跳转的前进/后退历史最多保留多少条。",
-  "settings.renderMarkdown": "大纲标题渲染 Markdown",
+  "settings.renderMarkdown": "导航标题渲染 Markdown",
   "settings.renderMarkdownDesc":
-    "在面包屑与菜单标题中渲染行内 Markdown（加粗、链接等）。",
-  "settings.outlineItemMaxWidth": "大纲条目最大宽度",
+    "在导航栏与菜单标题中渲染行内 Markdown（加粗、链接等）。",
+  "settings.outlineItemMaxWidth": "导航标题最大宽度",
   "settings.outlineItemMaxWidthDesc":
-    "大纲标题的最大宽度（像素）。过长文本以省略号截断。",
+    "导航标题的最大宽度（像素）。过长文本以省略号截断。",
   "settings.debug": "调试模式",
   "settings.debugDesc":
     "打开开发者工具（Command+Option+I 或 Control+Shift+I）以复制调试日志。",
+  "settings.sourceNote": "基于 Viacheslav Slinko 的原版 Zoom 插件。",
+  "settings.sourceLink": "原插件 GitHub 仓库",
   "commands.zoomIn": "放大",
   "commands.zoomOut": "退出全部缩放",
   "commands.zoomBack": "缩放过中后退",
