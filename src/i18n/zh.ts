@@ -42,6 +42,9 @@ export const zh: LocaleTable = {
   "settings.restoreZoomOnOpen": "打开笔记时自动缩放",
   "settings.restoreZoomOnOpenDesc":
     "打开笔记时，若存在已保存的缩放范围则自动恢复。",
+  "settings.zoomStateMaxEntries": "缩放状态最大笔记数",
+  "settings.zoomStateMaxEntriesDesc":
+    "最多保留多少篇笔记的缩放记录。超出后按更新时间淘汰最旧记录；已删除笔记的记录也会被清理。",
   "settings.resetZoomStateRecords": "重置缩放状态记录",
   "settings.resetZoomStateRecordsDesc":
     "清除库内插件目录 data/zoom-state.json 中保存的所有缩放范围记录。",

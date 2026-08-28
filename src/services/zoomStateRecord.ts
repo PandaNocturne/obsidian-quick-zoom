@@ -4,6 +4,8 @@ export interface DocumentZoomStateRecord {
   updatedAt: string;
 }
 
+export type ZoomStateStoreFile = Record<string, DocumentZoomStateRecord>;
+
 export function isValidZoomStateRecord(
   record: DocumentZoomStateRecord | null | undefined,
   docLength: number
@@ -55,4 +57,38 @@ export function createZoomStateRecord(
     to,
     updatedAt: new Date().toISOString(),
   };
+}
+
+/**
+ * Drop paths that no longer exist, then keep only the newest `maxEntries`
+ * records by `updatedAt` (oldest removed first).
+ */
+export function pruneZoomStateStore(
+  store: ZoomStateStoreFile,
+  options: {
+    maxEntries: number;
+    keepPath?: (path: string) => boolean;
+  }
+): ZoomStateStoreFile {
+  const maxEntries = Math.max(1, Math.floor(options.maxEntries));
+  const keepPath = options.keepPath ?? (() => true);
+
+  const entries = Object.entries(store).filter(([path, record]) => {
+    if (!record || typeof record !== "object") {
+      return false;
+    }
+    return keepPath(path);
+  });
+
+  entries.sort((a, b) => {
+    const aTime = Date.parse(a[1].updatedAt) || 0;
+    const bTime = Date.parse(b[1].updatedAt) || 0;
+    return bTime - aTime;
+  });
+
+  const next: ZoomStateStoreFile = {};
+  for (const [path, record] of entries.slice(0, maxEntries)) {
+    next[path] = record;
+  }
+  return next;
 }

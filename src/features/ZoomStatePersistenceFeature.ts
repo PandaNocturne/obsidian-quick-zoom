@@ -21,7 +21,10 @@ export class ZoomStatePersistenceFeature implements Feature {
     private settings: SettingsService,
     private zoomFeature: ZoomFeature
   ) {
-    this.persistence = new ZoomStatePersistenceService(plugin);
+    this.persistence = new ZoomStatePersistenceService(
+      plugin,
+      () => this.settings.zoomStateMaxEntries
+    );
   }
 
   async load() {

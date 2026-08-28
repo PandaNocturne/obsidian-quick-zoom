@@ -42,6 +42,9 @@ export const en: LocaleTable = {
   "settings.restoreZoomOnOpen": "Restore zoom on open",
   "settings.restoreZoomOnOpenDesc":
     "When opening a note, restore the last saved zoom range if one exists.",
+  "settings.zoomStateMaxEntries": "Zoom state max notes",
+  "settings.zoomStateMaxEntriesDesc":
+    "Maximum number of notes to keep zoom state for. When over the limit, the oldest records are removed. Missing notes are also cleaned up.",
   "settings.resetZoomStateRecords": "Reset zoom state records",
   "settings.resetZoomStateRecordsDesc":
     "Clear all saved zoom ranges in the plugin folder data/zoom-state.json.",

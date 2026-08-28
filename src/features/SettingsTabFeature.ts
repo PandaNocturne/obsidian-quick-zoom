@@ -165,6 +165,23 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
+      .setName(t("settings.zoomStateMaxEntries"))
+      .setDesc(t("settings.zoomStateMaxEntriesDesc"))
+      .addText((text) => {
+        text
+          .setPlaceholder("200")
+          .setValue(String(this.settings.zoomStateMaxEntries))
+          .onChange(async (value) => {
+            const parsed = Number.parseInt(value, 10);
+            if (Number.isNaN(parsed) || parsed < 1) {
+              return;
+            }
+            this.settings.zoomStateMaxEntries = Math.min(parsed, 5000);
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
       .setName(t("settings.resetZoomStateRecords"))
       .setDesc(t("settings.resetZoomStateRecordsDesc"))
       .addButton((button) => {

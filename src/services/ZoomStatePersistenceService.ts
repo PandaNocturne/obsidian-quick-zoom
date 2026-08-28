@@ -2,16 +2,16 @@ import { Plugin, TFile } from "obsidian";
 
 import {
   DocumentZoomStateRecord,
+  ZoomStateStoreFile,
   createZoomStateRecord,
   parseZoomStateRecord,
+  pruneZoomStateStore,
 } from "./zoomStateRecord";
-
-type ZoomStateStoreFile = Record<string, DocumentZoomStateRecord | null>;
 
 export class ZoomStatePersistenceService {
   private writeChain: Promise<void> = Promise.resolve();
 
-  constructor(private plugin: Plugin) {}
+  constructor(private plugin: Plugin, private getMaxEntries: () => number) {}
 
   async load(file: TFile): Promise<DocumentZoomStateRecord | null> {
     const storePath = this.getStorePath();
@@ -105,6 +105,19 @@ export class ZoomStatePersistenceService {
       delete store[file.path];
     } else {
       store[file.path] = record;
+    }
+
+    store = pruneZoomStateStore(store, {
+      maxEntries: this.getMaxEntries(),
+      keepPath: (path) =>
+        this.plugin.app.vault.getAbstractFileByPath(path) != null,
+    });
+
+    if (Object.keys(store).length === 0) {
+      if (await adapter.exists(storePath)) {
+        await adapter.remove(storePath);
+      }
+      return;
     }
 
     await adapter.write(storePath, JSON.stringify(store, null, 2) + "\n");

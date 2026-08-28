@@ -29,6 +29,8 @@ export type LocaleKey =
   | "settings.recordZoomStateDesc"
   | "settings.restoreZoomOnOpen"
   | "settings.restoreZoomOnOpenDesc"
+  | "settings.zoomStateMaxEntries"
+  | "settings.zoomStateMaxEntriesDesc"
   | "settings.resetZoomStateRecords"
   | "settings.resetZoomStateRecordsDesc"
   | "settings.resetZoomStateRecordsButton"

@@ -18,6 +18,7 @@ export interface ObsidianZoomPluginSettings {
   headerWidthMode: HeaderWidthMode;
   recordZoomState: boolean;
   restoreZoomOnOpen: boolean;
+  zoomStateMaxEntries: number;
 }
 
 interface ObsidianZoomPluginSettingsJson {
@@ -35,6 +36,7 @@ interface ObsidianZoomPluginSettingsJson {
   headerWidthMode: HeaderWidthMode;
   recordZoomState: boolean;
   restoreZoomOnOpen: boolean;
+  zoomStateMaxEntries: number;
 }
 
 const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
@@ -52,6 +54,7 @@ const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
   headerWidthMode: "note",
   recordZoomState: true,
   restoreZoomOnOpen: true,
+  zoomStateMaxEntries: 200,
 };
 
 export interface Storage {
@@ -166,6 +169,13 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     this.set("restoreZoomOnOpen", value);
   }
 
+  get zoomStateMaxEntries() {
+    return this.values.zoomStateMaxEntries;
+  }
+  set zoomStateMaxEntries(value: number) {
+    this.set("zoomStateMaxEntries", value);
+  }
+
   getListRecognitionOptions(): ListRecognitionOptions {
     return {
       recognizeUnorderedLists: this.recognizeUnorderedLists,
@@ -250,6 +260,9 @@ export class SettingsService implements ObsidianZoomPluginSettings {
         break;
       case "restoreZoomOnOpen":
         this.values.restoreZoomOnOpen = value as boolean;
+        break;
+      case "zoomStateMaxEntries":
+        this.values.zoomStateMaxEntries = value as number;
         break;
     }
 
