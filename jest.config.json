@@ -6,6 +6,9 @@
   },
   "testRegex": ["/__tests__/.*\\.ts$", "\\.spec\\.md$"],
   "moduleFileExtensions": ["js", "ts", "md"],
+  "moduleNameMapper": {
+    "^obsidian$": "<rootDir>/jest/obsidian-stub.js"
+  },
   "globalSetup": "./jest/global-setup.js",
   "globalTeardown": "./jest/global-teardown.js",
   "setupFilesAfterEnv": ["./jest/obsidian-expect.js"],

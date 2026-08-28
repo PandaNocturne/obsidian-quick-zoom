@@ -196,17 +196,6 @@ class FollowViewportInDefaultMode implements Feature {
       this.syncHeaderWidthClass();
       this.refreshAllEditors();
     });
-
-    // metadataCache updates after Obsidian re-parses the file (async).
-    // Refresh when it catches up so setext / cache-only headings appear.
-    this.plugin.registerEvent(
-      this.plugin.app.metadataCache.on("changed", (file) => {
-        const active = this.plugin.app.workspace.getActiveFile();
-        if (active && file.path === active.path) {
-          this.refreshAllEditors();
-        }
-      })
-    );
   }
 
   async unload() {

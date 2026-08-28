@@ -14,8 +14,7 @@ const HEADING_RE = /^\s*(#{1,6})\s/;
 const FENCE_OPEN_RE = /^(`{3,}|~{3,})(.*)$/;
 
 /**
- * Regex-only heading level (does not know about code blocks).
- * Prefer {@link getHeadingIndex} in production.
+ * Regex-only heading level (does not skip code fences by itself).
  */
 export function detectHeadingLevelFromText(lineText: string): number | null {
   const match = lineText.match(HEADING_RE);
@@ -25,24 +24,11 @@ export function detectHeadingLevelFromText(lineText: string): number | null {
 /**
  * Heading index for outline / zoom navigation.
  *
- * 1. Live ATX headings from the editor doc, skipping fenced code blocks
- *    (updates immediately; ignores `#` comments inside ```python etc.)
- * 2. Merges Obsidian `metadataCache.headings` for anything not already
- *    covered (e.g. setext), once the cache has caught up.
+ * Scans the live editor document with ATX heading regex, skipping fenced
+ * code blocks (` ``` ` / `~~~`) so `#` comments inside Python/etc. are ignored.
  */
 export function getHeadingIndex(state: EditorState): HeadingIndex {
-  const index = liveFenceAwareAtxIndex(state);
-
-  const fromCache = tryMetadataHeadingIndex(state);
-  if (fromCache) {
-    for (const [pos, info] of fromCache) {
-      if (!index.has(pos)) {
-        index.set(pos, info);
-      }
-    }
-  }
-
-  return index;
+  return liveFenceAwareAtxIndex(state);
 }
 
 export function getHeadingAt(
@@ -96,61 +82,4 @@ export function liveFenceAwareAtxIndex(state: EditorState): HeadingIndex {
   }
 
   return index;
-}
-
-function tryMetadataHeadingIndex(state: EditorState): HeadingIndex | null {
-  try {
-    // Lazy load so Jest unit tests can import this module without resolving
-    // the Obsidian runtime package (types-only in node_modules).
-    /* eslint-disable @typescript-eslint/no-var-requires */
-    const obsidian = require("obsidian") as typeof import("obsidian");
-    /* eslint-enable @typescript-eslint/no-var-requires */
-    const mdView = state.field(obsidian.editorViewField);
-    const file = mdView.file;
-    if (!file) {
-      return new Map();
-    }
-
-    const cache = mdView.app.metadataCache.getFileCache(file);
-    const index: HeadingIndex = new Map();
-
-    for (const h of cache?.headings ?? []) {
-      const lineNumber = h.position.start.line + 1;
-      if (lineNumber < 1 || lineNumber > state.doc.lines) {
-        continue;
-      }
-      const line = state.doc.line(lineNumber);
-
-      // Prefer live ATX text when the line still is an ATX heading (avoids
-      // stale titles while metadataCache lags). Skip if the live line no
-      // longer matches and looks like plain text after an edit.
-      const liveLevel = detectHeadingLevelFromText(line.text);
-      if (liveLevel !== null) {
-        index.set(line.from, {
-          level: liveLevel,
-          title: cleanTitle(line.text),
-        });
-        continue;
-      }
-
-      // Setext / cache-only: keep Obsidian's parsed heading if the cached
-      // offset still lands on this line.
-      const cachedOffset = h.position.start.offset;
-      if (
-        cachedOffset >= line.from &&
-        cachedOffset <= line.to &&
-        cachedOffset <= state.doc.length
-      ) {
-        index.set(line.from, {
-          level: h.level,
-          title: h.heading || cleanTitle(line.text),
-        });
-      }
-    }
-
-    return index;
-  } catch {
-    // editorViewField / obsidian missing outside the app (unit tests)
-    return null;
-  }
 }

@@ -34,7 +34,7 @@ export interface OutlineIconTarget {
   listType?: ListType;
 }
 
-/** @deprecated Prefer getHeadingIndex / metadataCache */
+/** @deprecated Prefer getHeadingIndex (fence-aware regex) */
 export { detectHeadingLevelFromText as detectHeadingLevel } from "./utils/getCachedHeadings";
 
 export function detectOutlineKind(lineText: string): OutlineKind {
@@ -57,8 +57,27 @@ export function outlineIcon(
         return "list";
     }
   }
-  const level = Math.min(6, Math.max(1, item.headingLevel ?? 1));
-  return `heading-${level}`;
+  // kind === "heading" (or unknown treated as heading icon)
+  return `heading-${resolveHeadingLevel(item)}`;
+}
+
+/**
+ * Resolve heading level for icons: prefer explicit level, else parse ATX marks.
+ */
+export function resolveHeadingLevel(
+  item: Pick<SiblingItem, "headingLevel"> & { title?: string },
+  lineText?: string
+): number {
+  if (typeof item.headingLevel === "number" && item.headingLevel >= 1) {
+    return Math.min(6, item.headingLevel);
+  }
+  if (lineText) {
+    const fromLine = detectHeadingLevelFromText(lineText);
+    if (fromLine !== null) {
+      return fromLine;
+    }
+  }
+  return 1;
 }
 
 export function outlineIconName(item: OutlineIconTarget): string {

@@ -161,7 +161,12 @@ export class RenderNavigationHeader {
     mode: HeaderInteractionMode = "zoom"
   ) {
     const key = breadcrumbs
-      .map((b) => `${b.pos}:${b.title}:${b.dimmed ? 1 : 0}`)
+      .map(
+        (b) =>
+          `${b.pos}:${b.title}:${b.kind}:${b.headingLevel ?? ""}:${
+            b.listType ?? ""
+          }:${b.dimmed ? 1 : 0}`
+      )
       .join("|");
     const historyKey = this.getHistoryKey(view, mode);
     const widthKey = this.settings.headerWidthMode;
