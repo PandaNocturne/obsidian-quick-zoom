@@ -1,13 +1,8 @@
-/** YAML frontmatter key for per-note zoom state. */
-export const ZOOM_STATE_FRONTMATTER_KEY = "quick-zoom";
-
 export interface DocumentZoomStateRecord {
   from: number;
   to: number;
   updatedAt: string;
 }
-
-export type ZoomStateStorageMode = "tmp" | "frontmatter";
 
 export function isValidZoomStateRecord(
   record: DocumentZoomStateRecord | null | undefined,

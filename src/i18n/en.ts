@@ -36,17 +36,10 @@ export const en: LocaleTable = {
   "settings.outlineItemMaxWidthDesc":
     "Maximum width of navigation titles in pixels. Longer text is truncated with an ellipsis.",
   "settings.groupZoomState": "Zoom state",
-  "settings.recordZoomState": "Record zoom state per note",
-  "settings.recordZoomStateDesc":
-    "Save the current zoom range when you zoom in or out so it can be restored later.",
-  "settings.zoomStateStorage": "Zoom state storage",
-  "settings.zoomStateStorageDesc":
-    "Where to store zoom state: plugin tmp folder (default) or the note YAML frontmatter.",
-  "settings.zoomStateStorageTmp": "Plugin tmp folder",
-  "settings.zoomStateStorageFrontmatter": "Note YAML frontmatter",
-  "settings.restoreZoomOnOpen": "Restore zoom on open",
-  "settings.restoreZoomOnOpenDesc":
-    "When opening a note, restore the last saved zoom range if one exists.",
+  "settings.resetZoomStateRecords": "Reset zoom state records",
+  "settings.resetZoomStateRecordsDesc":
+    "Clear all saved zoom ranges in the plugin tmp/zoom-state.json file.",
+  "settings.resetZoomStateRecordsButton": "Reset",
   "settings.debug": "Debug mode",
   "settings.debugDesc":
     "Open DevTools (Command+Option+I or Control+Shift+I) to copy the debug logs.",
@@ -64,6 +57,7 @@ export const en: LocaleTable = {
   "commands.zoomNextSibling": "Zoom to next sibling",
   "notice.enableFolding":
     'In order to zoom, you must first enable "Fold heading" and "Fold indent" under Settings -> Editor',
+  "notice.zoomStateRecordsReset": "Zoom state records cleared.",
   "aria.zoomToCurrentHeading": "Zoom to current heading",
   "aria.exitZoom": "Exit zoom",
   "aria.expandSubmenu": "Expand submenu",
