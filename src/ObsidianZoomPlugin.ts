@@ -8,6 +8,7 @@ import { ResetZoomWhenVisibleContentBoundariesViolatedFeature } from "./features
 import { SettingsTabFeature } from "./features/SettingsTabFeature";
 import { ZoomFeature } from "./features/ZoomFeature";
 import { ZoomOnClickFeature } from "./features/ZoomOnClickFeature";
+import { refreshLocale } from "./i18n";
 import { LoggerService } from "./services/LoggerService";
 import { SettingsService } from "./services/SettingsService";
 import { getEditorViewFromEditor } from "./utils/getEditorViewFromEditor";
@@ -24,6 +25,7 @@ export default class ObsidianZoomPlugin extends Plugin {
 
   async onload() {
     console.log(`Loading obsidian-zoom`);
+    refreshLocale();
 
     window.ObsidianZoomPlugin = this;
 

@@ -9,6 +9,7 @@ import { OutlineHoverMenu } from "./OutlineHoverMenu";
 import { ZoomHistory } from "./ZoomHistory";
 import { HeaderHistoryControls, renderHeader } from "./utils/renderHeader";
 
+import { t } from "../i18n";
 import { LoggerService } from "../services/LoggerService";
 import { SettingsService } from "../services/SettingsService";
 
@@ -251,8 +252,8 @@ export class RenderNavigationHeader {
         canGoForward: this.cursorHistory.canGoForward(view),
         onBack: () => this.cursorBack(view),
         onForward: () => this.cursorForward(view),
-        backLabel: "后退到上一光标位置",
-        forwardLabel: "前进到下一光标位置",
+        backLabel: t("history.cursorBack"),
+        forwardLabel: t("history.cursorForward"),
       };
     }
 
@@ -261,8 +262,8 @@ export class RenderNavigationHeader {
       canGoForward: this.zoomHistory.canZoomForward(view),
       onBack: () => this.zoomHistory.zoomBack(view),
       onForward: () => this.zoomHistory.zoomForward(view),
-      backLabel: "后退到上一次缩放",
-      forwardLabel: "前进到下一次缩放",
+      backLabel: t("history.zoomBack"),
+      forwardLabel: t("history.zoomForward"),
     };
   };
 

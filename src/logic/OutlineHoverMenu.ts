@@ -10,6 +10,8 @@ import {
 } from "./CollectSiblings";
 import { renderOutlineTitle } from "./utils/renderOutlineTitle";
 
+import { t } from "../i18n";
+
 export interface OutlineHoverMenuContext {
   view: EditorView;
   selectedPath: Set<number>;
@@ -56,7 +58,7 @@ export class OutlineHoverMenu {
 
     if (options?.includeExitZoom) {
       root.addItem((item) => {
-        item.setTitle("退出缩放");
+        item.setTitle(t("menu.exitZoom"));
         item.setIcon("zoom-out");
         item.onClick(() => {
           this.hideAll();
@@ -144,7 +146,7 @@ export class OutlineHoverMenu {
     item.setTitle("");
     const titleEl = item.dom.querySelector(".menu-item-title");
     if (!(titleEl instanceof HTMLElement)) {
-      item.setTitle(title || "(empty)");
+      item.setTitle(title || t("menu.emptyTitle"));
       return;
     }
 
@@ -168,7 +170,7 @@ export class OutlineHoverMenu {
 
     const chevron = item.dom.createDiv({
       cls: "zoom-plugin-outline-chevron",
-      attr: { "aria-label": "展开/折叠子菜单" },
+      attr: { "aria-label": t("aria.toggleSubmenu") },
     });
     setIcon(chevron, "chevron-right");
 

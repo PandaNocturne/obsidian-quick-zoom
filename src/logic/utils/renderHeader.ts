@@ -5,6 +5,7 @@ import {
   renderOutlineTitle,
 } from "./renderOutlineTitle";
 
+import { t } from "../../i18n";
 import type { HeaderWidthMode } from "../../services/SettingsService";
 import { Breadcrumb } from "../CollectBreadcrumbs";
 import {
@@ -141,7 +142,9 @@ export function renderHeader(
     if (isDocument) {
       b.setAttribute(
         "aria-label",
-        mode === "navigate" ? "缩放到当前标题" : "退出缩放"
+        mode === "navigate"
+          ? t("aria.zoomToCurrentHeading")
+          : t("aria.exitZoom")
       );
     } else {
       b.setAttribute("aria-label", breadcrumb.title);
@@ -186,7 +189,7 @@ export function renderHeader(
       if (children.length > 0) {
         d.classList.add("zoom-plugin-delimiter--clickable");
         d.setAttribute("role", "button");
-        d.setAttribute("aria-label", "展开子菜单");
+        d.setAttribute("aria-label", t("aria.expandSubmenu"));
         d.tabIndex = 0;
         d.addEventListener("click", (e) => {
           e.preventDefault();
@@ -211,14 +214,14 @@ export function renderHeader(
 
     appendHistoryButton(historyEl, {
       icon: "arrow-left",
-      label: history.backLabel ?? "后退到上一次缩放",
+      label: history.backLabel ?? t("history.zoomBack"),
       disabled: !history.canGoBack,
       onClick: history.onBack,
     });
 
     appendHistoryButton(historyEl, {
       icon: "arrow-right",
-      label: history.forwardLabel ?? "前进到下一次缩放",
+      label: history.forwardLabel ?? t("history.zoomForward"),
       disabled: !history.canGoForward,
       onClick: history.onForward,
     });

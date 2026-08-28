@@ -6,6 +6,7 @@ import { EditorView } from "@codemirror/view";
 import { Feature } from "./Feature";
 import { isFoldingEnabled } from "./utils/isFoldingEnabled";
 
+import { t } from "../i18n";
 import { CalculateRangeForZooming } from "../logic/CalculateRangeForZooming";
 import { KeepOnlyZoomedContentVisible } from "../logic/KeepOnlyZoomedContentVisible";
 import { ZoomHistory } from "../logic/ZoomHistory";
@@ -129,9 +130,7 @@ export class ZoomFeature implements Feature {
     l("zooming in");
 
     if (!isFoldingEnabled(this.plugin.app)) {
-      new Notice(
-        `In order to zoom, you must first enable "Fold heading" and "Fold indent" under Settings -> Editor`
-      );
+      new Notice(t("notice.enableFolding"));
       return;
     }
 
@@ -179,7 +178,7 @@ export class ZoomFeature implements Feature {
 
     this.plugin.addCommand({
       id: "zoom-in",
-      name: "Zoom in",
+      name: t("commands.zoomIn"),
       icon: "zoom-in",
       editorCallback: (editor) => {
         const view = getEditorViewFromEditor(editor);
@@ -195,7 +194,7 @@ export class ZoomFeature implements Feature {
 
     this.plugin.addCommand({
       id: "zoom-out",
-      name: "Zoom out the entire document",
+      name: t("commands.zoomOut"),
       icon: "zoom-out",
       editorCallback: (editor) => this.zoomOut(getEditorViewFromEditor(editor)),
       hotkeys: [
@@ -208,7 +207,7 @@ export class ZoomFeature implements Feature {
 
     this.plugin.addCommand({
       id: "zoom-back",
-      name: "Zoom back",
+      name: t("commands.zoomBack"),
       icon: "arrow-left",
       editorCallback: (editor) =>
         this.zoomBack(getEditorViewFromEditor(editor)),
@@ -216,7 +215,7 @@ export class ZoomFeature implements Feature {
 
     this.plugin.addCommand({
       id: "zoom-forward",
-      name: "Zoom forward",
+      name: t("commands.zoomForward"),
       icon: "arrow-right",
       editorCallback: (editor) =>
         this.zoomForward(getEditorViewFromEditor(editor)),

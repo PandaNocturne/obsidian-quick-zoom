@@ -2,6 +2,7 @@ import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
 
 import { Feature } from "./Feature";
 
+import { t } from "../i18n";
 import { SettingsService } from "../services/SettingsService";
 
 class ObsidianZoomPluginSettingTab extends PluginSettingTab {
@@ -15,7 +16,7 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName("Zooming in when clicking on the bullet")
+      .setName(t("settings.zoomOnClick"))
       .addToggle((toggle) => {
         toggle.setValue(this.settings.zoomOnClick).onChange(async (value) => {
           this.settings.zoomOnClick = value;
@@ -24,10 +25,8 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Outline submenu close delay")
-      .setDesc(
-        "Milliseconds to wait before closing outline submenus after the mouse leaves."
-      )
+      .setName(t("settings.submenuCloseDelay"))
+      .setDesc(t("settings.submenuCloseDelayDesc"))
       .addText((text) => {
         text
           .setPlaceholder("400")
@@ -42,11 +41,11 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
           });
       });
 
-    containerEl.createEl("h3", { text: "Outline lists" });
+    containerEl.createEl("h3", { text: t("settings.outlineLists") });
 
     new Setting(containerEl)
-      .setName("Recognize unordered lists")
-      .setDesc("Include unordered list items (-, *, +) in the outline.")
+      .setName(t("settings.recognizeUnordered"))
+      .setDesc(t("settings.recognizeUnorderedDesc"))
       .addToggle((toggle) => {
         toggle
           .setValue(this.settings.recognizeUnorderedLists)
@@ -57,8 +56,8 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Recognize ordered lists")
-      .setDesc("Include ordered list items (1., 2., ...) in the outline.")
+      .setName(t("settings.recognizeOrdered"))
+      .setDesc(t("settings.recognizeOrderedDesc"))
       .addToggle((toggle) => {
         toggle
           .setValue(this.settings.recognizeOrderedLists)
@@ -69,8 +68,8 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Recognize task lists")
-      .setDesc("Include task list items (- [ ], - [x]) in the outline.")
+      .setName(t("settings.recognizeTask"))
+      .setDesc(t("settings.recognizeTaskDesc"))
       .addToggle((toggle) => {
         toggle
           .setValue(this.settings.recognizeTaskLists)
@@ -80,13 +79,11 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
           });
       });
 
-    containerEl.createEl("h3", { text: "Outline display" });
+    containerEl.createEl("h3", { text: t("settings.outlineDisplay") });
 
     new Setting(containerEl)
-      .setName("Show breadcrumbs in default mode")
-      .setDesc(
-        "Always show the top outline breadcrumbs without zooming. They follow the cursor heading. Clicks jump to headings instead of zooming."
-      )
+      .setName(t("settings.showBreadcrumbsDefault"))
+      .setDesc(t("settings.showBreadcrumbsDefaultDesc"))
       .addToggle((toggle) => {
         toggle
           .setValue(this.settings.showBreadcrumbsInDefaultMode)
@@ -97,14 +94,12 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Header width")
-      .setDesc(
-        "Width of the top breadcrumb bar: match the note content column, or span the full editor page pane."
-      )
+      .setName(t("settings.headerWidth"))
+      .setDesc(t("settings.headerWidthDesc"))
       .addDropdown((dropdown) => {
         dropdown
-          .addOption("note", "Note area width")
-          .addOption("page", "Page area width")
+          .addOption("note", t("settings.headerWidthNote"))
+          .addOption("page", t("settings.headerWidthPage"))
           .setValue(this.settings.headerWidthMode)
           .onChange(async (value) => {
             this.settings.headerWidthMode = value === "page" ? "page" : "note";
@@ -113,10 +108,8 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Track cursor while zoomed")
-      .setDesc(
-        "While zoomed, keep following the cursor heading beyond the zoom root. Levels below the zoom root are shown dimmed."
-      )
+      .setName(t("settings.trackCursorZoomed"))
+      .setDesc(t("settings.trackCursorZoomedDesc"))
       .addToggle((toggle) => {
         toggle
           .setValue(this.settings.trackCursorWhileZoomed)
@@ -127,10 +120,8 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("History max entries")
-      .setDesc(
-        "Maximum number of back/forward history entries for zoom visits and default-mode cursor jumps."
-      )
+      .setName(t("settings.historyMaxEntries"))
+      .setDesc(t("settings.historyMaxEntriesDesc"))
       .addText((text) => {
         text
           .setPlaceholder("50")
@@ -146,10 +137,8 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Render markdown in outline titles")
-      .setDesc(
-        "Render inline markdown (bold, links, etc.) in breadcrumb and menu titles."
-      )
+      .setName(t("settings.renderMarkdown"))
+      .setDesc(t("settings.renderMarkdownDesc"))
       .addToggle((toggle) => {
         toggle
           .setValue(this.settings.renderMarkdown)
@@ -160,10 +149,8 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Outline item max width")
-      .setDesc(
-        "Maximum width of outline titles in pixels. Longer text is truncated with an ellipsis."
-      )
+      .setName(t("settings.outlineItemMaxWidth"))
+      .setDesc(t("settings.outlineItemMaxWidthDesc"))
       .addText((text) => {
         text
           .setPlaceholder("300")
@@ -179,10 +166,8 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Debug mode")
-      .setDesc(
-        "Open DevTools (Command+Option+I or Control+Shift+I) to copy the debug logs."
-      )
+      .setName(t("settings.debug"))
+      .setDesc(t("settings.debugDesc"))
       .addToggle((toggle) => {
         toggle.setValue(this.settings.debug).onChange(async (value) => {
           this.settings.debug = value;
