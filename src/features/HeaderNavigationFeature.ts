@@ -76,11 +76,8 @@ class ShowHeaderAfterZoomIn implements Feature {
 class HideOrShowHistoryHeaderAfterZoomOut implements Feature {
   constructor(
     private notifyAfterZoomOut: NotifyAfterZoomOut,
-    private collectBreadcrumbs: CollectBreadcrumbs,
     private renderNavigationHeader: RenderNavigationHeader,
-    private zoomHistory: ZoomHistoryNav,
     private settings: SettingsService,
-    private calculateVisibleContentRange: CalculateVisibleContentRange,
     private refreshDefaultModeHeader: (view: EditorView) => void
   ) {}
 
@@ -91,17 +88,8 @@ class HideOrShowHistoryHeaderAfterZoomOut implements Feature {
         return;
       }
 
-      if (
-        this.zoomHistory.canZoomBack(view) ||
-        this.zoomHistory.canZoomForward(view)
-      ) {
-        const breadcrumbs = this.collectBreadcrumbs.collectDocumentBreadcrumb(
-          view.state
-        );
-        this.renderNavigationHeader.showHeader(view, breadcrumbs, "zoom");
-        return;
-      }
-
+      // Default breadcrumbs off: hide immediately on zoom-out (don't keep a
+      // history-only header until the next mouse/selection refresh).
       this.renderNavigationHeader.hideHeader(view);
     });
   }
@@ -371,11 +359,8 @@ export class HeaderNavigationFeature implements Feature {
     this.hideOrShowHistoryHeaderAfterZoomOut =
       new HideOrShowHistoryHeaderAfterZoomOut(
         this.notifyAfterZoomOut,
-        this.collectBreadcrumbs,
         this.renderNavigationHeader,
-        this.zoomHistory,
         this.settings,
-        this.calculateVisibleContentRange,
         refreshHeader
       );
 
