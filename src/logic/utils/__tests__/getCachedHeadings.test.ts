@@ -21,7 +21,7 @@ test("detectHeadingLevelFromText matches ATX headings only by text", () => {
   expect(detectHeadingLevelFromText("#comment")).toBeNull();
 });
 
-test("liveFenceAwareAtxIndex skips headings inside fenced code blocks", () => {
+test("liveFenceAwareAtxIndex skips # comments inside fenced code blocks", () => {
   const state = EditorState.create({
     doc: "# real\n\n```python\n# fake\nprint(1)\n```\n\n## also\n",
   });
@@ -33,27 +33,32 @@ test("liveFenceAwareAtxIndex skips headings inside fenced code blocks", () => {
   expect(getHeadingAt(index, state.doc.line(8).from)?.title).toBe("also");
 });
 
-test("getHeadingIndex includes live headings immediately without metadata", () => {
+test("getHeadingIndex uses fence-aware regex only (no metadata API)", () => {
   const state = EditorState.create({
-    doc: "# a\n\n## b\n",
+    doc: "# a\n\n```js\n# not heading\n```\n\n## b\n",
   });
 
   const index = getHeadingIndex(state);
   expect(getHeadingAt(index, 0)?.level).toBe(1);
-  expect(getHeadingAt(index, state.doc.line(3).from)?.level).toBe(2);
+  expect(getHeadingAt(index, state.doc.line(4).from)).toBeNull();
+  expect(getHeadingAt(index, state.doc.line(7).from)?.level).toBe(2);
 });
 
-test("collectSiblings respects an explicit metadata heading index", () => {
+test("tilde fences are skipped the same way", () => {
+  const state = EditorState.create({
+    doc: "# a\n\n~~~~\n# inside\n~~~~\n\n# b\n",
+  });
+
+  const index = getHeadingIndex(state);
+  expect([...index.values()].map((h) => h.title)).toEqual(["a", "b"]);
+});
+
+test("collectSiblings ignores code-fence comments via getHeadingIndex", () => {
   const doc = "# real\n\n```python\n# fake\nprint(1)\n```\n\n## also\n";
   const state = EditorState.create({ doc });
   const fakeLineFrom = state.doc.line(4).from;
   const realFrom = 0;
   const alsoFrom = state.doc.line(8).from;
-
-  const headings = new Map([
-    [realFrom, { level: 1, title: "real" }],
-    [alsoFrom, { level: 2, title: "also" }],
-  ]);
 
   const options: ListRecognitionOptions = {
     recognizeUnorderedLists: false,
@@ -61,7 +66,7 @@ test("collectSiblings respects an explicit metadata heading index", () => {
     recognizeTaskLists: false,
   };
 
-  const siblings = collectSiblings(state, null, options, headings);
+  const siblings = collectSiblings(state, null, options);
   expect(siblings.map((s) => s.pos)).toEqual([realFrom, alsoFrom]);
   expect(siblings.find((s) => s.pos === fakeLineFrom)).toBeUndefined();
 });

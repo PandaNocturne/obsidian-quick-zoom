@@ -34,7 +34,7 @@ export interface OutlineIconTarget {
   listType?: ListType;
 }
 
-/** @deprecated Prefer getHeadingIndex / metadataCache */
+/** @deprecated Prefer getHeadingIndex (fence-aware regex) */
 export { detectHeadingLevelFromText as detectHeadingLevel } from "./utils/getCachedHeadings";
 
 export function detectOutlineKind(lineText: string): OutlineKind {
