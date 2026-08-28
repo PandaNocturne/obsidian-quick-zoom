@@ -38,13 +38,13 @@ export const en: LocaleTable = {
   "settings.groupZoomState": "Zoom state",
   "settings.recordZoomState": "Record zoom state per note",
   "settings.recordZoomStateDesc":
-    "Save the current zoom range to data/zoom-state.json when you zoom in or out.",
+    "Save the current zoom range under the plugin folder (data/zoom-state.json) when you zoom in or out.",
   "settings.restoreZoomOnOpen": "Restore zoom on open",
   "settings.restoreZoomOnOpenDesc":
     "When opening a note, restore the last saved zoom range if one exists.",
   "settings.resetZoomStateRecords": "Reset zoom state records",
   "settings.resetZoomStateRecordsDesc":
-    "Clear all saved zoom ranges in the plugin data/zoom-state.json file.",
+    "Clear all saved zoom ranges in the plugin folder data/zoom-state.json.",
   "settings.resetZoomStateRecordsButton": "Reset",
   "settings.debug": "Debug mode",
   "settings.debugDesc":

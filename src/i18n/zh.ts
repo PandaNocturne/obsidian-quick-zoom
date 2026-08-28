@@ -38,13 +38,13 @@ export const zh: LocaleTable = {
   "settings.groupZoomState": "缩放状态",
   "settings.recordZoomState": "记录笔记缩放状态",
   "settings.recordZoomStateDesc":
-    "缩放或退出缩放时，将当前可见范围保存到 data/zoom-state.json。",
+    "缩放或退出缩放时，将当前可见范围保存到库内插件目录 data/zoom-state.json。",
   "settings.restoreZoomOnOpen": "打开笔记时自动缩放",
   "settings.restoreZoomOnOpenDesc":
     "打开笔记时，若存在已保存的缩放范围则自动恢复。",
   "settings.resetZoomStateRecords": "重置缩放状态记录",
   "settings.resetZoomStateRecordsDesc":
-    "清除插件 data/zoom-state.json 中保存的所有缩放范围记录。",
+    "清除库内插件目录 data/zoom-state.json 中保存的所有缩放范围记录。",
   "settings.resetZoomStateRecordsButton": "重置",
   "settings.debug": "调试模式",
   "settings.debugDesc":

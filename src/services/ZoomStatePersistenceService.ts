@@ -1,7 +1,4 @@
-import { Platform, Plugin, TFile } from "obsidian";
-
-import { promises as fs } from "fs";
-import { join } from "path";
+import { Plugin, TFile } from "obsidian";
 
 import {
   DocumentZoomStateRecord,
@@ -23,7 +20,11 @@ export class ZoomStatePersistenceService {
     }
 
     try {
-      const raw = await fs.readFile(storePath, "utf8");
+      const adapter = this.plugin.app.vault.adapter;
+      if (!(await adapter.exists(storePath))) {
+        return null;
+      }
+      const raw = await adapter.read(storePath);
       const store = JSON.parse(raw) as ZoomStateStoreFile;
       return parseZoomStateRecord(store[file.path]);
     } catch {
@@ -52,7 +53,10 @@ export class ZoomStatePersistenceService {
 
     this.writeChain = this.writeChain.then(async () => {
       try {
-        await fs.unlink(storePath);
+        const adapter = this.plugin.app.vault.adapter;
+        if (await adapter.exists(storePath)) {
+          await adapter.remove(storePath);
+        }
       } catch {
         // File may not exist yet.
       }
@@ -60,12 +64,16 @@ export class ZoomStatePersistenceService {
     await this.writeChain;
   }
 
+  /**
+   * Vault-relative path under the plugin folder, e.g.
+   * `.obsidian/plugins/quick-zoom/data/zoom-state.json`
+   */
   private getStorePath(): string | null {
     const dir = (this.plugin.manifest as { dir?: string }).dir;
-    if (!dir || !Platform.isDesktopApp) {
+    if (!dir) {
       return null;
     }
-    return join(dir, "data", "zoom-state.json");
+    return `${dir.replace(/\\/g, "/").replace(/\/$/, "")}/data/zoom-state.json`;
   }
 
   private async writeRecord(
@@ -77,12 +85,18 @@ export class ZoomStatePersistenceService {
       return;
     }
 
-    await fs.mkdir(join(storePath, ".."), { recursive: true });
+    const adapter = this.plugin.app.vault.adapter;
+    const dataDir = storePath.replace(/\/[^/]+$/, "");
+    if (!(await adapter.exists(dataDir))) {
+      await adapter.mkdir(dataDir);
+    }
 
     let store: ZoomStateStoreFile = {};
     try {
-      const raw = await fs.readFile(storePath, "utf8");
-      store = JSON.parse(raw) as ZoomStateStoreFile;
+      if (await adapter.exists(storePath)) {
+        const raw = await adapter.read(storePath);
+        store = JSON.parse(raw) as ZoomStateStoreFile;
+      }
     } catch {
       store = {};
     }
@@ -93,10 +107,6 @@ export class ZoomStatePersistenceService {
       store[file.path] = record;
     }
 
-    await fs.writeFile(
-      storePath,
-      JSON.stringify(store, null, 2) + "\n",
-      "utf8"
-    );
+    await adapter.write(storePath, JSON.stringify(store, null, 2) + "\n");
   }
 }
