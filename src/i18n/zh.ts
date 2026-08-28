@@ -35,8 +35,9 @@ export const zh: LocaleTable = {
   "settings.debug": "调试模式",
   "settings.debugDesc":
     "打开开发者工具（Command+Option+I 或 Control+Shift+I）以复制调试日志。",
-  "settings.sourceNote": "基于 Viacheslav Slinko 的原版 Zoom 插件。",
-  "settings.sourceLink": "原插件 GitHub 仓库",
+  "settings.sourceNote":
+    "基于 Viacheslav Slinko 的 Obsidian Zoom 二次开发。致谢与捐赠请见原插件仓库。",
+  "settings.sourceLink": "原 Obsidian Zoom 仓库",
   "commands.zoomIn": "放大",
   "commands.zoomOut": "退出全部缩放",
   "commands.zoomBack": "缩放过中后退",

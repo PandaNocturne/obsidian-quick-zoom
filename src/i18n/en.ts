@@ -39,8 +39,8 @@ export const en: LocaleTable = {
   "settings.debugDesc":
     "Open DevTools (Command+Option+I or Control+Shift+I) to copy the debug logs.",
   "settings.sourceNote":
-    "Based on the original Zoom plugin by Viacheslav Slinko.",
-  "settings.sourceLink": "Original plugin on GitHub",
+    "Fork of Obsidian Zoom by Viacheslav Slinko. See the original plugin for credits and donations.",
+  "settings.sourceLink": "Original Obsidian Zoom on GitHub",
   "commands.zoomIn": "Zoom in",
   "commands.zoomOut": "Zoom out the entire document",
   "commands.zoomBack": "Zoom back",
