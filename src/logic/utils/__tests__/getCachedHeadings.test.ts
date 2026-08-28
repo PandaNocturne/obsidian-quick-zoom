@@ -5,6 +5,7 @@ import {
   detectHeadingLevelFromText,
   getHeadingAt,
   getHeadingIndex,
+  liveFenceAwareAtxIndex,
 } from "../getCachedHeadings";
 import { ListRecognitionOptions } from "../listItemParsing";
 
@@ -20,7 +21,19 @@ test("detectHeadingLevelFromText matches ATX headings only by text", () => {
   expect(detectHeadingLevelFromText("#comment")).toBeNull();
 });
 
-test("getHeadingIndex falls back to regex when metadata is unavailable", () => {
+test("liveFenceAwareAtxIndex skips headings inside fenced code blocks", () => {
+  const state = EditorState.create({
+    doc: "# real\n\n```python\n# fake\nprint(1)\n```\n\n## also\n",
+  });
+
+  const index = liveFenceAwareAtxIndex(state);
+  const fakeFrom = state.doc.line(4).from;
+  expect(getHeadingAt(index, 0)?.title).toBe("real");
+  expect(getHeadingAt(index, fakeFrom)).toBeNull();
+  expect(getHeadingAt(index, state.doc.line(8).from)?.title).toBe("also");
+});
+
+test("getHeadingIndex includes live headings immediately without metadata", () => {
   const state = EditorState.create({
     doc: "# a\n\n## b\n",
   });
@@ -33,7 +46,7 @@ test("getHeadingIndex falls back to regex when metadata is unavailable", () => {
 test("collectSiblings respects an explicit metadata heading index", () => {
   const doc = "# real\n\n```python\n# fake\nprint(1)\n```\n\n## also\n";
   const state = EditorState.create({ doc });
-  const fakeLineFrom = state.doc.line(4).from; // "# fake"
+  const fakeLineFrom = state.doc.line(4).from;
   const realFrom = 0;
   const alsoFrom = state.doc.line(8).from;
 
