@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-zoom",
+  "name": "obsidian-quick-zoom",
   "version": "1.1.2",
   "description": "Zoom into heading and lists.",
   "main": "main.js",

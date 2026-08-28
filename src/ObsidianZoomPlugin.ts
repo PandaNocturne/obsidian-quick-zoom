@@ -24,7 +24,7 @@ export default class ObsidianZoomPlugin extends Plugin {
   protected features: Feature[];
 
   async onload() {
-    console.log(`Loading obsidian-zoom`);
+    console.log(`Loading quick-zoom`);
     refreshLocale();
 
     window.ObsidianZoomPlugin = this;
@@ -83,7 +83,7 @@ export default class ObsidianZoomPlugin extends Plugin {
   }
 
   async onunload() {
-    console.log(`Unloading obsidian-zoom`);
+    console.log(`Unloading quick-zoom`);
 
     delete window.ObsidianZoomPlugin;
 

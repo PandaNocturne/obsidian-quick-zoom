@@ -1,13 +1,10 @@
-# Obsidian Zoom
+# Quick Zoom
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/vslinko/obsidian-zoom/release.yml?style=for-the-badge)
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/vslinko/obsidian-zoom?style=for-the-badge&sort=semver)
+Fork of [Obsidian Zoom](https://github.com/vslinko/obsidian-zoom) with extra outline navigation features.
 
 **Zoom into heading and lists**
 
-⁉️ [Discuss ideas or ask a question](https://github.com/vslinko/obsidian-zoom/discussions)<br>
-⚙️ [Follow the development process](https://github.com/users/vslinko/projects/3/views/1)<br>
-🐛 [Report issues](https://github.com/vslinko/obsidian-zoom/issues)
+🐛 [Report issues](https://github.com/PandaNocturne/obsidian-quick-zoom/issues)
 
 ## Demo
 
@@ -15,20 +12,9 @@
 
 ## How to install
 
-### From within Obsidian
-
-You can activate this plugin within Obsidian by doing the following:
-
-- Open Settings > Third-party plugin
-- Make sure Safe mode is off
-- Click Browse community plugins
-- Search for "Zoom"
-- Click Install
-- Once installed, close the community plugins window and activate the newly installed plugin
-
 ### Manual installation
 
-Download `main.js`, `manifest.json`, `styles.css` from the [latest release](https://github.com/vslinko/obsidian-zoom/releases/latest) and put them into `<vault>/.obsidian/plugins/obsidian-zoom` folder.
+Download `main.js`, `manifest.json`, `styles.css` from the [latest release](https://github.com/PandaNocturne/obsidian-quick-zoom/releases/latest) and put them into `<vault>/.obsidian/plugins/quick-zoom` folder.
 
 ## Features
 
@@ -55,7 +41,7 @@ Open DevTools (Command+Option+I or Control+Shift+I) to copy the debug logs.
 
 ## Pricing
 
-This plugin is free for everyone, however, if you would like to thank me
+This plugin is free for everyone, however, if you would like to thank the original author
 or help with further development, you can donate in one of the following ways:
 
 - [Crypto](https://vslinko.cb.id)

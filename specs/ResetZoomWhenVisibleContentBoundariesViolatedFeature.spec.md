@@ -10,7 +10,7 @@ text
 text
 ```
 
-- execute: `obsidian-zoom:zoom-in`
+- execute: `quick-zoom:zoom-in`
 - keydown: `Backspace`
 - assertState:
 
@@ -35,7 +35,7 @@ text
 text
 ```
 
-- execute: `obsidian-zoom:zoom-in`
+- execute: `quick-zoom:zoom-in`
 - keydown: `ArrowRight`
 - keydown: `ArrowDown`
 - keydown: `ArrowDown`

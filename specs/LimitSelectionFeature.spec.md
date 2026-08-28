@@ -18,7 +18,7 @@ text
 text
 ```
 
-- execute: `obsidian-zoom:zoom-in`
+- execute: `quick-zoom:zoom-in`
 - assertState:
 
 ```md
@@ -58,7 +58,7 @@ text
 text
 ```
 
-- execute: `obsidian-zoom:zoom-in`
+- execute: `quick-zoom:zoom-in`
 - keydown: `Cmd-KeyA`
 - assertState:
 
@@ -99,7 +99,7 @@ text
 text
 ```
 
-- execute: `obsidian-zoom:zoom-in`
+- execute: `quick-zoom:zoom-in`
 - keydown: `Ctrl-KeyA`
 - assertState:
 
@@ -129,7 +129,7 @@ text #hidden
 # h2
 ```
 
-- execute: `obsidian-zoom:zoom-in`
+- execute: `quick-zoom:zoom-in`
 - keydown: `ArrowDown`
 - replaceSelection: `a`
 - replaceSelection: `b`

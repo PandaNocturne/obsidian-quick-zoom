@@ -102,7 +102,7 @@ async function prepareVault() {
 
   const vaultConfigFilePath = `${VAULT_DIR}/.obsidian/app.json`;
   const vaultCommunityPluginsConfigFilePath = `${VAULT_DIR}/.obsidian/community-plugins.json`;
-  const vaultPluginDir = `${VAULT_DIR}/.obsidian/plugins/obsidian-zoom`;
+  const vaultPluginDir = `${VAULT_DIR}/.obsidian/plugins/quick-zoom`;
 
   if (!fs.existsSync(vaultConfigFilePath)) {
     debug("  Running Obsidian for 90 seconds to setup vault");
@@ -127,7 +127,7 @@ async function prepareVault() {
   debug(`  Saving ${vaultCommunityPluginsConfigFilePath}`);
   fs.writeFileSync(
     vaultCommunityPluginsConfigFilePath,
-    JSON.stringify(["obsidian-zoom"])
+    JSON.stringify(["quick-zoom"])
   );
 
   debug(`  Disabling Safe Mode`);
