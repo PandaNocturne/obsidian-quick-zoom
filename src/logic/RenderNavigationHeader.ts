@@ -7,6 +7,7 @@ import { Breadcrumb } from "./CollectBreadcrumbs";
 import { SiblingItem } from "./CollectSiblings";
 import { OutlineHoverMenu } from "./OutlineHoverMenu";
 import { ZoomHistory, ZoomHistoryEntry } from "./ZoomHistory";
+import { resolveListRecognitionOptions } from "./utils/listItemParsing";
 import { HeaderHistoryControls, renderHeader } from "./utils/renderHeader";
 
 import { t } from "../i18n";
@@ -459,7 +460,11 @@ export class RenderNavigationHeader {
         app: this.app,
         sourcePath: this.app.workspace.getActiveFile()?.path ?? "",
         component: this.menuComponent,
-        getListOptions: () => this.settings.getListRecognitionOptions(),
+        getListOptions: () =>
+          resolveListRecognitionOptions(
+            this.settings.getListRecognitionOptions(),
+            view.state.doc.lineAt(view.state.selection.main.head).text
+          ),
         onMenuClose: () => {
           this.menuComponent?.unload();
           this.menuComponent = null;

@@ -6,11 +6,14 @@ export const zh: LocaleTable = {
   "settings.zoomOnClick": "点击列表标记时缩放",
   "settings.outlineLists": "大纲列表",
   "settings.recognizeUnordered": "识别无序列表",
-  "settings.recognizeUnorderedDesc": "在大纲中包含无序列表项（-、*、+）。",
+  "settings.recognizeUnorderedDesc":
+    "在大纲中包含无序列表项（-、*、+）。关闭时顶部导航默认不解析列表；光标落在列表行时仍会自动识别。",
   "settings.recognizeOrdered": "识别有序列表",
-  "settings.recognizeOrderedDesc": "在大纲中包含有序列表项（1.、2.、…）。",
+  "settings.recognizeOrderedDesc":
+    "在大纲中包含有序列表项（1.、2.、…）。关闭时顶部导航默认不解析列表；光标落在列表行时仍会自动识别。",
   "settings.recognizeTask": "识别任务列表",
-  "settings.recognizeTaskDesc": "在大纲中包含任务列表项（- [ ]、- [x]）。",
+  "settings.recognizeTaskDesc":
+    "在大纲中包含任务列表项（- [ ]、- [x]）。关闭时顶部导航默认不解析列表；光标落在列表行时仍会自动识别。",
   "settings.outlineDisplay": "导航栏设置",
   "settings.showBreadcrumbsDefault": "默认模式显示面包屑",
   "settings.showBreadcrumbsDefaultDesc":

@@ -7,13 +7,13 @@ export const en: LocaleTable = {
   "settings.outlineLists": "Outline lists",
   "settings.recognizeUnordered": "Recognize unordered lists",
   "settings.recognizeUnorderedDesc":
-    "Include unordered list items (-, *, +) in the outline.",
+    "Include unordered list items (-, *, +) in the outline. Even when off, focusing a list line still parses lists in the header.",
   "settings.recognizeOrdered": "Recognize ordered lists",
   "settings.recognizeOrderedDesc":
-    "Include ordered list items (1., 2., ...) in the outline.",
+    "Include ordered list items (1., 2., ...) in the outline. Even when off, focusing a list line still parses lists in the header.",
   "settings.recognizeTask": "Recognize task lists",
   "settings.recognizeTaskDesc":
-    "Include task list items (- [ ], - [x]) in the outline.",
+    "Include task list items (- [ ], - [x]) in the outline. Even when off, focusing a list line still parses lists in the header.",
   "settings.outlineDisplay": "Navigation bar",
   "settings.showBreadcrumbsDefault": "Show breadcrumbs in default mode",
   "settings.showBreadcrumbsDefaultDesc":

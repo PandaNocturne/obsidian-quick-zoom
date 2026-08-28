@@ -1,7 +1,9 @@
 import {
   ListRecognitionOptions,
+  detectAnyListType,
   detectListType,
   isRecognizedListLine,
+  resolveListRecognitionOptions,
 } from "../listItemParsing";
 
 const ALL_LISTS_ON: ListRecognitionOptions = {
@@ -58,4 +60,34 @@ test("should respect per-type toggles", () => {
 test("isRecognizedListLine mirrors detectListType", () => {
   expect(isRecognizedListLine("- item", ALL_LISTS_ON)).toBe(true);
   expect(isRecognizedListLine("- item", ALL_LISTS_OFF)).toBe(false);
+});
+
+test("detectAnyListType ignores recognition toggles", () => {
+  expect(detectAnyListType("- item")).toBe("unordered");
+  expect(detectAnyListType("1. item")).toBe("ordered");
+  expect(detectAnyListType("- [ ] task")).toBe("task");
+  expect(detectAnyListType("# heading")).toBeNull();
+});
+
+test("resolveListRecognitionOptions enables all lists when focused on a list", () => {
+  expect(resolveListRecognitionOptions(ALL_LISTS_OFF, "- focused")).toEqual(
+    ALL_LISTS_ON
+  );
+  expect(resolveListRecognitionOptions(ALL_LISTS_OFF, "# heading")).toEqual(
+    ALL_LISTS_OFF
+  );
+  expect(
+    resolveListRecognitionOptions(
+      {
+        recognizeUnorderedLists: true,
+        recognizeOrderedLists: false,
+        recognizeTaskLists: false,
+      },
+      "plain paragraph"
+    )
+  ).toEqual({
+    recognizeUnorderedLists: true,
+    recognizeOrderedLists: false,
+    recognizeTaskLists: false,
+  });
 });

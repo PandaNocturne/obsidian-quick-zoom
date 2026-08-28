@@ -17,6 +17,7 @@ import {
   ListRecognitionOptions,
   ListType,
   detectListType,
+  resolveListRecognitionOptions,
 } from "./utils/listItemParsing";
 
 import { SettingsService } from "../services/SettingsService";
@@ -124,7 +125,11 @@ export class CollectBreadcrumbs {
   }
 
   public collectBreadcrumbs(state: EditorState, pos: number) {
-    const listOptions = this.settings.getListRecognitionOptions();
+    const posLine = state.doc.lineAt(pos);
+    const listOptions = resolveListRecognitionOptions(
+      this.settings.getListRecognitionOptions(),
+      posLine.text
+    );
     const headings = getHeadingIndex(state);
     const breadcrumbs: Breadcrumb[] = [
       {
@@ -137,7 +142,6 @@ export class CollectBreadcrumbs {
     ];
 
     const frontmatterEnd = getFrontmatterEnd(state);
-    const posLine = state.doc.lineAt(pos);
 
     for (let i = 1; i < posLine.number; i++) {
       const line = state.doc.line(i);

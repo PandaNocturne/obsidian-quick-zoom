@@ -109,3 +109,43 @@ test("should return breadcrumbs based on folable zones that should include input
     },
   ]);
 });
+
+test("should auto-recognize lists when focused on a list even if settings are off", () => {
+  const state = EditorState.create({
+    doc: "# a\n\n- 1\n\t- 2\n",
+  });
+  foldable.mockImplementation((_state, from) => {
+    if (from === 0) return { from: 0, to: state.doc.length };
+    if (from === 5) return { from: 5, to: state.doc.length };
+    if (from === 9) return { from: 9, to: state.doc.length };
+    return null;
+  });
+
+  const offSettings = {
+    getListRecognitionOptions: () => ({
+      recognizeUnorderedLists: false,
+      recognizeOrderedLists: false,
+      recognizeTaskLists: false,
+    }),
+  } as SettingsService;
+
+  const collectBreadcrumbs = new CollectBreadcrumbs(
+    getDocumentTitle,
+    offSettings
+  );
+
+  // Focused on a heading: lists stay off
+  const onHeading = collectBreadcrumbs.collectBreadcrumbs(state, 0);
+  expect(onHeading.map((b) => b.kind)).toEqual(["document", "heading"]);
+
+  // Focused on nested list: auto-enable list parsing
+  const onList = collectBreadcrumbs.collectBreadcrumbs(state, 12);
+  expect(onList.map((b) => b.kind)).toEqual([
+    "document",
+    "heading",
+    "list",
+    "list",
+  ]);
+  expect(onList[2].title).toBe("1");
+  expect(onList[3].title).toBe("2");
+});

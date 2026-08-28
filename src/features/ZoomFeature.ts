@@ -19,6 +19,7 @@ import {
 import { KeepOnlyZoomedContentVisible } from "../logic/KeepOnlyZoomedContentVisible";
 import { ZoomHistory, ZoomHistoryEntry } from "../logic/ZoomHistory";
 import { getActiveOutlinePos } from "../logic/utils/getActiveOutlinePos";
+import { resolveListRecognitionOptions } from "../logic/utils/listItemParsing";
 import { LoggerService } from "../services/LoggerService";
 import { SettingsService } from "../services/SettingsService";
 import { getEditorViewFromEditor } from "../utils/getEditorViewFromEditor";
@@ -126,7 +127,7 @@ export class ZoomFeature implements Feature {
     const newRange = this.calculateRangeForZooming.calculateRangeForZooming(
       view.state,
       prevRange.from,
-      this.settings.getListRecognitionOptions()
+      this.getListOptionsForPos(view.state, prevRange.from)
     );
 
     if (!newRange) {
@@ -187,7 +188,7 @@ export class ZoomFeature implements Feature {
     const range = this.calculateRangeForZooming.calculateRangeForZooming(
       view.state,
       pos,
-      this.settings.getListRecognitionOptions()
+      this.getListOptionsForPos(view.state, pos)
     );
 
     if (!range) {
@@ -217,6 +218,13 @@ export class ZoomFeature implements Feature {
     for (const cb of this.zoomInCallbacks) {
       cb(view, from);
     }
+  }
+
+  private getListOptionsForPos(state: EditorState, pos: number) {
+    return resolveListRecognitionOptions(
+      this.settings.getListRecognitionOptions(),
+      state.doc.lineAt(pos).text
+    );
   }
 
   public zoomOut(view: EditorView) {
