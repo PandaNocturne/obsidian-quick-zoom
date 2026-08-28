@@ -43,6 +43,11 @@ export const en: LocaleTable = {
   "commands.zoomOut": "Zoom out the entire document",
   "commands.zoomBack": "Zoom back",
   "commands.zoomForward": "Zoom forward",
+  "commands.zoomPrevHeading": "Zoom to previous heading",
+  "commands.zoomNextHeading": "Zoom to next heading",
+  "commands.zoomParent": "Zoom to parent",
+  "commands.zoomPrevSibling": "Zoom to previous sibling",
+  "commands.zoomNextSibling": "Zoom to next sibling",
   "notice.enableFolding":
     'In order to zoom, you must first enable "Fold heading" and "Fold indent" under Settings -> Editor',
   "aria.zoomToCurrentHeading": "Zoom to current heading",

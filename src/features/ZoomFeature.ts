@@ -4,12 +4,21 @@ import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 
 import { Feature } from "./Feature";
+import { getDocumentTitle } from "./utils/getDocumentTitle";
 import { isFoldingEnabled } from "./utils/isFoldingEnabled";
 
 import { t } from "../i18n";
 import { CalculateRangeForZooming } from "../logic/CalculateRangeForZooming";
+import { CollectBreadcrumbs } from "../logic/CollectBreadcrumbs";
+import {
+  findNextHeadingPos,
+  findParentZoomPos,
+  findPreviousHeadingPos,
+  findSiblingZoomPos,
+} from "../logic/FindOutlineNeighbor";
 import { KeepOnlyZoomedContentVisible } from "../logic/KeepOnlyZoomedContentVisible";
 import { ZoomHistory, ZoomHistoryEntry } from "../logic/ZoomHistory";
+import { getActiveOutlinePos } from "../logic/utils/getActiveOutlinePos";
 import { LoggerService } from "../services/LoggerService";
 import { SettingsService } from "../services/SettingsService";
 import { getEditorViewFromEditor } from "../utils/getEditorViewFromEditor";
@@ -27,12 +36,17 @@ export class ZoomFeature implements Feature {
 
   private calculateRangeForZooming = new CalculateRangeForZooming();
   private zoomHistory = new ZoomHistory();
+  private collectBreadcrumbs: CollectBreadcrumbs;
 
   constructor(
     private plugin: Plugin,
     private logger: LoggerService,
     private settings: SettingsService
   ) {
+    this.collectBreadcrumbs = new CollectBreadcrumbs(
+      { getDocumentTitle },
+      this.settings
+    );
     this.syncHistoryLimit();
     this.settings.onChange("historyMaxEntries", () => {
       this.syncHistoryLimit();
@@ -217,6 +231,55 @@ export class ZoomFeature implements Feature {
     }
   }
 
+  public zoomToPreviousHeading(view: EditorView) {
+    const pos = findPreviousHeadingPos(view.state, getActiveOutlinePos(view));
+    if (pos !== null) {
+      this.zoomIn(view, pos);
+    }
+  }
+
+  public zoomToNextHeading(view: EditorView) {
+    const pos = findNextHeadingPos(view.state, getActiveOutlinePos(view));
+    if (pos !== null) {
+      this.zoomIn(view, pos);
+    }
+  }
+
+  public zoomToParent(view: EditorView) {
+    const breadcrumbs = this.collectBreadcrumbs.collectStickyBreadcrumbs(
+      view.state,
+      getActiveOutlinePos(view)
+    );
+    const parentPos = findParentZoomPos(breadcrumbs);
+    if (parentPos === null) {
+      this.zoomOut(view);
+      return;
+    }
+    this.zoomIn(view, parentPos);
+  }
+
+  public zoomToPreviousSibling(view: EditorView) {
+    const breadcrumbs = this.collectBreadcrumbs.collectStickyBreadcrumbs(
+      view.state,
+      getActiveOutlinePos(view)
+    );
+    const pos = findSiblingZoomPos(breadcrumbs, -1);
+    if (pos !== null) {
+      this.zoomIn(view, pos);
+    }
+  }
+
+  public zoomToNextSibling(view: EditorView) {
+    const breadcrumbs = this.collectBreadcrumbs.collectStickyBreadcrumbs(
+      view.state,
+      getActiveOutlinePos(view)
+    );
+    const pos = findSiblingZoomPos(breadcrumbs, 1);
+    if (pos !== null) {
+      this.zoomIn(view, pos);
+    }
+  }
+
   async load() {
     this.plugin.registerEditorExtension(
       this.keepOnlyZoomedContentVisible.getExtension()
@@ -265,6 +328,46 @@ export class ZoomFeature implements Feature {
       icon: "arrow-right",
       editorCallback: (editor) =>
         this.zoomForward(getEditorViewFromEditor(editor)),
+    });
+
+    this.plugin.addCommand({
+      id: "zoom-prev-heading",
+      name: t("commands.zoomPrevHeading"),
+      icon: "chevron-up",
+      editorCallback: (editor) =>
+        this.zoomToPreviousHeading(getEditorViewFromEditor(editor)),
+    });
+
+    this.plugin.addCommand({
+      id: "zoom-next-heading",
+      name: t("commands.zoomNextHeading"),
+      icon: "chevron-down",
+      editorCallback: (editor) =>
+        this.zoomToNextHeading(getEditorViewFromEditor(editor)),
+    });
+
+    this.plugin.addCommand({
+      id: "zoom-parent",
+      name: t("commands.zoomParent"),
+      icon: "outdent",
+      editorCallback: (editor) =>
+        this.zoomToParent(getEditorViewFromEditor(editor)),
+    });
+
+    this.plugin.addCommand({
+      id: "zoom-prev-sibling",
+      name: t("commands.zoomPrevSibling"),
+      icon: "chevrons-up",
+      editorCallback: (editor) =>
+        this.zoomToPreviousSibling(getEditorViewFromEditor(editor)),
+    });
+
+    this.plugin.addCommand({
+      id: "zoom-next-sibling",
+      name: t("commands.zoomNextSibling"),
+      icon: "chevrons-down",
+      editorCallback: (editor) =>
+        this.zoomToNextSibling(getEditorViewFromEditor(editor)),
     });
   }
 

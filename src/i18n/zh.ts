@@ -40,6 +40,11 @@ export const zh: LocaleTable = {
   "commands.zoomOut": "退出全部缩放",
   "commands.zoomBack": "缩放过中后退",
   "commands.zoomForward": "缩放过中前进",
+  "commands.zoomPrevHeading": "缩放到上一个标题",
+  "commands.zoomNextHeading": "缩放到下一个标题",
+  "commands.zoomParent": "缩放到父节点",
+  "commands.zoomPrevSibling": "缩放到上一个同级",
+  "commands.zoomNextSibling": "缩放到下一个同级",
   "notice.enableFolding":
     "要使用缩放，请先在「设置 → 编辑器」中启用「折叠标题」和「折叠缩进」。",
   "aria.zoomToCurrentHeading": "缩放到当前标题",
