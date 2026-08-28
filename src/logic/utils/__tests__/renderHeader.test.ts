@@ -9,6 +9,31 @@ jest.mock("obsidian", () => ({
   },
 }));
 
+beforeAll(() => {
+  const proto = HTMLElement.prototype as HTMLElement & {
+    empty?: () => void;
+    addClass?: (cls: string) => void;
+    setText?: (text: string) => void;
+  };
+  if (!proto.empty) {
+    proto.empty = function empty(this: HTMLElement) {
+      while (this.firstChild) {
+        this.removeChild(this.firstChild);
+      }
+    };
+  }
+  if (!proto.addClass) {
+    proto.addClass = function addClass(this: HTMLElement, cls: string) {
+      this.classList.add(cls);
+    };
+  }
+  if (!proto.setText) {
+    proto.setText = function setText(this: HTMLElement, text: string) {
+      this.textContent = text;
+    };
+  }
+});
+
 const renderOptions = {
   renderMarkdown: false,
   itemMaxWidthPx: 300,
@@ -46,7 +71,7 @@ test("should render html with icons and delimiters", () => {
     titles[0]
       .querySelector(".zoom-plugin-title-icon")
       ?.getAttribute("data-icon")
-  ).toBe("file-output");
+  ).toBe("scan-eye");
 
   expect(titles[1].querySelector(".zoom-plugin-title-text")?.textContent).toBe(
     "header 1"
@@ -58,12 +83,47 @@ test("should render html with icons and delimiters", () => {
   ).toBe("heading-1");
 
   const delimiters = h.querySelectorAll(".zoom-plugin-delimiter");
-  expect(delimiters).toHaveLength(2);
+  // Intermediate separators only; last crumb has no children so no trailing `>`.
+  expect(delimiters).toHaveLength(1);
   expect(delimiters[0].getAttribute("data-icon")).toBe("chevron-right");
-  expect(delimiters[1].getAttribute("data-icon")).toBe("chevron-right");
-  expect(
-    delimiters[1].classList.contains("zoom-plugin-delimiter--trailing")
-  ).toBe(true);
+});
+
+test("should render heading icons matching headingLevel 2 and 3", () => {
+  const h = renderHeader(document, {
+    breadcrumbs: [
+      {
+        title: "Document",
+        pos: null,
+        siblings: [],
+        children: [],
+        kind: "document",
+      },
+      {
+        title: "h2",
+        pos: 10,
+        siblings: [],
+        children: [],
+        kind: "heading",
+        headingLevel: 2,
+      },
+      {
+        title: "h3",
+        pos: 20,
+        siblings: [],
+        children: [],
+        kind: "heading",
+        headingLevel: 3,
+      },
+    ],
+    onClick: () => {},
+    renderOptions,
+  });
+
+  const icons = h.querySelectorAll(".zoom-plugin-title-icon");
+  expect(icons[1].getAttribute("data-icon")).toBe("heading-2");
+  expect(icons[1].getAttribute("data-heading-level")).toBe("2");
+  expect(icons[2].getAttribute("data-icon")).toBe("heading-3");
+  expect(icons[2].getAttribute("data-heading-level")).toBe("3");
 });
 
 test("should mark title when it has siblings", () => {

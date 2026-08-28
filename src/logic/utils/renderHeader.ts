@@ -40,7 +40,19 @@ function appendTitleIcon(
     iconSpan.classList.add("is-active");
   }
   iconSpan.setAttribute("aria-hidden", "true");
-  setIcon(iconSpan, outlineIconName(item));
+  // Ensure heading icons always use an explicit 1–6 level (never silent H1 default
+  // from a stale breadcrumb missing headingLevel).
+  const iconTarget: OutlineIconTarget =
+    item.kind === "heading"
+      ? {
+          ...item,
+          headingLevel: Math.min(6, Math.max(1, item.headingLevel ?? 1)),
+        }
+      : item;
+  setIcon(iconSpan, outlineIconName(iconTarget));
+  if (item.kind === "heading" && item.headingLevel) {
+    iconSpan.dataset.headingLevel = String(item.headingLevel);
+  }
   container.appendChild(iconSpan);
 }
 
