@@ -38,7 +38,7 @@ export const en: LocaleTable = {
   "settings.groupZoomState": "Zoom state",
   "settings.resetZoomStateRecords": "Reset zoom state records",
   "settings.resetZoomStateRecordsDesc":
-    "Clear all saved zoom ranges in the plugin tmp/zoom-state.json file.",
+    "Clear all saved zoom ranges in the plugin data/zoom-state.json file.",
   "settings.resetZoomStateRecordsButton": "Reset",
   "settings.debug": "Debug mode",
   "settings.debugDesc":

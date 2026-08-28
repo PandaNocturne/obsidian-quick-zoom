@@ -9,7 +9,7 @@ import {
   parseZoomStateRecord,
 } from "./zoomStateRecord";
 
-type TmpStoreFile = Record<string, DocumentZoomStateRecord | null>;
+type ZoomStateStoreFile = Record<string, DocumentZoomStateRecord | null>;
 
 export class ZoomStatePersistenceService {
   private writeChain: Promise<void> = Promise.resolve();
@@ -24,7 +24,7 @@ export class ZoomStatePersistenceService {
 
     try {
       const raw = await fs.readFile(storePath, "utf8");
-      const store = JSON.parse(raw) as TmpStoreFile;
+      const store = JSON.parse(raw) as ZoomStateStoreFile;
       return parseZoomStateRecord(store[file.path]);
     } catch {
       return null;
@@ -65,7 +65,7 @@ export class ZoomStatePersistenceService {
     if (!dir || !Platform.isDesktopApp) {
       return null;
     }
-    return join(dir, "tmp", "zoom-state.json");
+    return join(dir, "data", "zoom-state.json");
   }
 
   private async writeRecord(
@@ -79,10 +79,10 @@ export class ZoomStatePersistenceService {
 
     await fs.mkdir(join(storePath, ".."), { recursive: true });
 
-    let store: TmpStoreFile = {};
+    let store: ZoomStateStoreFile = {};
     try {
       const raw = await fs.readFile(storePath, "utf8");
-      store = JSON.parse(raw) as TmpStoreFile;
+      store = JSON.parse(raw) as ZoomStateStoreFile;
     } catch {
       store = {};
     }

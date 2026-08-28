@@ -38,7 +38,7 @@ export const zh: LocaleTable = {
   "settings.groupZoomState": "缩放状态",
   "settings.resetZoomStateRecords": "重置缩放状态记录",
   "settings.resetZoomStateRecordsDesc":
-    "清除插件 tmp/zoom-state.json 中保存的所有缩放范围记录。",
+    "清除插件 data/zoom-state.json 中保存的所有缩放范围记录。",
   "settings.resetZoomStateRecordsButton": "重置",
   "settings.debug": "调试模式",
   "settings.debugDesc":
