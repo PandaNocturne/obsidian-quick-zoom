@@ -133,6 +133,47 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
           });
       });
 
+    this.addHeading(t("settings.groupZoomState"));
+
+    new Setting(containerEl)
+      .setName(t("settings.recordZoomState"))
+      .setDesc(t("settings.recordZoomStateDesc"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.recordZoomState)
+          .onChange(async (value) => {
+            this.settings.recordZoomState = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName(t("settings.zoomStateStorage"))
+      .setDesc(t("settings.zoomStateStorageDesc"))
+      .addDropdown((dropdown) => {
+        dropdown
+          .addOption("tmp", t("settings.zoomStateStorageTmp"))
+          .addOption("frontmatter", t("settings.zoomStateStorageFrontmatter"))
+          .setValue(this.settings.zoomStateStorage)
+          .onChange(async (value) => {
+            this.settings.zoomStateStorage =
+              value === "frontmatter" ? "frontmatter" : "tmp";
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName(t("settings.restoreZoomOnOpen"))
+      .setDesc(t("settings.restoreZoomOnOpenDesc"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.restoreZoomOnOpen)
+          .onChange(async (value) => {
+            this.settings.restoreZoomOnOpen = value;
+            await this.settings.save();
+          });
+      });
+
     this.addHeading(t("settings.groupHistory"));
 
     new Setting(containerEl)

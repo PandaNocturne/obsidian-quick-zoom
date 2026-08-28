@@ -239,6 +239,20 @@ export class ZoomFeature implements Feature {
     }
   }
 
+  /** Restore a previously persisted zoom range without touching history. */
+  public restorePersistedZoom(view: EditorView, from: number, to: number) {
+    this.keepOnlyZoomedContentVisible.keepOnlyZoomedContentVisible(
+      view,
+      from,
+      to,
+      { scrollTo: from }
+    );
+
+    for (const cb of this.zoomInCallbacks) {
+      cb(view, from);
+    }
+  }
+
   public zoomToPreviousHeading(view: EditorView) {
     const pos = findPreviousHeadingPos(view.state, getActiveOutlinePos(view));
     if (pos !== null) {

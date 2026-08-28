@@ -8,6 +8,7 @@ import { ResetZoomWhenVisibleContentBoundariesViolatedFeature } from "./features
 import { SettingsTabFeature } from "./features/SettingsTabFeature";
 import { ZoomFeature } from "./features/ZoomFeature";
 import { ZoomOnClickFeature } from "./features/ZoomOnClickFeature";
+import { ZoomStatePersistenceFeature } from "./features/ZoomStatePersistenceFeature";
 import { refreshLocale } from "./i18n";
 import { LoggerService } from "./services/LoggerService";
 import { SettingsService } from "./services/SettingsService";
@@ -66,6 +67,11 @@ export default class ObsidianZoomPlugin extends Plugin {
       this.zoomFeature
     );
     const listsStylesFeature = new ListsStylesFeature(settings);
+    const zoomStatePersistenceFeature = new ZoomStatePersistenceFeature(
+      this,
+      settings,
+      this.zoomFeature
+    );
 
     this.features = [
       settingsTabFeature,
@@ -75,6 +81,7 @@ export default class ObsidianZoomPlugin extends Plugin {
       headerNavigationFeature,
       zoomOnClickFeature,
       listsStylesFeature,
+      zoomStatePersistenceFeature,
     ];
 
     for (const feature of this.features) {

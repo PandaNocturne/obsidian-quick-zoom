@@ -35,6 +35,18 @@ export const zh: LocaleTable = {
   "settings.outlineItemMaxWidth": "导航标题最大宽度",
   "settings.outlineItemMaxWidthDesc":
     "导航标题的最大宽度（像素）。过长文本以省略号截断。",
+  "settings.groupZoomState": "缩放状态",
+  "settings.recordZoomState": "记录笔记缩放状态",
+  "settings.recordZoomStateDesc":
+    "缩放或退出缩放时保存当前可见范围，以便之后恢复。",
+  "settings.zoomStateStorage": "缩放状态存储位置",
+  "settings.zoomStateStorageDesc":
+    "缩放状态保存位置：插件 tmp 文件夹（默认）或笔记 YAML 属性区。",
+  "settings.zoomStateStorageTmp": "插件 tmp 文件夹",
+  "settings.zoomStateStorageFrontmatter": "笔记 YAML 属性区",
+  "settings.restoreZoomOnOpen": "打开笔记时恢复缩放",
+  "settings.restoreZoomOnOpenDesc":
+    "打开笔记时，若存在已保存的缩放范围则自动恢复。",
   "settings.debug": "调试模式",
   "settings.debugDesc":
     "打开开发者工具（Command+Option+I 或 Control+Shift+I）以复制调试日志。",

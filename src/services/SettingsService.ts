@@ -3,6 +3,7 @@ import { Platform } from "obsidian";
 import { ListRecognitionOptions } from "../logic/utils/listItemParsing";
 
 export type HeaderWidthMode = "note" | "page";
+export type ZoomStateStorageMode = "tmp" | "frontmatter";
 
 export interface ObsidianZoomPluginSettings {
   debug: boolean;
@@ -16,6 +17,9 @@ export interface ObsidianZoomPluginSettings {
   trackCursorWhileZoomed: boolean;
   historyMaxEntries: number;
   headerWidthMode: HeaderWidthMode;
+  recordZoomState: boolean;
+  zoomStateStorage: ZoomStateStorageMode;
+  restoreZoomOnOpen: boolean;
 }
 
 interface ObsidianZoomPluginSettingsJson {
@@ -31,6 +35,9 @@ interface ObsidianZoomPluginSettingsJson {
   trackCursorWhileZoomed: boolean;
   historyMaxEntries: number;
   headerWidthMode: HeaderWidthMode;
+  recordZoomState: boolean;
+  zoomStateStorage: ZoomStateStorageMode;
+  restoreZoomOnOpen: boolean;
 }
 
 const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
@@ -46,6 +53,9 @@ const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
   trackCursorWhileZoomed: false,
   historyMaxEntries: 50,
   headerWidthMode: "note",
+  recordZoomState: true,
+  zoomStateStorage: "tmp",
+  restoreZoomOnOpen: true,
 };
 
 export interface Storage {
@@ -146,6 +156,27 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     this.set("headerWidthMode", value);
   }
 
+  get recordZoomState() {
+    return this.values.recordZoomState;
+  }
+  set recordZoomState(value: boolean) {
+    this.set("recordZoomState", value);
+  }
+
+  get zoomStateStorage() {
+    return this.values.zoomStateStorage;
+  }
+  set zoomStateStorage(value: ZoomStateStorageMode) {
+    this.set("zoomStateStorage", value);
+  }
+
+  get restoreZoomOnOpen() {
+    return this.values.restoreZoomOnOpen;
+  }
+  set restoreZoomOnOpen(value: boolean) {
+    this.set("restoreZoomOnOpen", value);
+  }
+
   getListRecognitionOptions(): ListRecognitionOptions {
     return {
       recognizeUnorderedLists: this.recognizeUnorderedLists,
@@ -223,6 +254,15 @@ export class SettingsService implements ObsidianZoomPluginSettings {
         break;
       case "headerWidthMode":
         this.values.headerWidthMode = value as HeaderWidthMode;
+        break;
+      case "recordZoomState":
+        this.values.recordZoomState = value as boolean;
+        break;
+      case "zoomStateStorage":
+        this.values.zoomStateStorage = value as ZoomStateStorageMode;
+        break;
+      case "restoreZoomOnOpen":
+        this.values.restoreZoomOnOpen = value as boolean;
         break;
     }
 

@@ -35,6 +35,18 @@ export const en: LocaleTable = {
   "settings.outlineItemMaxWidth": "Navigation title max width",
   "settings.outlineItemMaxWidthDesc":
     "Maximum width of navigation titles in pixels. Longer text is truncated with an ellipsis.",
+  "settings.groupZoomState": "Zoom state",
+  "settings.recordZoomState": "Record zoom state per note",
+  "settings.recordZoomStateDesc":
+    "Save the current zoom range when you zoom in or out so it can be restored later.",
+  "settings.zoomStateStorage": "Zoom state storage",
+  "settings.zoomStateStorageDesc":
+    "Where to store zoom state: plugin tmp folder (default) or the note YAML frontmatter.",
+  "settings.zoomStateStorageTmp": "Plugin tmp folder",
+  "settings.zoomStateStorageFrontmatter": "Note YAML frontmatter",
+  "settings.restoreZoomOnOpen": "Restore zoom on open",
+  "settings.restoreZoomOnOpenDesc":
+    "When opening a note, restore the last saved zoom range if one exists.",
   "settings.debug": "Debug mode",
   "settings.debugDesc":
     "Open DevTools (Command+Option+I or Control+Shift+I) to copy the debug logs.",
