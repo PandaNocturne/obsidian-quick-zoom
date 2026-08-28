@@ -1,6 +1,6 @@
 {
   "name": "obsidian-quick-zoom",
-  "version": "1.1.2",
+  "version": "1.0.0",
   "description": "快速缩放到标题与列表，含粘性导航栏。基于 Obsidian Zoom 二次开发。",
   "main": "main.js",
   "scripts": {
