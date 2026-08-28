@@ -104,7 +104,10 @@ test("should collect ordered and task list items by type", () => {
   const state = EditorState.create({
     doc: "# a\n\n1. ordered\n- [ ] task\n",
   });
-  foldable.mockImplementation(() => null);
+  foldable.mockImplementation((_state, from) => {
+    if (from === 0) return { from: 0, to: state.doc.length };
+    return null;
+  });
 
   expect(
     collectSiblings(state, 0, {

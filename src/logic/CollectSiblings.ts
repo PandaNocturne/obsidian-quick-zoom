@@ -2,6 +2,12 @@ import { foldable } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 
 import { cleanTitle } from "./utils/cleanTitle";
+import {
+  HeadingIndex,
+  detectHeadingLevelFromText,
+  getHeadingAt,
+  getHeadingIndex,
+} from "./utils/getCachedHeadings";
 import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
 import {
   ListRecognitionOptions,
@@ -28,15 +34,11 @@ export interface OutlineIconTarget {
   listType?: ListType;
 }
 
-const HEADING_RE = /^\s*(#{1,6})\s/;
-
-export function detectHeadingLevel(lineText: string): number | null {
-  const match = lineText.match(HEADING_RE);
-  return match ? match[1].length : null;
-}
+/** @deprecated Prefer getHeadingIndex / metadataCache */
+export { detectHeadingLevelFromText as detectHeadingLevel } from "./utils/getCachedHeadings";
 
 export function detectOutlineKind(lineText: string): OutlineKind {
-  return detectHeadingLevel(lineText) !== null ? "heading" : "list";
+  return detectHeadingLevelFromText(lineText) !== null ? "heading" : "list";
 }
 
 export function outlineIcon(
@@ -91,7 +93,8 @@ export function outlineIconColorClass(
 export function collectSiblings(
   state: EditorState,
   parentPos: number | null,
-  listOptions: ListRecognitionOptions
+  listOptions: ListRecognitionOptions,
+  headings: HeadingIndex = getHeadingIndex(state)
 ): SiblingItem[] {
   const doc = state.doc;
   const frontmatterEnd = getFrontmatterEnd(state);
@@ -128,13 +131,13 @@ export function collectSiblings(
 
     const f = foldable(state, line.from, line.to);
     if (f && f.to <= parentTo) {
-      const headingLevel = detectHeadingLevel(line.text);
-      if (headingLevel !== null) {
+      const heading = getHeadingAt(headings, line.from);
+      if (heading) {
         siblings.push({
-          title: cleanTitle(line.text),
+          title: heading.title,
           pos: line.from,
           kind: "heading",
-          headingLevel,
+          headingLevel: heading.level,
         });
         skipUntil = f.to;
         continue;
@@ -153,13 +156,13 @@ export function collectSiblings(
       continue;
     }
 
-    const headingLevel = detectHeadingLevel(line.text);
-    if (headingLevel !== null) {
+    const heading = getHeadingAt(headings, line.from);
+    if (heading) {
       siblings.push({
-        title: cleanTitle(line.text),
+        title: heading.title,
         pos: line.from,
         kind: "heading",
-        headingLevel,
+        headingLevel: heading.level,
       });
       skipUntil = line.to;
       continue;

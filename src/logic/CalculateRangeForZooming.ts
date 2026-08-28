@@ -1,8 +1,8 @@
 import { foldable } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 
-import { detectHeadingLevel } from "./CollectSiblings";
 import { calculateParagraphRange } from "./utils/calculateParagraphRange";
+import { getHeadingAt, getHeadingIndex } from "./utils/getCachedHeadings";
 import {
   ListRecognitionOptions,
   isRecognizedListLine,
@@ -21,16 +21,18 @@ export class CalculateRangeForZooming {
       return { from: line.from, to: foldRange.to };
     }
 
+    const headings = getHeadingIndex(state);
+
     // Empty headings / leaf list items: zoom the line itself
     if (
-      detectHeadingLevel(line.text) !== null ||
+      getHeadingAt(headings, line.from) ||
       isRecognizedListLine(line.text, listOptions)
     ) {
       return { from: line.from, to: line.to };
     }
 
     // Paragraphs and blank lines
-    return calculateParagraphRange(state, pos, listOptions);
+    return calculateParagraphRange(state, pos, listOptions, headings);
   }
 
   /**

@@ -5,9 +5,13 @@ import {
   BreadcrumbKind,
   SiblingItem,
   collectSiblings,
-  detectHeadingLevel,
 } from "./CollectSiblings";
 import { cleanTitle } from "./utils/cleanTitle";
+import {
+  HeadingIndex,
+  getHeadingAt,
+  getHeadingIndex,
+} from "./utils/getCachedHeadings";
 import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
 import {
   ListRecognitionOptions,
@@ -35,12 +39,14 @@ export interface GetDocumentTitle {
 }
 
 function lineBreadcrumbMeta(
+  lineFrom: number,
   lineText: string,
-  listOptions: ListRecognitionOptions
+  listOptions: ListRecognitionOptions,
+  headings: HeadingIndex
 ): Pick<Breadcrumb, "kind" | "headingLevel" | "listType"> {
-  const headingLevel = detectHeadingLevel(lineText);
-  if (headingLevel !== null) {
-    return { kind: "heading", headingLevel };
+  const heading = getHeadingAt(headings, lineFrom);
+  if (heading) {
+    return { kind: "heading", headingLevel: heading.level };
   }
 
   const listType = detectListType(lineText, listOptions);
@@ -103,7 +109,8 @@ export class CollectBreadcrumbs {
 
   public collectDocumentBreadcrumb(state: EditorState): Breadcrumb[] {
     const listOptions = this.settings.getListRecognitionOptions();
-    const rootSiblings = collectSiblings(state, null, listOptions);
+    const headings = getHeadingIndex(state);
+    const rootSiblings = collectSiblings(state, null, listOptions, headings);
 
     return [
       {
@@ -118,6 +125,7 @@ export class CollectBreadcrumbs {
 
   public collectBreadcrumbs(state: EditorState, pos: number) {
     const listOptions = this.settings.getListRecognitionOptions();
+    const headings = getHeadingIndex(state);
     const breadcrumbs: Breadcrumb[] = [
       {
         title: this.getDocumentTitle.getDocumentTitle(state),
@@ -141,15 +149,15 @@ export class CollectBreadcrumbs {
       }
       const f = foldable(state, line.from, line.to);
       if (f && f.to > posLine.from) {
-        const headingLevel = detectHeadingLevel(line.text);
-        if (headingLevel !== null) {
+        const heading = getHeadingAt(headings, line.from);
+        if (heading) {
           breadcrumbs.push({
-            title: cleanTitle(line.text),
+            title: heading.title,
             pos: line.from,
             siblings: [],
             children: [],
             kind: "heading",
-            headingLevel,
+            headingLevel: heading.level,
           });
           continue;
         }
@@ -168,26 +176,38 @@ export class CollectBreadcrumbs {
       }
     }
 
+    const tipHeading = getHeadingAt(headings, posLine.from);
     breadcrumbs.push({
-      title: cleanTitle(posLine.text),
+      title: tipHeading?.title ?? cleanTitle(posLine.text),
       pos: posLine.from,
       siblings: [],
       children: [],
-      ...lineBreadcrumbMeta(posLine.text, listOptions),
+      ...lineBreadcrumbMeta(posLine.from, posLine.text, listOptions, headings),
     });
 
-    breadcrumbs[0].siblings = collectSiblings(state, null, listOptions);
+    breadcrumbs[0].siblings = collectSiblings(
+      state,
+      null,
+      listOptions,
+      headings
+    );
 
     for (let i = 1; i < breadcrumbs.length; i++) {
       breadcrumbs[i].siblings = collectSiblings(
         state,
         breadcrumbs[i - 1].pos,
-        listOptions
+        listOptions,
+        headings
       );
     }
 
     for (const breadcrumb of breadcrumbs) {
-      breadcrumb.children = collectSiblings(state, breadcrumb.pos, listOptions);
+      breadcrumb.children = collectSiblings(
+        state,
+        breadcrumb.pos,
+        listOptions,
+        headings
+      );
     }
 
     return breadcrumbs;

@@ -1,59 +1,47 @@
 import { EditorState } from "@codemirror/state";
 
 import { Breadcrumb } from "./CollectBreadcrumbs";
-import { SiblingItem, detectHeadingLevel } from "./CollectSiblings";
-import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
+import { SiblingItem } from "./CollectSiblings";
+import { getHeadingIndex } from "./utils/getCachedHeadings";
 
 /**
- * Previous heading line before `pos` (document order, any level).
+ * Previous heading before `pos` (document order, any level).
+ * Uses Obsidian metadataCache headings when available.
  */
 export function findPreviousHeadingPos(
   state: EditorState,
   pos: number
 ): number | null {
-  const frontmatterEnd = getFrontmatterEnd(state);
-  const startLine = state.doc.lineAt(pos).number;
+  const lineFrom = state.doc.lineAt(pos).from;
+  let best: number | null = null;
 
-  for (let i = startLine - 1; i >= 1; i--) {
-    const line = state.doc.line(i);
-    if (line.from < frontmatterEnd) {
-      break;
-    }
-    if (line.text.trim() === "---") {
-      continue;
-    }
-    if (detectHeadingLevel(line.text) !== null) {
-      return line.from;
+  for (const from of getHeadingIndex(state).keys()) {
+    if (from < lineFrom && (best === null || from > best)) {
+      best = from;
     }
   }
 
-  return null;
+  return best;
 }
 
 /**
- * Next heading line after `pos` (document order, any level).
+ * Next heading after `pos` (document order, any level).
+ * Uses Obsidian metadataCache headings when available.
  */
 export function findNextHeadingPos(
   state: EditorState,
   pos: number
 ): number | null {
-  const frontmatterEnd = getFrontmatterEnd(state);
-  const startLine = state.doc.lineAt(pos).number;
+  const lineFrom = state.doc.lineAt(pos).from;
+  let best: number | null = null;
 
-  for (let i = startLine + 1; i <= state.doc.lines; i++) {
-    const line = state.doc.line(i);
-    if (line.from < frontmatterEnd) {
-      continue;
-    }
-    if (line.text.trim() === "---") {
-      continue;
-    }
-    if (detectHeadingLevel(line.text) !== null) {
-      return line.from;
+  for (const from of getHeadingIndex(state).keys()) {
+    if (from > lineFrom && (best === null || from < best)) {
+      best = from;
     }
   }
 
-  return null;
+  return best;
 }
 
 /**
