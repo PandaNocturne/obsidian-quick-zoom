@@ -32,4 +32,21 @@ export class CalculateRangeForZooming {
     // Paragraphs and blank lines
     return calculateParagraphRange(state, pos, listOptions);
   }
+
+  /**
+   * Zoom to the full lines covered by a text selection (supports multi-line).
+   */
+  public calculateRangeForSelection(
+    state: EditorState,
+    selectionFrom: number,
+    selectionTo: number
+  ) {
+    const anchor = Math.min(selectionFrom, selectionTo);
+    const head = Math.max(selectionFrom, selectionTo);
+    // Selection `to` is exclusive; if it sits on a line start, exclude that line.
+    const endPos = head > anchor ? head - 1 : head;
+    const from = state.doc.lineAt(anchor).from;
+    const to = state.doc.lineAt(endPos).to;
+    return { from, to };
+  }
 }

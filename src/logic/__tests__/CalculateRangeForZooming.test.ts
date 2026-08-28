@@ -121,3 +121,40 @@ test("should zoom contiguous paragraph lines as one block", () => {
     to: state.doc.line(4).to,
   });
 });
+
+test("should zoom selection to full lines covering the selection", () => {
+  foldable.mockReturnValue(null);
+  const state = EditorState.create({
+    doc: "a\nb\nc\nd\n",
+  });
+  const calculateRangeForZooming = new CalculateRangeForZooming();
+  const b = state.doc.line(2);
+  const c = state.doc.line(3);
+
+  const x = calculateRangeForZooming.calculateRangeForSelection(
+    state,
+    b.from,
+    c.to
+  );
+
+  expect(x).toStrictEqual({ from: b.from, to: c.to });
+});
+
+test("should exclude next line when selection ends at line start", () => {
+  foldable.mockReturnValue(null);
+  const state = EditorState.create({
+    doc: "a\nb\nc\n",
+  });
+  const calculateRangeForZooming = new CalculateRangeForZooming();
+  const a = state.doc.line(1);
+  const b = state.doc.line(2);
+  const c = state.doc.line(3);
+
+  const x = calculateRangeForZooming.calculateRangeForSelection(
+    state,
+    a.from,
+    c.from
+  );
+
+  expect(x).toStrictEqual({ from: a.from, to: b.to });
+});

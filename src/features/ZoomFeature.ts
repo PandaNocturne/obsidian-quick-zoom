@@ -9,7 +9,7 @@ import { isFoldingEnabled } from "./utils/isFoldingEnabled";
 import { t } from "../i18n";
 import { CalculateRangeForZooming } from "../logic/CalculateRangeForZooming";
 import { KeepOnlyZoomedContentVisible } from "../logic/KeepOnlyZoomedContentVisible";
-import { ZoomHistory } from "../logic/ZoomHistory";
+import { ZoomHistory, ZoomHistoryEntry } from "../logic/ZoomHistory";
 import { LoggerService } from "../services/LoggerService";
 import { SettingsService } from "../services/SettingsService";
 import { getEditorViewFromEditor } from "../utils/getEditorViewFromEditor";
@@ -87,10 +87,12 @@ export class ZoomFeature implements Feature {
     this.applyHistoryEntry(view, entry);
   }
 
-  private applyHistoryEntry(view: EditorView, entry: number | null) {
+  private applyHistoryEntry(view: EditorView, entry: ZoomHistoryEntry | null) {
     this.zoomHistory.runWithoutRecording(() => {
       if (entry === null) {
         this.zoomOut(view);
+      } else if (typeof entry === "object") {
+        this.applyZoomRange(view, entry.from, entry.to, entry.from, entry);
       } else {
         this.zoomIn(view, entry);
       }
@@ -117,12 +119,46 @@ export class ZoomFeature implements Feature {
       return;
     }
 
+    // Keep a larger previous extent (e.g. selection zoom) when structural
+    // recalculation would shrink below what the user had zoomed into.
+    const to = Math.max(
+      newRange.to,
+      Math.min(prevRange.to, view.state.doc.length)
+    );
+
     this.keepOnlyZoomedContentVisible.keepOnlyZoomedContentVisible(
       view,
       newRange.from,
-      newRange.to,
+      to,
       { scrollIntoView: false }
     );
+  }
+
+  /**
+   * Zoom using current selection when non-empty (multi-line supported);
+   * otherwise zoom at the cursor with heading/list/paragraph rules.
+   */
+  public zoomInFromEditor(view: EditorView) {
+    const sel = view.state.selection.main;
+    if (sel.from !== sel.to) {
+      const l = this.logger.bind("ZoomFeature:zoomInFromEditor");
+      l("zooming in to selection");
+
+      if (!isFoldingEnabled(this.plugin.app)) {
+        new Notice(t("notice.enableFolding"));
+        return;
+      }
+
+      const range = this.calculateRangeForZooming.calculateRangeForSelection(
+        view.state,
+        sel.from,
+        sel.to
+      );
+      this.applyZoomRange(view, range.from, range.to, sel.head, range);
+      return;
+    }
+
+    this.zoomIn(view, sel.head);
   }
 
   public zoomIn(view: EditorView, pos: number) {
@@ -145,17 +181,27 @@ export class ZoomFeature implements Feature {
       return;
     }
 
+    this.applyZoomRange(view, range.from, range.to, pos, pos);
+  }
+
+  private applyZoomRange(
+    view: EditorView,
+    from: number,
+    to: number,
+    scrollTo: number,
+    historyEntry: ZoomHistoryEntry
+  ) {
     this.keepOnlyZoomedContentVisible.keepOnlyZoomedContentVisible(
       view,
-      range.from,
-      range.to,
-      { scrollTo: pos }
+      from,
+      to,
+      { scrollTo }
     );
 
-    this.zoomHistory.record(view, pos);
+    this.zoomHistory.record(view, historyEntry);
 
     for (const cb of this.zoomInCallbacks) {
-      cb(view, pos);
+      cb(view, from);
     }
   }
 
@@ -182,7 +228,7 @@ export class ZoomFeature implements Feature {
       icon: "zoom-in",
       editorCallback: (editor) => {
         const view = getEditorViewFromEditor(editor);
-        this.zoomIn(view, view.state.selection.main.head);
+        this.zoomInFromEditor(view);
       },
       hotkeys: [
         {

@@ -1,6 +1,8 @@
 import { EditorView } from "@codemirror/view";
 
-export type ZoomHistoryEntry = number | null;
+/** Single-position zoom root, explicit range (selection zoom), or full document. */
+export type ZoomRangeEntry = { from: number; to: number };
+export type ZoomHistoryEntry = number | ZoomRangeEntry | null;
 
 interface ViewHistory {
   entries: ZoomHistoryEntry[];
@@ -8,6 +10,20 @@ interface ViewHistory {
 }
 
 const DEFAULT_MAX_ENTRIES = 50;
+
+function isRangeEntry(entry: ZoomHistoryEntry): entry is ZoomRangeEntry {
+  return typeof entry === "object" && entry !== null;
+}
+
+function entriesEqual(a: ZoomHistoryEntry, b: ZoomHistoryEntry): boolean {
+  if (a === b) {
+    return true;
+  }
+  if (isRangeEntry(a) && isRangeEntry(b)) {
+    return a.from === b.from && a.to === b.to;
+  }
+  return false;
+}
 
 /**
  * Per-editor zoom visit history (browser-like back/forward).
@@ -67,7 +83,10 @@ export class ZoomHistory {
 
     const history = this.getOrCreate(view);
 
-    if (history.index >= 0 && history.entries[history.index] === pos) {
+    if (
+      history.index >= 0 &&
+      entriesEqual(history.entries[history.index], pos)
+    ) {
       return;
     }
 
