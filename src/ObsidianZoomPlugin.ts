@@ -38,6 +38,7 @@ export default class ObsidianZoomPlugin extends Plugin {
     this.zoomFeature = new ZoomFeature(this, logger, settings);
     const zoomStatePersistenceFeature = new ZoomStatePersistenceFeature(
       this,
+      settings,
       this.zoomFeature
     );
     const settingsTabFeature = new SettingsTabFeature(this, settings, () =>

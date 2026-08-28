@@ -16,6 +16,8 @@ export interface ObsidianZoomPluginSettings {
   trackCursorWhileZoomed: boolean;
   historyMaxEntries: number;
   headerWidthMode: HeaderWidthMode;
+  recordZoomState: boolean;
+  restoreZoomOnOpen: boolean;
 }
 
 interface ObsidianZoomPluginSettingsJson {
@@ -31,6 +33,8 @@ interface ObsidianZoomPluginSettingsJson {
   trackCursorWhileZoomed: boolean;
   historyMaxEntries: number;
   headerWidthMode: HeaderWidthMode;
+  recordZoomState: boolean;
+  restoreZoomOnOpen: boolean;
 }
 
 const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
@@ -46,6 +50,8 @@ const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
   trackCursorWhileZoomed: false,
   historyMaxEntries: 50,
   headerWidthMode: "note",
+  recordZoomState: true,
+  restoreZoomOnOpen: true,
 };
 
 export interface Storage {
@@ -146,6 +152,20 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     this.set("headerWidthMode", value);
   }
 
+  get recordZoomState() {
+    return this.values.recordZoomState;
+  }
+  set recordZoomState(value: boolean) {
+    this.set("recordZoomState", value);
+  }
+
+  get restoreZoomOnOpen() {
+    return this.values.restoreZoomOnOpen;
+  }
+  set restoreZoomOnOpen(value: boolean) {
+    this.set("restoreZoomOnOpen", value);
+  }
+
   getListRecognitionOptions(): ListRecognitionOptions {
     return {
       recognizeUnorderedLists: this.recognizeUnorderedLists,
@@ -179,9 +199,7 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     // Drop removed setting if present in older data.json
     delete (this.values as { outlineSubmenuCloseDelayMs?: number })
       .outlineSubmenuCloseDelayMs;
-    delete (this.values as { recordZoomState?: boolean }).recordZoomState;
     delete (this.values as { zoomStateStorage?: string }).zoomStateStorage;
-    delete (this.values as { restoreZoomOnOpen?: boolean }).restoreZoomOnOpen;
   }
 
   async save() {
@@ -226,6 +244,12 @@ export class SettingsService implements ObsidianZoomPluginSettings {
         break;
       case "headerWidthMode":
         this.values.headerWidthMode = value as HeaderWidthMode;
+        break;
+      case "recordZoomState":
+        this.values.recordZoomState = value as boolean;
+        break;
+      case "restoreZoomOnOpen":
+        this.values.restoreZoomOnOpen = value as boolean;
         break;
     }
 

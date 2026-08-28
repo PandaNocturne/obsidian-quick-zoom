@@ -6,6 +6,7 @@ import { Feature } from "./Feature";
 import { ZoomFeature } from "./ZoomFeature";
 import { isFoldingEnabled } from "./utils/isFoldingEnabled";
 
+import { SettingsService } from "../services/SettingsService";
 import { ZoomStatePersistenceService } from "../services/ZoomStatePersistenceService";
 import { isValidZoomStateRecord } from "../services/zoomStateRecord";
 import { getEditorViewFromEditor } from "../utils/getEditorViewFromEditor";
@@ -15,7 +16,11 @@ export class ZoomStatePersistenceFeature implements Feature {
   private restoring = false;
   private pendingRestorePath: string | null = null;
 
-  constructor(private plugin: Plugin, private zoomFeature: ZoomFeature) {
+  constructor(
+    private plugin: Plugin,
+    private settings: SettingsService,
+    private zoomFeature: ZoomFeature
+  ) {
     this.persistence = new ZoomStatePersistenceService(plugin);
   }
 
@@ -46,7 +51,7 @@ export class ZoomStatePersistenceFeature implements Feature {
   }
 
   private async persistCurrentZoom(view: EditorView) {
-    if (this.restoring) {
+    if (this.restoring || !this.settings.recordZoomState) {
       return;
     }
 
@@ -64,7 +69,7 @@ export class ZoomStatePersistenceFeature implements Feature {
   }
 
   private async persistZoomCleared(view: EditorView) {
-    if (this.restoring) {
+    if (this.restoring || !this.settings.recordZoomState) {
       return;
     }
 
@@ -92,7 +97,11 @@ export class ZoomStatePersistenceFeature implements Feature {
   }
 
   private async tryRestore(view: MarkdownView) {
-    if (!isFoldingEnabled(this.plugin.app)) {
+    if (
+      !this.settings.recordZoomState ||
+      !this.settings.restoreZoomOnOpen ||
+      !isFoldingEnabled(this.plugin.app)
+    ) {
       return;
     }
 

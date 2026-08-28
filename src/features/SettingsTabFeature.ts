@@ -141,6 +141,30 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
     this.addHeading(t("settings.groupZoomState"));
 
     new Setting(containerEl)
+      .setName(t("settings.recordZoomState"))
+      .setDesc(t("settings.recordZoomStateDesc"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.recordZoomState)
+          .onChange(async (value) => {
+            this.settings.recordZoomState = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName(t("settings.restoreZoomOnOpen"))
+      .setDesc(t("settings.restoreZoomOnOpenDesc"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.restoreZoomOnOpen)
+          .onChange(async (value) => {
+            this.settings.restoreZoomOnOpen = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
       .setName(t("settings.resetZoomStateRecords"))
       .setDesc(t("settings.resetZoomStateRecordsDesc"))
       .addButton((button) => {
