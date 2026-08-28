@@ -38,6 +38,19 @@ export class ZoomStatePersistenceFeature implements Feature {
       })
     );
 
+    this.plugin.registerEvent(
+      this.plugin.app.workspace.on("file-open", (file) => {
+        if (!file) {
+          return;
+        }
+        const view =
+          this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
+        if (view?.file?.path === file.path) {
+          void this.scheduleRestore(view);
+        }
+      })
+    );
+
     this.plugin.app.workspace.onLayoutReady(() => {
       const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
       void this.scheduleRestore(view);
@@ -88,12 +101,13 @@ export class ZoomStatePersistenceFeature implements Feature {
 
     this.pendingRestorePath = view.file.path;
 
+    // Wait a tick so the editor view/doc is ready after leaf/file switch.
     window.setTimeout(() => {
       if (this.pendingRestorePath !== view.file?.path) {
         return;
       }
       void this.tryRestore(view);
-    }, 0);
+    }, 50);
   }
 
   private async tryRestore(view: MarkdownView) {
