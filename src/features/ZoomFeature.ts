@@ -36,7 +36,7 @@ export class ZoomFeature implements Feature {
   );
 
   private calculateRangeForZooming = new CalculateRangeForZooming();
-  private zoomHistory = new ZoomHistory();
+  private zoomHistory = new ZoomHistory({ stayInZoom: true });
   private collectBreadcrumbs: CollectBreadcrumbs;
 
   constructor(
@@ -103,10 +103,13 @@ export class ZoomFeature implements Feature {
   }
 
   private applyHistoryEntry(view: EditorView, entry: ZoomHistoryEntry | null) {
+    // Back/forward only restores zoomed states; never exit via history.
+    if (entry === null) {
+      return;
+    }
+
     this.zoomHistory.runWithoutRecording(() => {
-      if (entry === null) {
-        this.zoomOut(view);
-      } else if (typeof entry === "object") {
+      if (typeof entry === "object") {
         this.applyZoomRange(view, entry.from, entry.to, entry.from, entry);
       } else {
         this.zoomIn(view, entry);

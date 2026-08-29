@@ -44,7 +44,7 @@ Quick Zoom 支持快速缩放到标题与列表，提供顶部粘性导航栏、
 
 - 缩放到标题、列表、段落或选区，隐藏其余内容
 - 点击列表标记缩放（可关闭）
-- 缩放前进 / 后退历史
+- 缩放前进 / 后退历史（仅在缩放状态间跳转，不会退出缩放）
 
 #### 导航栏
 
@@ -131,7 +131,7 @@ Enable **Quick Zoom** under **Settings → Community plugins**.
 
 - Zoom into a heading, list, paragraph, or selection — hide everything else
 - Click a list bullet to zoom (optional)
-- Zoom back / forward history
+- Zoom back / forward history (stays zoomed; does not exit zoom mode)
 
 #### Navigation bar
 

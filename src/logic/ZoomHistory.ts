@@ -4,6 +4,14 @@ import { EditorView } from "@codemirror/view";
 export type ZoomRangeEntry = { from: number; to: number };
 export type ZoomHistoryEntry = number | ZoomRangeEntry | null;
 
+export interface ZoomHistoryOptions {
+  /**
+   * When true, back/forward only land on non-null entries so navigation never
+   * exits zoom. Also skips seeding an initial null on the first zoom.
+   */
+  stayInZoom?: boolean;
+}
+
 interface ViewHistory {
   entries: ZoomHistoryEntry[];
   index: number;
@@ -26,13 +34,18 @@ function entriesEqual(a: ZoomHistoryEntry, b: ZoomHistoryEntry): boolean {
 }
 
 /**
- * Per-editor zoom visit history (browser-like back/forward).
- * `null` means the full document (zoomed out).
+ * Per-editor visit history (browser-like back/forward).
+ * `null` means the full document (zoomed out) or document root for cursor nav.
  */
 export class ZoomHistory {
   private byView = new WeakMap<EditorView, ViewHistory>();
   private navigating = false;
   private maxEntries = DEFAULT_MAX_ENTRIES;
+  private stayInZoom: boolean;
+
+  constructor(options: ZoomHistoryOptions = {}) {
+    this.stayInZoom = options.stayInZoom === true;
+  }
 
   isNavigating(): boolean {
     return this.navigating;
@@ -63,18 +76,40 @@ export class ZoomHistory {
     return history.entries[history.index];
   }
 
+  /** Next allowed index in `direction`, or -1 if none. */
+  private findNavigateIndex(
+    history: ViewHistory,
+    from: number,
+    direction: -1 | 1
+  ): number {
+    let i = from + direction;
+    while (i >= 0 && i < history.entries.length) {
+      if (!this.stayInZoom || history.entries[i] !== null) {
+        return i;
+      }
+      i += direction;
+    }
+    return -1;
+  }
+
   canGoBack(view: EditorView): boolean {
     const history = this.byView.get(view);
-    return !!history && history.index > 0;
+    if (!history || history.index < 0) {
+      return false;
+    }
+    return this.findNavigateIndex(history, history.index, -1) >= 0;
   }
 
   canGoForward(view: EditorView): boolean {
     const history = this.byView.get(view);
-    return !!history && history.index < history.entries.length - 1;
+    if (!history || history.index < 0) {
+      return false;
+    }
+    return this.findNavigateIndex(history, history.index, 1) >= 0;
   }
 
   /**
-   * Record a successful zoom change. Skipped while applying back/forward.
+   * Record a successful visit. Skipped while applying back/forward.
    */
   record(view: EditorView, pos: ZoomHistoryEntry) {
     if (this.navigating) {
@@ -90,7 +125,9 @@ export class ZoomHistory {
       return;
     }
 
-    if (history.entries.length === 0 && pos !== null) {
+    // Cursor/default history: seed document-root so the first back leaves the
+    // first heading. Zoom history (`stayInZoom`) never exits via back.
+    if (!this.stayInZoom && history.entries.length === 0 && pos !== null) {
       history.entries.push(null);
       history.index = 0;
     }
@@ -115,7 +152,7 @@ export class ZoomHistory {
       return null;
     }
     const history = this.getOrCreate(view);
-    history.index -= 1;
+    history.index = this.findNavigateIndex(history, history.index, -1);
     return history.entries[history.index];
   }
 
@@ -124,7 +161,7 @@ export class ZoomHistory {
       return null;
     }
     const history = this.getOrCreate(view);
-    history.index += 1;
+    history.index = this.findNavigateIndex(history, history.index, 1);
     return history.entries[history.index];
   }
 
