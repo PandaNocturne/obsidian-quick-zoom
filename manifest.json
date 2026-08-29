@@ -1,7 +1,7 @@
 {
   "id": "quick-zoom",
   "name": "Quick Zoom",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minAppVersion": "1.1.16",
   "description": "Quickly zoom into headings and lists, with a sticky navigation bar.",
   "author": "PandaNocturne",
