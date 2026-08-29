@@ -9,7 +9,8 @@
     "build": "rollup --config rollup.config.mjs",
     "lint": "prettier --check src && eslint src",
     "test": "jest",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "version": "node scripts/sync-version.mjs && git add manifest.json versions.json"
   },
   "author": "熊猫别熬夜",
   "license": "MIT",
