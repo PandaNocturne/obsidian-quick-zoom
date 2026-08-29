@@ -1,7 +1,7 @@
 # Quick Zoom
 
 - [中文说明](#中文说明)
-- [English](#english)
+- [English](#English)
 
 ---
 
@@ -15,7 +15,7 @@ Quick Zoom 支持快速缩放到标题与列表，提供顶部粘性导航栏、
 
 ### 演示
 
-![demo](images/demo.gif)
+<video controls src="image/README/PixPin_2026-08-29_22-19-02.mp4" title="Title"></video>
 
 ### 安装
 
@@ -57,6 +57,8 @@ Quick Zoom 支持快速缩放到标题与列表，提供顶部粘性导航栏、
 
 - 识别无序、有序、任务列表（可分别开关）
 
+![1788013336505](image/README/1788013336505.png)
+
 #### 缩放状态记录
 
 - 按笔记保存最近一次缩放范围到插件目录 `data/zoom-state.json`
@@ -68,8 +70,8 @@ Quick Zoom 支持快速缩放到标题与列表，提供顶部粘性导航栏、
 
 | 命令                  | 默认快捷键             |
 | --------------------- | ---------------------- |
-| 放大                  | `Ctrl/Cmd + .`         |
-| 退出全部缩放          | `Ctrl/Cmd + Shift + .` |
+| 放大                  | `Ctrl/Cmd + Shift + .` |
+| 退出全部缩放          | `Ctrl/Cmd + Shift + /` |
 | 缩放过中后退 / 前进   | —                      |
 | 缩放到上 / 下一个标题 | —                      |
 | 缩放到父节点          | —                      |
@@ -100,7 +102,7 @@ This plugin is a fork of **[Obsidian Zoom](https://github.com/vslinko/obsidian-z
 
 ### Demo
 
-![demo](images/demo.gif)
+<video controls src="image/README/PixPin_2026-08-29_22-19-02.mp4" title="Title"></video>
 
 ### Install
 
@@ -142,6 +144,8 @@ Enable **Quick Zoom** under **Settings → Community plugins**.
 
 - Recognize unordered, ordered, and task lists (each toggleable)
 
+![1788013336505](image/README/1788013336505.png)
+
 #### Zoom state
 
 - Persist the last zoom range per note under the plugin folder `data/zoom-state.json`
@@ -153,8 +157,8 @@ Enable **Quick Zoom** under **Settings → Community plugins**.
 
 | Command                         | Default hotkey         |
 | ------------------------------- | ---------------------- |
-| Zoom in                         | `Ctrl/Cmd + .`         |
-| Zoom out                        | `Ctrl/Cmd + Shift + .` |
+| Zoom in                         | `Ctrl/Cmd + Shift + .` |
+| Zoom out                        | `Ctrl/Cmd + Shift + /` |
 | Zoom back / forward             | —                      |
 | Zoom to previous / next heading | —                      |
 | Zoom to parent                  | —                      |

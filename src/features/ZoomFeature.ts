@@ -317,7 +317,7 @@ export class ZoomFeature implements Feature {
       },
       hotkeys: [
         {
-          modifiers: ["Mod"],
+          modifiers: ["Mod", "Shift"],
           key: ".",
         },
       ],
@@ -331,7 +331,7 @@ export class ZoomFeature implements Feature {
       hotkeys: [
         {
           modifiers: ["Mod", "Shift"],
-          key: ".",
+          key: "/",
         },
       ],
     });
