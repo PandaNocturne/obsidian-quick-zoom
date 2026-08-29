@@ -57,6 +57,13 @@ Quick Zoom 支持快速缩放到标题与列表，提供顶部粘性导航栏、
 
 - 识别无序、有序、任务列表（可分别开关）
 
+#### 缩放状态记录
+
+- 按笔记保存最近一次缩放范围到插件目录 `data/zoom-state.json`
+- 可选：打开笔记时自动恢复上次缩放
+- 可配置最大记录笔记数（默认 200，超出淘汰最旧；已删除笔记自动清理）
+- 设置中可一键重置全部记录
+
 #### 导航命令
 
 | 命令                  | 默认快捷键             |
@@ -134,6 +141,13 @@ Enable **Quick Zoom** under **Settings → Community plugins**.
 #### Outline lists
 
 - Recognize unordered, ordered, and task lists (each toggleable)
+
+#### Zoom state
+
+- Persist the last zoom range per note under the plugin folder `data/zoom-state.json`
+- Optionally restore that zoom when reopening a note
+- Cap how many notes are kept (default 200; oldest dropped; missing notes cleaned up)
+- Reset all saved records from Settings
 
 #### Navigation commands
 

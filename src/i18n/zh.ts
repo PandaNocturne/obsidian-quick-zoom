@@ -35,6 +35,20 @@ export const zh: LocaleTable = {
   "settings.outlineItemMaxWidth": "导航标题最大宽度",
   "settings.outlineItemMaxWidthDesc":
     "导航标题的最大宽度（像素）。过长文本以省略号截断。",
+  "settings.groupZoomState": "缩放状态",
+  "settings.recordZoomState": "记录笔记缩放状态",
+  "settings.recordZoomStateDesc":
+    "缩放或退出缩放时，将当前可见范围保存到库内插件目录 data/zoom-state.json。",
+  "settings.restoreZoomOnOpen": "打开笔记时自动缩放",
+  "settings.restoreZoomOnOpenDesc":
+    "打开笔记时，若存在已保存的缩放范围则自动恢复。",
+  "settings.zoomStateMaxEntries": "缩放状态最大笔记数",
+  "settings.zoomStateMaxEntriesDesc":
+    "最多保留多少篇笔记的缩放记录。超出后按更新时间淘汰最旧记录；已删除笔记的记录也会被清理。",
+  "settings.resetZoomStateRecords": "重置缩放状态记录",
+  "settings.resetZoomStateRecordsDesc":
+    "清除库内插件目录 data/zoom-state.json 中保存的所有缩放范围记录。",
+  "settings.resetZoomStateRecordsButton": "重置",
   "settings.debug": "调试模式",
   "settings.debugDesc":
     "打开开发者工具（Command+Option+I 或 Control+Shift+I）以复制调试日志。",
@@ -52,6 +66,7 @@ export const zh: LocaleTable = {
   "commands.zoomNextSibling": "缩放到下一个同级",
   "notice.enableFolding":
     "要使用缩放，请先在「设置 → 编辑器」中启用「折叠标题」和「折叠缩进」。",
+  "notice.zoomStateRecordsReset": "已清除缩放状态记录。",
   "aria.zoomToCurrentHeading": "缩放到当前标题",
   "aria.exitZoom": "退出缩放",
   "aria.expandSubmenu": "展开子菜单",

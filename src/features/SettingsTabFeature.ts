@@ -1,4 +1,4 @@
-import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
+import { App, Notice, Plugin, PluginSettingTab, Setting } from "obsidian";
 
 import { Feature } from "./Feature";
 
@@ -8,7 +8,12 @@ import { SettingsService } from "../services/SettingsService";
 const ORIGINAL_PLUGIN_URL = "https://github.com/vslinko/obsidian-zoom";
 
 class ObsidianZoomPluginSettingTab extends PluginSettingTab {
-  constructor(app: App, plugin: Plugin, private settings: SettingsService) {
+  constructor(
+    app: App,
+    plugin: Plugin,
+    private settings: SettingsService,
+    private resetZoomStateRecords: () => Promise<void>
+  ) {
     super(app, plugin);
   }
 
@@ -133,6 +138,61 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
           });
       });
 
+    this.addHeading(t("settings.groupZoomState"));
+
+    new Setting(containerEl)
+      .setName(t("settings.recordZoomState"))
+      .setDesc(t("settings.recordZoomStateDesc"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.recordZoomState)
+          .onChange(async (value) => {
+            this.settings.recordZoomState = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName(t("settings.restoreZoomOnOpen"))
+      .setDesc(t("settings.restoreZoomOnOpenDesc"))
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.settings.restoreZoomOnOpen)
+          .onChange(async (value) => {
+            this.settings.restoreZoomOnOpen = value;
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName(t("settings.zoomStateMaxEntries"))
+      .setDesc(t("settings.zoomStateMaxEntriesDesc"))
+      .addText((text) => {
+        text
+          .setPlaceholder("200")
+          .setValue(String(this.settings.zoomStateMaxEntries))
+          .onChange(async (value) => {
+            const parsed = Number.parseInt(value, 10);
+            if (Number.isNaN(parsed) || parsed < 1) {
+              return;
+            }
+            this.settings.zoomStateMaxEntries = Math.min(parsed, 5000);
+            await this.settings.save();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName(t("settings.resetZoomStateRecords"))
+      .setDesc(t("settings.resetZoomStateRecordsDesc"))
+      .addButton((button) => {
+        button.setButtonText(t("settings.resetZoomStateRecordsButton"));
+        button.onClick(() => {
+          void this.resetZoomStateRecords().then(() => {
+            new Notice(t("notice.zoomStateRecordsReset"));
+          });
+        });
+      });
+
     this.addHeading(t("settings.groupHistory"));
 
     new Setting(containerEl)
@@ -192,14 +252,19 @@ class ObsidianZoomPluginSettingTab extends PluginSettingTab {
 }
 
 export class SettingsTabFeature implements Feature {
-  constructor(private plugin: Plugin, private settings: SettingsService) {}
+  constructor(
+    private plugin: Plugin,
+    private settings: SettingsService,
+    private resetZoomStateRecords: () => Promise<void>
+  ) {}
 
   async load() {
     this.plugin.addSettingTab(
       new ObsidianZoomPluginSettingTab(
         this.plugin.app,
         this.plugin,
-        this.settings
+        this.settings,
+        this.resetZoomStateRecords
       )
     );
   }
