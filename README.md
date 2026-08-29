@@ -15,7 +15,7 @@ Quick Zoom 支持快速缩放到标题与列表，提供顶部粘性导航栏、
 
 ### 演示
 
-<video controls src="image/README/PixPin_2026-08-29_22-19-02.mp4" title="Title"></video>
+![demo](image/README/demo.gif)
 
 ### 安装
 
@@ -102,7 +102,7 @@ This plugin is a fork of **[Obsidian Zoom](https://github.com/vslinko/obsidian-z
 
 ### Demo
 
-<video controls src="image/README/PixPin_2026-08-29_22-19-02.mp4" title="Title"></video>
+![demo](image/README/demo.gif)
 
 ### Install
 
