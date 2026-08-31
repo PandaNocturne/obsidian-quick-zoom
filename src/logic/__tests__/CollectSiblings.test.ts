@@ -120,3 +120,36 @@ test("should collect ordered and task list items by type", () => {
     { title: "task", pos: 16, kind: "list", listType: "task" },
   ]);
 });
+
+test("should keep lists nested under headings when foldable is unavailable", () => {
+  const state = EditorState.create({
+    doc: "# title\n\n- item\n\t- nested\n\n# other\n",
+  });
+  // Simulate first note load: CodeMirror fold service not ready yet
+  foldable.mockReturnValue(null);
+
+  expect(collectSiblings(state, null, ALL_LISTS_ON)).toStrictEqual([
+    { title: "title", pos: 0, kind: "heading", headingLevel: 1 },
+    { title: "other", pos: 27, kind: "heading", headingLevel: 1 },
+  ]);
+
+  expect(collectSiblings(state, 0, ALL_LISTS_ON)).toStrictEqual([
+    { title: "item", pos: 9, kind: "list", listType: "unordered" },
+  ]);
+});
+
+test("should keep nested list items under parent when foldable is unavailable", () => {
+  const state = EditorState.create({
+    doc: "- parent\n\t- child\n\t\t- grand\n- sibling\n",
+  });
+  foldable.mockReturnValue(null);
+
+  expect(collectSiblings(state, null, ALL_LISTS_ON)).toStrictEqual([
+    { title: "parent", pos: 0, kind: "list", listType: "unordered" },
+    { title: "sibling", pos: 28, kind: "list", listType: "unordered" },
+  ]);
+
+  expect(collectSiblings(state, 0, ALL_LISTS_ON)).toStrictEqual([
+    { title: "child", pos: 9, kind: "list", listType: "unordered" },
+  ]);
+});

@@ -1,4 +1,3 @@
-import { foldable } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 
 import { cleanTitle } from "./utils/cleanTitle";
@@ -9,6 +8,7 @@ import {
   getHeadingIndex,
 } from "./utils/getCachedHeadings";
 import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
+import { getOutlineFoldRange } from "./utils/getOutlineFoldRange";
 import {
   ListRecognitionOptions,
   ListType,
@@ -126,7 +126,12 @@ export function collectSiblings(
     parentTo = doc.length;
   } else {
     const parentLine = doc.lineAt(parentPos);
-    const parentFold = foldable(state, parentLine.from, parentLine.to);
+    const parentFold = getOutlineFoldRange(
+      state,
+      parentLine.from,
+      listOptions,
+      headings
+    );
     startLine = parentLine.number + 1;
     parentTo = parentFold ? parentFold.to : parentLine.to;
   }
@@ -148,7 +153,7 @@ export function collectSiblings(
       continue;
     }
 
-    const f = foldable(state, line.from, line.to);
+    const f = getOutlineFoldRange(state, line.from, listOptions, headings);
     if (f && f.to <= parentTo) {
       const heading = getHeadingAt(headings, line.from);
       if (heading) {

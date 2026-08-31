@@ -1,4 +1,3 @@
-import { foldable } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 
 import {
@@ -13,6 +12,7 @@ import {
   getHeadingIndex,
 } from "./utils/getCachedHeadings";
 import { getFrontmatterEnd } from "./utils/getFrontmatterEnd";
+import { getOutlineFoldRange } from "./utils/getOutlineFoldRange";
 import {
   ListRecognitionOptions,
   ListType,
@@ -151,7 +151,7 @@ export class CollectBreadcrumbs {
       if (line.text.trim() === "---") {
         continue;
       }
-      const f = foldable(state, line.from, line.to);
+      const f = getOutlineFoldRange(state, line.from, listOptions, headings);
       if (f && f.to > posLine.from) {
         const heading = getHeadingAt(headings, line.from);
         if (heading) {

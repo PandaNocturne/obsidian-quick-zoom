@@ -3,3 +3,6 @@
 /main.js
 tmp/
 data/
+
+data.json
+.hotreload

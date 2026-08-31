@@ -1,8 +1,8 @@
-import { foldable } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 
 import { calculateParagraphRange } from "./utils/calculateParagraphRange";
 import { getHeadingAt, getHeadingIndex } from "./utils/getCachedHeadings";
+import { getOutlineFoldRange } from "./utils/getOutlineFoldRange";
 import {
   ListRecognitionOptions,
   isRecognizedListLine,
@@ -15,7 +15,7 @@ export class CalculateRangeForZooming {
     listOptions: ListRecognitionOptions
   ) {
     const line = state.doc.lineAt(pos);
-    const foldRange = foldable(state, line.from, line.to);
+    const foldRange = getOutlineFoldRange(state, line.from, listOptions);
 
     if (foldRange) {
       return { from: line.from, to: foldRange.to };

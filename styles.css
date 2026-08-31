@@ -14,7 +14,7 @@
 /* Note area width: align CodeMirror top panels to the readable line column */
 body.zoom-plugin-header-width-note .markdown-source-view.mod-cm6 .cm-panels {
   background-color: var(--background-primary);
-  width: calc(var(--file-line-width) + 6%);
+  width: calc(var(--file-line-width) + 3%);
   left: calc(47% - var(--file-line-width) / 2);
   z-index: 10;
 }
