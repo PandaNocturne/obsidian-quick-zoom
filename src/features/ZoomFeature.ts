@@ -283,10 +283,22 @@ export class ZoomFeature implements Feature {
     this.zoomIn(view, parentPos);
   }
 
+  /**
+   * Sibling navigation targets the current zoom root when zoomed,
+   * not wherever the cursor happens to sit inside the visible range.
+   */
+  private getSiblingNavigationPos(view: EditorView): number {
+    const visible = this.calculateVisibleContentRange(view.state);
+    if (visible) {
+      return visible.from;
+    }
+    return getActiveOutlinePos(view);
+  }
+
   public zoomToPreviousSibling(view: EditorView) {
     const breadcrumbs = this.collectBreadcrumbs.collectStickyBreadcrumbs(
       view.state,
-      getActiveOutlinePos(view)
+      this.getSiblingNavigationPos(view)
     );
     const pos = findSiblingZoomPos(breadcrumbs, -1);
     if (pos !== null) {
@@ -297,7 +309,7 @@ export class ZoomFeature implements Feature {
   public zoomToNextSibling(view: EditorView) {
     const breadcrumbs = this.collectBreadcrumbs.collectStickyBreadcrumbs(
       view.state,
-      getActiveOutlinePos(view)
+      this.getSiblingNavigationPos(view)
     );
     const pos = findSiblingZoomPos(breadcrumbs, 1);
     if (pos !== null) {
