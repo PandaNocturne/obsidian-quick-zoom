@@ -113,7 +113,7 @@ export class ZoomStatePersistenceFeature implements Feature {
     }, 50);
   }
 
-  private async tryRestore(view: MarkdownView) {
+  private async tryRestore(view: MarkdownView, attempt = 0) {
     if (
       !this.settings.recordZoomState ||
       !this.settings.restoreZoomOnOpen ||
@@ -128,6 +128,23 @@ export class ZoomStatePersistenceFeature implements Feature {
     }
 
     const cm = getEditorViewFromEditor(view.editor);
+    if (!cm) {
+      return;
+    }
+
+    // CM extensions may not be attached yet right after leaf/file switch.
+    if (!this.zoomFeature.isZoomStateAvailable(cm.state)) {
+      if (attempt < 10 && this.pendingRestorePath === file.path) {
+        window.setTimeout(() => {
+          if (this.pendingRestorePath !== view.file?.path) {
+            return;
+          }
+          void this.tryRestore(view, attempt + 1);
+        }, 50);
+      }
+      return;
+    }
+
     if (this.zoomFeature.calculateVisibleContentRange(cm.state)) {
       return;
     }

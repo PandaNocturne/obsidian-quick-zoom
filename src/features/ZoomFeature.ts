@@ -70,6 +70,10 @@ export class ZoomFeature implements Feature {
     );
   }
 
+  public isZoomStateAvailable(state: EditorState) {
+    return this.keepOnlyZoomedContentVisible.isZoomStateAvailable(state);
+  }
+
   public notifyAfterZoomIn(cb: ZoomInCallback) {
     this.zoomInCallbacks.push(cb);
   }

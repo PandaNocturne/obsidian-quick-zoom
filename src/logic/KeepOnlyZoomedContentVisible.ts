@@ -56,8 +56,19 @@ export class KeepOnlyZoomedContentVisible {
     return zoomStateField;
   }
 
+  /** True when the zoom StateField is attached to this editor. */
+  public isZoomStateAvailable(state: EditorState): boolean {
+    return state.field(zoomStateField, false) !== undefined;
+  }
+
   public calculateHiddenContentRanges(state: EditorState) {
-    return rangeSetToArray(state.field(zoomStateField));
+    // Editors can briefly exist without plugin extensions (leaf/file switch,
+    // reading→source, hot reload). Never throw on missing field.
+    const decorations = state.field(zoomStateField, false);
+    if (!decorations) {
+      return [];
+    }
+    return rangeSetToArray(decorations);
   }
 
   public calculateVisibleContentRange(state: EditorState) {
