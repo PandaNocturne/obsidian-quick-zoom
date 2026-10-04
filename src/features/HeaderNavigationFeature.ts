@@ -149,10 +149,7 @@ class UpdateHeaderAfterRangeBeforeVisibleRangeChanged implements Feature {
 }
 
 class FollowViewportInDefaultMode implements Feature {
-  private debounceTimers = new WeakMap<
-    EditorView,
-    ReturnType<typeof setTimeout>
-  >();
+  private debounceTimers = new WeakMap<EditorView, number>();
 
   private extension = ViewPlugin.define((view) => {
     // Initial paint after editor mounts
@@ -167,7 +164,7 @@ class FollowViewportInDefaultMode implements Feature {
       destroy: () => {
         const timer = this.debounceTimers.get(view);
         if (timer) {
-          clearTimeout(timer);
+          window.clearTimeout(timer);
           this.debounceTimers.delete(view);
         }
       },
@@ -234,9 +231,9 @@ class FollowViewportInDefaultMode implements Feature {
   private scheduleRefresh(view: EditorView) {
     const prev = this.debounceTimers.get(view);
     if (prev) {
-      clearTimeout(prev);
+      window.clearTimeout(prev);
     }
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
       this.debounceTimers.delete(view);
       this.refreshNow(view);
     }, 60);

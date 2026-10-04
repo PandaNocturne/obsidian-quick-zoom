@@ -11,7 +11,8 @@ export const zoomInEffect = StateEffect.define<ZoomInRange>();
 
 export const zoomOutEffect = StateEffect.define<void>();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isZoomInEffect(e: StateEffect<any>): e is ZoomInStateEffect {
+export function isZoomInEffect(
+  e: StateEffect<unknown>
+): e is ZoomInStateEffect {
   return e.is(zoomInEffect);
 }

@@ -334,12 +334,6 @@ export class ZoomFeature implements Feature {
         const view = getEditorViewFromEditor(editor);
         this.zoomInFromEditor(view);
       },
-      hotkeys: [
-        {
-          modifiers: ["Mod", "Shift"],
-          key: ".",
-        },
-      ],
     });
 
     this.plugin.addCommand({
@@ -347,12 +341,6 @@ export class ZoomFeature implements Feature {
       name: t("commands.zoomOut"),
       icon: "zoom-out",
       editorCallback: (editor) => this.zoomOut(getEditorViewFromEditor(editor)),
-      hotkeys: [
-        {
-          modifiers: ["Mod", "Shift"],
-          key: "/",
-        },
-      ],
     });
 
     this.plugin.addCommand({

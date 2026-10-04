@@ -39,7 +39,7 @@ const SUBMENU_CLOSE_DELAY_MS = 400;
 export class OutlineHoverMenu {
   /** menus[0] = root, menus[1] = first submenu, ... */
   private menus: Menu[] = [];
-  private closeTimer: ReturnType<typeof setTimeout> | null = null;
+  private closeTimer: number | null = null;
   private expandedChevrons = new Map<number, HTMLElement>();
   private outsideClickHandler: ((e: MouseEvent) => void) | null = null;
   private onMenuClose: (() => void) | null = null;
@@ -90,7 +90,7 @@ export class OutlineHoverMenu {
     const menu = new Menu();
     menu.setUseNativeMenu?.(false);
     menu.dom.addClass("zoom-plugin-outline-menu");
-    menu.dom.style.zIndex = String(1000 + depth);
+    menu.dom.setCssProps({ "z-index": String(1000 + depth) });
     return menu;
   }
 
@@ -152,13 +152,16 @@ export class OutlineHoverMenu {
     }
 
     titleEl.addClass("zoom-plugin-outline-title");
-    titleEl.style.maxWidth = `${ctx.itemMaxWidthPx}px`;
+    titleEl.setCssProps({ "max-width": `${ctx.itemMaxWidthPx}px` });
     renderOutlineTitle(titleEl, title, {
       renderMarkdown: ctx.renderMarkdown,
       app: ctx.app,
       sourcePath: ctx.sourcePath,
       component: ctx.component,
     });
+    if (titleEl.hasClass("zoom-plugin-outline-title-md")) {
+      item.dom.addClass("zoom-plugin-outline-item--md");
+    }
   }
 
   private bindChevronSubmenu(
@@ -361,7 +364,7 @@ export class OutlineHoverMenu {
       if (!menu.dom.isConnected) {
         document.body.appendChild(menu.dom);
       }
-      menu.dom.style.display = "";
+      menu.dom.show();
     }
   }
 
@@ -375,7 +378,7 @@ export class OutlineHoverMenu {
 
   private scheduleClose(delayMs: number, clientX?: number, clientY?: number) {
     this.cancelClose();
-    this.closeTimer = setTimeout(() => {
+    this.closeTimer = window.setTimeout(() => {
       this.closeTimer = null;
       if (this.isPointerOverMenuTree(clientX, clientY)) {
         return;
@@ -386,7 +389,7 @@ export class OutlineHoverMenu {
 
   private cancelClose() {
     if (this.closeTimer !== null) {
-      clearTimeout(this.closeTimer);
+      window.clearTimeout(this.closeTimer);
       this.closeTimer = null;
     }
   }

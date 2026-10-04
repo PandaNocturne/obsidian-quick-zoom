@@ -58,8 +58,8 @@ const DEFAULT_SETTINGS: ObsidianZoomPluginSettingsJson = {
 };
 
 export interface Storage {
-  loadData(): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-  saveData(settigns: any): Promise<void>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  loadData(): Promise<unknown>;
+  saveData(settings: unknown): Promise<void>;
 }
 
 type K = keyof ObsidianZoomPluginSettings;
@@ -204,7 +204,7 @@ export class SettingsService implements ObsidianZoomPluginSettings {
     this.values = Object.assign(
       {},
       DEFAULT_SETTINGS,
-      await this.storage.loadData()
+      (await this.storage.loadData()) as Partial<ObsidianZoomPluginSettingsJson>
     );
     // Drop removed setting if present in older data.json
     delete (this.values as { outlineSubmenuCloseDelayMs?: number })

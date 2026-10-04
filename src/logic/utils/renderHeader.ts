@@ -34,12 +34,13 @@ function appendTitleIcon(
   item: OutlineIconTarget,
   options?: { active?: boolean }
 ) {
-  const iconSpan = container.ownerDocument.createElement("span");
-  iconSpan.className = `zoom-plugin-title-icon ${outlineIconColorClass(item)}`;
+  const iconSpan = container.createSpan({
+    cls: `zoom-plugin-title-icon ${outlineIconColorClass(item)}`,
+    attr: { "aria-hidden": "true" },
+  });
   if (item.kind === "document" && options?.active) {
     iconSpan.classList.add("is-active");
   }
-  iconSpan.setAttribute("aria-hidden", "true");
   // Ensure heading icons always use an explicit 1–6 level (never silent H1 default
   // from a stale breadcrumb missing headingLevel).
   const iconTarget: OutlineIconTarget =
@@ -53,7 +54,6 @@ function appendTitleIcon(
   if (item.kind === "heading" && item.headingLevel) {
     iconSpan.dataset.headingLevel = String(item.headingLevel);
   }
-  container.appendChild(iconSpan);
 }
 
 function appendHistoryButton(
@@ -65,10 +65,13 @@ function appendHistoryButton(
     onClick: () => void;
   }
 ) {
-  const button = container.ownerDocument.createElement("button");
-  button.type = "button";
-  button.className = "zoom-plugin-history-btn clickable-icon";
-  button.setAttribute("aria-label", options.label);
+  const button = container.createEl("button", {
+    cls: "zoom-plugin-history-btn clickable-icon",
+    attr: {
+      type: "button",
+      "aria-label": options.label,
+    },
+  });
   button.disabled = options.disabled;
   if (options.disabled) {
     button.addClass("is-disabled");
@@ -81,7 +84,6 @@ function appendHistoryButton(
       options.onClick();
     }
   });
-  container.appendChild(button);
 }
 
 export function renderHeader(
@@ -118,11 +120,9 @@ export function renderHeader(
     renderOptions,
   } = ctx;
 
-  const h = doc.createElement("div");
-  h.classList.add("zoom-plugin-header");
+  const h = doc.createDiv({ cls: "zoom-plugin-header" });
 
-  const trail = doc.createElement("div");
-  trail.classList.add("zoom-plugin-header-trail");
+  const trail = h.createDiv({ cls: "zoom-plugin-header-trail" });
 
   for (let i = 0; i < breadcrumbs.length; i++) {
     const breadcrumb = breadcrumbs[i];
@@ -131,47 +131,46 @@ export function renderHeader(
     const isDocument = breadcrumb.kind === "document";
     const isLast = i === breadcrumbs.length - 1;
 
-    const crumb = doc.createElement("span");
-    crumb.classList.add("zoom-plugin-crumb");
+    const crumbClasses = ["zoom-plugin-crumb"];
     if (isLast) {
-      crumb.classList.add("zoom-plugin-crumb--last");
+      crumbClasses.push("zoom-plugin-crumb--last");
     }
     if (breadcrumb.dimmed) {
-      crumb.classList.add("zoom-plugin-crumb--dimmed");
+      crumbClasses.push("zoom-plugin-crumb--dimmed");
     }
+    const crumb = trail.createSpan({ cls: crumbClasses });
 
-    const b = doc.createElement("a");
-    b.classList.add("zoom-plugin-title");
+    const titleClasses = ["zoom-plugin-title"];
     if (isDocument) {
-      b.classList.add("zoom-plugin-title--document");
+      titleClasses.push("zoom-plugin-title--document");
     }
     // Document is a zoom toggle (enter/exit), not a sibling picker.
     if (!isDocument && siblings.length > 0) {
-      b.classList.add("zoom-plugin-title-has-siblings");
+      titleClasses.push("zoom-plugin-title-has-siblings");
     }
-    b.dataset.pos = String(breadcrumb.pos);
-    b.href = "#";
-    if (isDocument) {
-      b.setAttribute(
-        "aria-label",
-        mode === "navigate"
-          ? t("aria.zoomToCurrentHeading")
-          : t("aria.exitZoom")
-      );
-    } else {
-      b.setAttribute("aria-label", breadcrumb.title);
-    }
+    const b = crumb.createEl("a", {
+      cls: titleClasses,
+      href: "#",
+      attr: {
+        "data-pos": String(breadcrumb.pos),
+        "aria-label": isDocument
+          ? mode === "navigate"
+            ? t("aria.zoomToCurrentHeading")
+            : t("aria.exitZoom")
+          : breadcrumb.title,
+      },
+    });
 
     appendTitleIcon(b, breadcrumb, {
       active: isDocument && mode === "zoom",
     });
 
     if (!isDocument) {
-      const titleSpan = doc.createElement("span");
-      titleSpan.classList.add("zoom-plugin-title-text");
-      titleSpan.style.maxWidth = `${renderOptions.itemMaxWidthPx}px`;
+      const titleSpan = b.createSpan({ cls: "zoom-plugin-title-text" });
+      titleSpan.setCssProps({
+        "max-width": `${renderOptions.itemMaxWidthPx}px`,
+      });
       renderOutlineTitle(titleSpan, breadcrumb.title, renderOptions);
-      b.appendChild(titleSpan);
     }
 
     b.addEventListener("click", (e) => {
@@ -188,41 +187,40 @@ export function renderHeader(
       });
     }
 
-    crumb.appendChild(b);
-
     // Last crumb only shows `>` when it has children to expand.
     // Intermediate crumbs always show `>` as hierarchy separators.
     if (!isLast || children.length > 0) {
-      const d = doc.createElement("span");
-      d.classList.add("zoom-plugin-delimiter");
+      const delimiterClasses = ["zoom-plugin-delimiter"];
       if (isLast) {
-        d.classList.add("zoom-plugin-delimiter--trailing");
+        delimiterClasses.push("zoom-plugin-delimiter--trailing");
       }
       if (children.length > 0) {
-        d.classList.add("zoom-plugin-delimiter--clickable");
-        d.setAttribute("role", "button");
-        d.setAttribute("aria-label", t("aria.expandSubmenu"));
-        d.tabIndex = 0;
+        delimiterClasses.push("zoom-plugin-delimiter--clickable");
+      }
+      const d = crumb.createSpan({
+        cls: delimiterClasses,
+        attr:
+          children.length > 0
+            ? {
+                role: "button",
+                "aria-label": t("aria.expandSubmenu"),
+                tabindex: "0",
+              }
+            : { "aria-hidden": "true" },
+      });
+      if (children.length > 0) {
         d.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
           onDelimiterClick?.(breadcrumb.pos, e, children);
         });
-      } else {
-        d.setAttribute("aria-hidden", "true");
       }
       setIcon(d, "chevron-right");
-      crumb.appendChild(d);
     }
-
-    trail.appendChild(crumb);
   }
 
-  h.appendChild(trail);
-
   if (history) {
-    const historyEl = doc.createElement("div");
-    historyEl.classList.add("zoom-plugin-header-history");
+    const historyEl = h.createDiv({ cls: "zoom-plugin-header-history" });
 
     appendHistoryButton(historyEl, {
       icon: "arrow-left",
@@ -237,8 +235,6 @@ export function renderHeader(
       disabled: !history.canGoForward,
       onClick: history.onForward,
     });
-
-    h.appendChild(historyEl);
   }
 
   return h;

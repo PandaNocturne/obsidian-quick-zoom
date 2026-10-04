@@ -22,12 +22,15 @@ export default class ObsidianZoomPluginWithTests extends ObsidianZoomPlugin {
   private editorView: EditorView;
 
   wait(time: number) {
-    return new Promise((resolve) => setTimeout(resolve, time));
+    return new Promise((resolve) => window.setTimeout(resolve, time));
   }
 
   executeCommandById(id: string) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.app as any).commands.executeCommandById(id);
+    (
+      this.app as unknown as {
+        commands: { executeCommandById: (id: string) => boolean };
+      }
+    ).commands.executeCommandById(id);
   }
 
   replaceSelection(char: string) {

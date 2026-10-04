@@ -3,6 +3,5 @@ import { Editor } from "obsidian";
 import { EditorView } from "@codemirror/view";
 
 export function getEditorViewFromEditor(editor: Editor): EditorView {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (editor as any).cm;
+  return (editor as unknown as { cm: EditorView }).cm;
 }

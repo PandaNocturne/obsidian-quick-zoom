@@ -80,6 +80,10 @@ jobs:
     if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-22.04
     needs: [lint, test-on-linux, test-on-osx]
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -91,6 +95,13 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            main.js
+            styles.css
+            manifest.json
       - name: Upload main.js
         uses: actions/upload-release-asset@v1
         env:
