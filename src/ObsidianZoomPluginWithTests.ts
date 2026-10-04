@@ -18,6 +18,19 @@ const keysMap: { [key: string]: number } = {
   KeyA: 65,
 };
 
+function readProcessEnv(name: string): string | undefined {
+  const proc: unknown = typeof process === "undefined" ? undefined : process;
+  if (!proc || typeof proc !== "object") {
+    return undefined;
+  }
+  const envValue: unknown = Reflect.get(proc, "env");
+  if (!envValue || typeof envValue !== "object") {
+    return undefined;
+  }
+  const value: unknown = Reflect.get(envValue, name);
+  return typeof value === "string" ? value : undefined;
+}
+
 export default class ObsidianZoomPluginWithTests extends ObsidianZoomPlugin {
   private editorView: EditorView;
 
@@ -96,7 +109,8 @@ export default class ObsidianZoomPluginWithTests extends ObsidianZoomPlugin {
   protected async bootstrap() {
     await super.bootstrap();
 
-    if (process.env.TEST_PLATFORM) {
+    const testPlatform = readProcessEnv("TEST_PLATFORM");
+    if (testPlatform) {
       window.setTimeout(() => {
         void (async () => {
           await this.wait(1000);
