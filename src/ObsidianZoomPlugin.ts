@@ -25,8 +25,8 @@ export default class ObsidianZoomPlugin extends Plugin {
   protected features: Feature[] = [];
   private headerNavigationFeature: HeaderNavigationFeature | null = null;
 
-  onload() {
-    void this.bootstrap();
+  async onload() {
+    await this.bootstrap();
   }
 
   protected async bootstrap() {
@@ -97,12 +97,12 @@ export default class ObsidianZoomPlugin extends Plugin {
     this.headerNavigationFeature.refreshAllOpenEditors();
   }
 
-  onunload() {
+  async onunload() {
     delete window.ObsidianZoomPlugin;
     this.headerNavigationFeature = null;
 
     for (const feature of this.features) {
-      void feature.unload();
+      await feature.unload();
     }
   }
 

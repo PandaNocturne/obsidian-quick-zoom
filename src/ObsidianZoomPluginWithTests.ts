@@ -102,8 +102,8 @@ export default class ObsidianZoomPluginWithTests extends ObsidianZoomPlugin {
     runScopeHandlers(this.editorView, e as KeyboardEvent, "editor");
   }
 
-  onload() {
-    void this.bootstrap();
+  async onload() {
+    await this.bootstrap();
   }
 
   protected async bootstrap() {

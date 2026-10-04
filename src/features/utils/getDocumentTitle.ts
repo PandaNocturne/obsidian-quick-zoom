@@ -1,12 +1,8 @@
-import { editorInfoField } from "obsidian";
+import { editorViewField } from "obsidian";
 
 import { EditorState } from "@codemirror/state";
 
 export function getDocumentTitle(state: EditorState) {
-  try {
-    const info = state.field(editorInfoField, false);
-    return info?.file?.basename ?? "";
-  } catch {
-    return "";
-  }
+  const view = state.field(editorViewField, false);
+  return view?.getDisplayText() ?? "";
 }
