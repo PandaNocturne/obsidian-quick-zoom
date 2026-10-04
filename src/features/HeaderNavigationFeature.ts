@@ -57,16 +57,20 @@ class ShowHeaderAfterZoomIn implements Feature {
 
   async load() {
     this.notifyAfterZoomIn.notifyAfterZoomIn((view, pos) => {
-      if (this.settings.trackCursorWhileZoomed) {
-        this.refreshHeader(view);
-        return;
-      }
+      try {
+        if (this.settings.trackCursorWhileZoomed) {
+          this.refreshHeader(view);
+          return;
+        }
 
-      const breadcrumbs = this.collectBreadcrumbs.collectBreadcrumbs(
-        view.state,
-        pos
-      );
-      this.renderNavigationHeader.showHeader(view, breadcrumbs, "zoom");
+        const breadcrumbs = this.collectBreadcrumbs.collectBreadcrumbs(
+          view.state,
+          pos
+        );
+        this.renderNavigationHeader.showHeader(view, breadcrumbs, "zoom");
+      } catch {
+        this.refreshHeader(view);
+      }
     });
   }
 
@@ -206,6 +210,10 @@ class FollowViewportInDefaultMode implements Feature {
     this.refreshNow(view, { syncZoomRoot: true });
   }
 
+  public refreshAllOpenEditors() {
+    this.refreshAllEditors();
+  }
+
   private syncHeaderWidthClass() {
     const mode = this.settings.headerWidthMode;
     document.body.classList.toggle(
@@ -244,6 +252,17 @@ class FollowViewportInDefaultMode implements Feature {
     view: EditorView,
     options: { syncZoomRoot?: boolean } = {}
   ) {
+    try {
+      this.refreshNowUnsafe(view, options);
+    } catch {
+      // Keep the editor usable if breadcrumb collection fails.
+    }
+  }
+
+  private refreshNowUnsafe(
+    view: EditorView,
+    options: { syncZoomRoot?: boolean } = {}
+  ) {
     const visible =
       this.calculateVisibleContentRange.calculateVisibleContentRange(
         view.state
@@ -263,7 +282,7 @@ class FollowViewportInDefaultMode implements Feature {
         return;
       }
 
-      if (options.syncZoomRoot) {
+      if (options.syncZoomRoot !== false) {
         const breadcrumbs = this.collectBreadcrumbs.collectBreadcrumbs(
           view.state,
           visible.from
@@ -398,5 +417,9 @@ export class HeaderNavigationFeature implements Feature {
     await this.hideOrShowHistoryHeaderAfterZoomOut.unload();
     await this.updateHeaderAfterRangeBeforeVisibleRangeChanged.unload();
     await this.followViewportInDefaultMode.unload();
+  }
+
+  public refreshAllOpenEditors() {
+    this.followViewportInDefaultMode.refreshAllOpenEditors();
   }
 }

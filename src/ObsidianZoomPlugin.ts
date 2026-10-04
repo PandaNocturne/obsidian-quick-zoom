@@ -22,7 +22,8 @@ declare global {
 
 export default class ObsidianZoomPlugin extends Plugin {
   protected zoomFeature: ZoomFeature;
-  protected features: Feature[];
+  protected features: Feature[] = [];
+  private headerNavigationFeature: HeaderNavigationFeature | null = null;
 
   onload() {
     void this.bootstrap();
@@ -59,7 +60,7 @@ export default class ObsidianZoomPlugin extends Plugin {
         this.zoomFeature,
         this.zoomFeature
       );
-    const headerNavigationFeature = new HeaderNavigationFeature(
+    this.headerNavigationFeature = new HeaderNavigationFeature(
       this,
       logger,
       settings,
@@ -83,7 +84,7 @@ export default class ObsidianZoomPlugin extends Plugin {
       this.zoomFeature,
       limitSelectionFeature,
       resetZoomWhenVisibleContentBoundariesViolatedFeature,
-      headerNavigationFeature,
+      this.headerNavigationFeature,
       zoomOnClickFeature,
       listsStylesFeature,
       zoomStatePersistenceFeature,
@@ -92,10 +93,13 @@ export default class ObsidianZoomPlugin extends Plugin {
     for (const feature of this.features) {
       await feature.load();
     }
+
+    this.headerNavigationFeature.refreshAllOpenEditors();
   }
 
   onunload() {
     delete window.ObsidianZoomPlugin;
+    this.headerNavigationFeature = null;
 
     for (const feature of this.features) {
       void feature.unload();
