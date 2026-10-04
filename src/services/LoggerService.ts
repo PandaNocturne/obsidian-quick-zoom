@@ -7,8 +7,9 @@ export class LoggerService {
     if (!this.settings.debug) {
       return;
     }
-
-    console.info(method, ...args);
+    // Obsidian review disallows console logging; keep a debug gate for call sites.
+    void method;
+    void args;
   }
 
   bind(method: string) {

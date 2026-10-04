@@ -34,11 +34,11 @@ export class DetectRangeBeforeVisibleRangeChanged {
       calculateVisibleContentBoundariesViolation(tr, hiddenRanges);
 
     if (touchedBefore && !touchedInside) {
-      setImmediate(() => {
+      window.setTimeout(() => {
         this.rangeBeforeVisibleRangeChanged.rangeBeforeVisibleRangeChanged(
           tr.state
         );
-      });
+      }, 0);
     }
 
     return null;

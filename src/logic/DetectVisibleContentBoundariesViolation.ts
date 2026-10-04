@@ -34,11 +34,11 @@ export class DetectVisibleContentBoundariesViolation {
       calculateVisibleContentBoundariesViolation(tr, hiddenRanges);
 
     if (touchedOutside && touchedInside) {
-      setImmediate(() => {
+      window.setTimeout(() => {
         this.visibleContentBoundariesViolated.visibleContentBoundariesViolated(
           tr.state
         );
-      });
+      }, 0);
     }
 
     return null;

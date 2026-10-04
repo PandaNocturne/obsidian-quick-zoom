@@ -168,7 +168,7 @@ export function renderHeader(
     if (!isDocument) {
       const titleSpan = b.createSpan({ cls: "zoom-plugin-title-text" });
       titleSpan.setCssProps({
-        "max-width": `${renderOptions.itemMaxWidthPx}px`,
+        "--zoom-outline-item-max-width": `${renderOptions.itemMaxWidthPx}px`,
       });
       renderOutlineTitle(titleSpan, breadcrumb.title, renderOptions);
     }

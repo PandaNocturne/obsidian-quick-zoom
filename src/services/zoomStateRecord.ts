@@ -73,7 +73,9 @@ export function pruneZoomStateStore(
   const maxEntries = Math.max(1, Math.floor(options.maxEntries));
   const keepPath = options.keepPath ?? (() => true);
 
-  const entries = Object.entries(store).filter(([path, record]) => {
+  const entries = (
+    Object.entries(store) as [string, DocumentZoomStateRecord][]
+  ).filter(([path, record]) => {
     if (!record || typeof record !== "object") {
       return false;
     }

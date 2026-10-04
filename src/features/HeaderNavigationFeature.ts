@@ -387,16 +387,16 @@ export class HeaderNavigationFeature implements Feature {
       this.renderNavigationHeader.getExtension()
     );
 
-    this.showHeaderAfterZoomIn.load();
-    this.hideOrShowHistoryHeaderAfterZoomOut.load();
-    this.updateHeaderAfterRangeBeforeVisibleRangeChanged.load();
-    this.followViewportInDefaultMode.load();
+    await this.showHeaderAfterZoomIn.load();
+    await this.hideOrShowHistoryHeaderAfterZoomOut.load();
+    await this.updateHeaderAfterRangeBeforeVisibleRangeChanged.load();
+    await this.followViewportInDefaultMode.load();
   }
 
   async unload() {
-    this.showHeaderAfterZoomIn.unload();
-    this.hideOrShowHistoryHeaderAfterZoomOut.unload();
-    this.updateHeaderAfterRangeBeforeVisibleRangeChanged.unload();
-    this.followViewportInDefaultMode.unload();
+    await this.showHeaderAfterZoomIn.unload();
+    await this.hideOrShowHistoryHeaderAfterZoomOut.unload();
+    await this.updateHeaderAfterRangeBeforeVisibleRangeChanged.unload();
+    await this.followViewportInDefaultMode.unload();
   }
 }

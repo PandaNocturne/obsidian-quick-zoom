@@ -90,7 +90,9 @@ export class OutlineHoverMenu {
     const menu = new Menu();
     menu.setUseNativeMenu?.(false);
     menu.dom.addClass("zoom-plugin-outline-menu");
-    menu.dom.setCssProps({ "z-index": String(1000 + depth) });
+    menu.dom.setCssProps({
+      "--zoom-outline-menu-z": String(1000 + depth),
+    });
     return menu;
   }
 
@@ -152,7 +154,9 @@ export class OutlineHoverMenu {
     }
 
     titleEl.addClass("zoom-plugin-outline-title");
-    titleEl.setCssProps({ "max-width": `${ctx.itemMaxWidthPx}px` });
+    titleEl.setCssProps({
+      "--zoom-outline-item-max-width": `${ctx.itemMaxWidthPx}px`,
+    });
     renderOutlineTitle(titleEl, title, {
       renderMarkdown: ctx.renderMarkdown,
       app: ctx.app,

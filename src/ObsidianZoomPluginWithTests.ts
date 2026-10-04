@@ -89,14 +89,20 @@ export default class ObsidianZoomPluginWithTests extends ObsidianZoomPlugin {
     runScopeHandlers(this.editorView, e as KeyboardEvent, "editor");
   }
 
-  async load() {
-    await super.load();
+  onload() {
+    void this.bootstrap();
+  }
+
+  protected async bootstrap() {
+    await super.bootstrap();
 
     if (process.env.TEST_PLATFORM) {
-      setImmediate(async () => {
-        await this.wait(1000);
-        this.connect();
-      });
+      window.setTimeout(() => {
+        void (async () => {
+          await this.wait(1000);
+          void this.connect();
+        })();
+      }, 0);
     }
   }
 
@@ -110,8 +116,9 @@ export default class ObsidianZoomPluginWithTests extends ObsidianZoomPlugin {
     }
     for (let i = 0; i < 10; i++) {
       await this.wait(1000);
-      if (this.app.workspace.activeLeaf) {
-        this.app.workspace.activeLeaf.openFile(file);
+      const leaf = this.app.workspace.getMostRecentLeaf();
+      if (leaf) {
+        void leaf.openFile(file);
         break;
       }
     }
@@ -133,35 +140,57 @@ export default class ObsidianZoomPluginWithTests extends ObsidianZoomPlugin {
     ws.send("ready");
 
     ws.addEventListener("message", (event) => {
-      const { id, type, data } = JSON.parse(event.data);
-
-      let result;
-      let error;
+      let id: unknown;
+      let result: unknown;
+      let error: string | undefined;
 
       try {
+        const parsed: unknown = JSON.parse(String(event.data));
+        if (!parsed || typeof parsed !== "object") {
+          throw new Error("Invalid test message");
+        }
+        const message = parsed as {
+          id?: unknown;
+          type?: unknown;
+          data?: unknown;
+        };
+        id = message.id;
+        const type = message.type;
+        const data = message.data;
+
         switch (type) {
           case "applyState":
-            this.applyState(data);
+            if (typeof data === "string") {
+              this.applyState(data);
+            } else if (Array.isArray(data)) {
+              this.applyState(data as string[]);
+            } else if (data && typeof data === "object") {
+              this.applyState(data as IState);
+            }
             break;
           case "simulateKeydown":
-            this.simulateKeydown(data);
+            this.simulateKeydown(String(data));
             break;
           case "replaceSelection":
-            this.replaceSelection(data);
+            this.replaceSelection(String(data));
             break;
           case "executeCommandById":
-            this.executeCommandById(data);
+            this.executeCommandById(String(data));
             break;
           case "parseState":
-            result = this.parseState(data);
+            if (typeof data === "string") {
+              result = this.parseState(data);
+            } else if (Array.isArray(data)) {
+              result = this.parseState(data as string[]);
+            }
             break;
           case "getCurrentState":
             result = this.getCurrentState();
             break;
         }
-      } catch (e) {
+      } catch (e: unknown) {
         error = String(e);
-        if (e.stack) {
+        if (e instanceof Error && e.stack) {
           error += "\n" + e.stack;
         }
       }

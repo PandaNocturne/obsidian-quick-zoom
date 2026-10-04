@@ -141,7 +141,7 @@ body.zoom-plugin-header-width-note .markdown-source-view.mod-cm6 .cm-panels {
 .zoom-plugin-title-text {
   display: block;
   min-width: 0;
-  max-width: 100%;
+  max-width: var(--zoom-outline-item-max-width, 100%);
   height: auto;
   max-height: var(--zoom-header-row-height);
   overflow: hidden;
@@ -296,6 +296,10 @@ body.zoom-plugin-header-width-note .markdown-source-view.mod-cm6 .cm-panels {
   color: var(--text-normal);
 }
 
+.menu.zoom-plugin-outline-menu {
+  z-index: var(--zoom-outline-menu-z, 1000);
+}
+
 .menu.zoom-plugin-outline-menu .menu-item:not(.is-disabled):not(.is-label) {
   display: flex;
   align-items: center;
@@ -315,6 +319,7 @@ body.zoom-plugin-header-width-note .markdown-source-view.mod-cm6 .cm-panels {
   display: block;
   align-self: center;
   min-width: 0;
+  max-width: var(--zoom-outline-item-max-width, 300px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

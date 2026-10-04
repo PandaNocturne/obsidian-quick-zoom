@@ -24,7 +24,11 @@ export default class ObsidianZoomPlugin extends Plugin {
   protected zoomFeature: ZoomFeature;
   protected features: Feature[];
 
-  async onload() {
+  onload() {
+    void this.bootstrap();
+  }
+
+  protected async bootstrap() {
     refreshLocale();
 
     window.ObsidianZoomPlugin = this;
@@ -90,11 +94,11 @@ export default class ObsidianZoomPlugin extends Plugin {
     }
   }
 
-  async onunload() {
+  onunload() {
     delete window.ObsidianZoomPlugin;
 
     for (const feature of this.features) {
-      await feature.unload();
+      void feature.unload();
     }
   }
 
